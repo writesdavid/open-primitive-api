@@ -1,0 +1,19 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Open Primitive",
+  "name_for_model": "open_primitive",
+  "description_for_human": "Federal government data across 7 domains: flights, cars, food, water, drugs, hospitals, health research.",
+  "description_for_model": "Access structured US federal government data. Query real-time FAA flight delays, NHTSA vehicle safety ratings and recalls, FDA food recalls and drug adverse events, EPA drinking water violations, CMS hospital quality ratings, and PubMed health research evidence. All data comes from primary government sources with freshness timestamps.",
+  "auth": {
+    "type": "service_http",
+    "authorization_type": "bearer",
+    "verification_tokens": {}
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://api.openprimitive.com/openapi.json"
+  },
+  "logo_url": "https://openprimitive.com/logo.png",
+  "contact_email": "davehamiltonj@gmail.com",
+  "legal_info_url": "https://openprimitive.com/manifesto.html"
+}

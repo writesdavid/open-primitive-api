@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { apiKeyAuth, rateLimitMiddleware, meterUsage } = require('./middleware/auth');
+const { agentDetect, getStats } = require('./middleware/agent-detect');
 
 const flights = require('./sources/flights');
 const cars = require('./sources/cars');
@@ -22,6 +23,9 @@ app.use((req, res, next) => {
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
+
+// Agent detection on ALL requests
+app.use(agentDetect);
 
 // Auth + rate limit + meter on all /v1 routes
 app.use('/v1', apiKeyAuth, rateLimitMiddleware, meterUsage);
@@ -88,6 +92,22 @@ app.get('/v1', (req, res) => {
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
     rateLimit: '200 requests per hour per key',
     mcp: 'MCP server available at /mcp or via stdio (node mcp.js)',
+  });
+});
+
+// ─── STATS (public — no auth, this is the viral page data) ───
+app.get('/v1/stats', (req, res) => {
+  const stats = getStats();
+  const pct = stats.total > 0 ? Math.round((stats.agent / stats.total) * 100) : 0;
+  res.json({
+    agentPercent: pct,
+    total: stats.total,
+    agent: stats.agent,
+    human: stats.human,
+    byAgent: stats.byAgent,
+    byEndpoint: stats.byEndpoint,
+    hourly: stats.hourly,
+    upSince: stats.upSince,
   });
 });
 

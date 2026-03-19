@@ -1,0 +1,30 @@
+# Open Primitive API
+
+> Federal data for agents. 7 government data domains, one unified API.
+
+## Endpoints
+
+- GET /v1/flights — Live airline delays and hub weather for 8 US carriers. Source: FAA NAS + Open-Meteo.
+- GET /v1/flights/:iata — Single airline by IATA code (DL, UA, AA, WN, AS, B6, G4, F9).
+- GET /v1/cars?year=&make=&model= — Crash safety ratings and recalls. Source: NHTSA.
+- GET /v1/food — Active food recalls (last 90 days). Source: FDA Enforcement.
+- GET /v1/food?q= — Search food recalls by product or brand.
+- GET /v1/water?zip= — Drinking water systems by ZIP. Source: EPA SDWIS.
+- GET /v1/water/:pwsid — Water system violations by ID.
+- GET /v1/drugs?name= — Drug adverse events and label warnings. Source: FDA FAERS.
+- GET /v1/hospitals?q= — Search hospitals by name or ZIP. Source: CMS Care Compare.
+- GET /v1/hospitals?id= — Hospital quality detail by provider ID.
+- GET /v1/health?q= — Research evidence for health claims. Source: PubMed/MEDLINE.
+
+## Authentication
+Pass API key via X-API-Key header or ?api_key= query parameter.
+
+## Response Format
+Every response includes: domain, source, source_url, freshness (ISO 8601 timestamp).
+
+## MCP Server
+Available as Model Context Protocol server. Install: node mcp.js (stdio transport).
+Tools: get-flights, get-car-safety, get-food-recalls, get-water-safety, get-drug-safety, get-hospital-quality, get-health-evidence.
+
+## About
+Open Primitive translates federal government data into structured, agent-consumable endpoints. Primary sources: FAA, NHTSA, FDA, EPA, CMS, NIH/PubMed.

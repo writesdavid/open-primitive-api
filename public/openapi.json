@@ -1,0 +1,506 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Open Primitive API",
+    "version": "1.0.0",
+    "description": "Federal data for agents. 7 government data domains, one unified API.",
+    "contact": {
+      "email": "davehamiltonj@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.openprimitive.com"
+    }
+  ],
+  "security": [
+    {
+      "apiKey": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "schemas": {
+      "Envelope": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string" },
+          "source": { "type": "string" },
+          "source_url": { "type": "string", "format": "uri" },
+          "freshness": { "type": "string" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/v1/flights": {
+      "get": {
+        "summary": "All airline flight data",
+        "description": "Returns delay statistics and weather data for 8 major U.S. carriers (DL, UA, AA, WN, AS, B6, G4, F9).",
+        "operationId": "getFlights",
+        "responses": {
+          "200": {
+            "description": "Flight data for all carriers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "airlines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "iata": { "type": "string", "description": "IATA airline code" },
+                              "name": { "type": "string" },
+                              "delay_pct": { "type": "number", "description": "Historical delay percentage" },
+                              "cancel_pct": { "type": "number", "description": "Historical cancellation percentage" },
+                              "weather": { "type": "object", "description": "Current weather at hub airports" },
+                              "faa_status": { "type": "object", "description": "Current FAA ground delays/stops" },
+                              "news": { "type": "array", "items": { "type": "object" }, "description": "Recent airline news" },
+                              "score": { "type": "number", "description": "Composite risk score 0-100" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/flights/{iata}": {
+      "get": {
+        "summary": "Single airline flight data",
+        "description": "Returns delay statistics and weather data for one carrier by IATA code.",
+        "operationId": "getFlightByIata",
+        "parameters": [
+          {
+            "name": "iata",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "enum": ["DL", "UA", "AA", "WN", "AS", "B6", "G4", "F9"] },
+            "description": "IATA airline code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flight data for the requested carrier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "airline": {
+                          "type": "object",
+                          "properties": {
+                            "iata": { "type": "string" },
+                            "name": { "type": "string" },
+                            "delay_pct": { "type": "number" },
+                            "cancel_pct": { "type": "number" },
+                            "weather": { "type": "object" },
+                            "faa_status": { "type": "object" },
+                            "news": { "type": "array", "items": { "type": "object" } },
+                            "score": { "type": "number" }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cars": {
+      "get": {
+        "summary": "Vehicle safety ratings and recalls",
+        "description": "Query NHTSA data by year, make, and model. Returns safety ratings and recall history.",
+        "operationId": "getCars",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "Model year"
+          },
+          {
+            "name": "make",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Vehicle make (e.g. Toyota, Ford)"
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Vehicle model (e.g. Camry, F-150)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Safety ratings and recalls for matched vehicles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "vehicles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "year": { "type": "integer" },
+                              "make": { "type": "string" },
+                              "model": { "type": "string" },
+                              "overall_rating": { "type": "integer", "description": "NHTSA star rating 1-5" },
+                              "recalls": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "date": { "type": "string" },
+                                    "component": { "type": "string" },
+                                    "summary": { "type": "string" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/food": {
+      "get": {
+        "summary": "FDA food recalls",
+        "description": "Returns recent FDA food recalls. Use the q parameter to search by product or brand.",
+        "operationId": "getFood",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Search term for product or brand. Omit for recent recalls."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Food recall results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "recalls": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "product": { "type": "string" },
+                              "brand": { "type": "string" },
+                              "reason": { "type": "string" },
+                              "classification": { "type": "string", "description": "Class I, II, or III severity" },
+                              "date": { "type": "string" },
+                              "status": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/water": {
+      "get": {
+        "summary": "Search water systems by ZIP code",
+        "description": "Returns EPA-regulated public water systems serving the given ZIP code.",
+        "operationId": "getWater",
+        "parameters": [
+          {
+            "name": "zip",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "5-digit ZIP code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Water systems serving the ZIP code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "systems": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "pwsid": { "type": "string", "description": "Public Water System ID" },
+                              "name": { "type": "string" },
+                              "population_served": { "type": "integer" },
+                              "violation_count": { "type": "integer" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/water/{pwsid}": {
+      "get": {
+        "summary": "Water system violations",
+        "description": "Returns violation history for a specific public water system by PWSID.",
+        "operationId": "getWaterViolations",
+        "parameters": [
+          {
+            "name": "pwsid",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Public Water System ID (e.g. TX0010001)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Violations for the water system",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "system": {
+                          "type": "object",
+                          "properties": {
+                            "pwsid": { "type": "string" },
+                            "name": { "type": "string" }
+                          }
+                        },
+                        "violations": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "contaminant": { "type": "string" },
+                              "type": { "type": "string" },
+                              "begin_date": { "type": "string" },
+                              "end_date": { "type": "string" },
+                              "status": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/drugs": {
+      "get": {
+        "summary": "Drug adverse events",
+        "description": "Returns FDA adverse event reports for a drug by name.",
+        "operationId": "getDrugs",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Drug name (brand or generic, e.g. ibuprofen, Lipitor)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Adverse event data for the drug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "drug": { "type": "string" },
+                        "total_reports": { "type": "integer" },
+                        "events": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reaction": { "type": "string" },
+                              "count": { "type": "integer" },
+                              "serious": { "type": "boolean" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/hospitals": {
+      "get": {
+        "summary": "Hospital quality data",
+        "description": "Search CMS hospital quality ratings by name, or get detail by CMS ID.",
+        "operationId": "getHospitals",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Search term for hospital name or city"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "CMS facility ID for detailed data"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hospital quality results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "hospitals": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "name": { "type": "string" },
+                              "city": { "type": "string" },
+                              "state": { "type": "string" },
+                              "overall_rating": { "type": "integer", "description": "CMS star rating 1-5" },
+                              "type": { "type": "string" },
+                              "emergency_services": { "type": "boolean" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "summary": "PubMed health evidence",
+        "description": "Searches PubMed for clinical evidence on a health topic.",
+        "operationId": "getHealth",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Health topic or question (e.g. melatonin sleep, vitamin D dosage)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PubMed evidence results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "query": { "type": "string" },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": { "type": "string" },
+                              "authors": { "type": "array", "items": { "type": "string" } },
+                              "journal": { "type": "string" },
+                              "year": { "type": "integer" },
+                              "abstract": { "type": "string" },
+                              "pmid": { "type": "string" },
+                              "url": { "type": "string", "format": "uri" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
