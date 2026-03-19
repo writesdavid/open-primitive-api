@@ -3,188 +3,478 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open Primitive API</title>
+  <title>Open Primitive API — Federal Data for Agents</title>
+  <meta name="description" content="7 federal data domains. One unified API. Structured for AI agents, MCP servers, and human developers.">
   <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
   <style>
-    .api-hero { text-align: center; padding: var(--space-12) var(--space-4) var(--space-8); }
-    .api-hero h1 { font-family: var(--font-display); font-size: 2.4rem; color: var(--text); margin-bottom: var(--space-2); }
-    .api-hero p { color: var(--body); font-size: 1.1rem; max-width: 540px; margin: 0 auto; }
-    .tagline { color: var(--accent); font-weight: 600; font-size: 1.2rem; margin-bottom: var(--space-4); }
+    :root {
+      --code-bg: #1a1a1a;
+      --code-text: #e0e0e0;
+    }
 
-    .domains { max-width: 800px; margin: 0 auto; padding: 0 var(--space-4) var(--space-8); }
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: var(--space-12) var(--space-4) var(--space-6);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-3);
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      color: var(--text);
+      margin-bottom: var(--space-3);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .hero p {
+      color: var(--body);
+      font-size: 1.15rem;
+      line-height: 1.5;
+    }
+
+    /* Live proof */
+    .live-proof {
+      text-align: center;
+      padding: var(--space-4) var(--space-4) var(--space-8);
+    }
+    .proof-stat {
+      display: inline-block;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: var(--space-3) var(--space-6);
+    }
+    .proof-stat .number {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .proof-stat .label {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: var(--space-1);
+    }
+
+    /* Section layout */
+    .section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 var(--space-4) var(--space-8);
+    }
+    .section-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: var(--space-4);
+    }
+    .section h2 {
+      font-family: var(--font-display);
+      color: var(--text);
+      font-size: 1.6rem;
+      margin-bottom: var(--space-2);
+    }
+    .section p.intro {
+      color: var(--body);
+      margin-bottom: var(--space-5);
+      max-width: 600px;
+    }
+
+    /* Domain cards */
+    .domain-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
     .domain-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: var(--space-5);
-      margin-bottom: var(--space-4);
     }
-    .domain-card h3 { margin: 0 0 var(--space-1); color: var(--text); font-family: var(--font-display); }
-    .domain-card .source { color: var(--muted); font-size: 0.85rem; margin-bottom: var(--space-2); }
-    .domain-card .desc { color: var(--body); margin-bottom: var(--space-3); }
-    .endpoint {
-      background: var(--bg);
+    .domain-card.full-width {
+      grid-column: 1 / -1;
+    }
+    .domain-card h3 {
+      margin: 0 0 var(--space-1);
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+    }
+    .domain-card .source {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: var(--space-2);
+    }
+    .domain-card .desc {
+      color: var(--body);
+      font-size: 0.95rem;
+      margin-bottom: var(--space-3);
+    }
+    .domain-card .curl {
+      background: var(--code-bg);
       border-radius: 4px;
       padding: var(--space-2) var(--space-3);
       font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: var(--text);
+      font-size: 0.8rem;
+      color: var(--code-text);
       overflow-x: auto;
+      white-space: nowrap;
     }
-    .example { margin-top: var(--space-2); font-size: 0.8rem; color: var(--muted); font-family: var(--font-mono); }
 
-    .setup { max-width: 800px; margin: 0 auto; padding: 0 var(--space-4) var(--space-12); }
-    .setup h2 { font-family: var(--font-display); color: var(--text); margin-bottom: var(--space-4); }
+    /* Code blocks */
     .code-block {
-      background: #1a1a1a;
-      color: #e0e0e0;
+      background: var(--code-bg);
+      color: var(--code-text);
       border-radius: 6px;
       padding: var(--space-4);
       font-family: var(--font-mono);
       font-size: 0.85rem;
       overflow-x: auto;
       margin-bottom: var(--space-4);
-      line-height: 1.6;
+      line-height: 1.7;
     }
     .code-block .comment { color: #6a9955; }
     .code-block .str { color: #ce9178; }
     .code-block .key { color: #9cdcfe; }
 
-    .badge {
-      display: inline-block;
-      background: var(--accent);
-      color: white;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
+    /* Envelope */
+    .envelope-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      align-items: start;
+    }
+    .envelope-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .envelope-list li {
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--body);
+      font-size: 0.95rem;
+    }
+    .envelope-list li:last-child { border-bottom: none; }
+    .envelope-list code {
+      font-family: var(--font-mono);
+      color: var(--text);
       font-weight: 600;
-      margin-left: var(--space-2);
-      vertical-align: middle;
+      font-size: 0.85rem;
     }
 
-    .section-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+    /* Pricing summary */
+    .pricing-tiers {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+    .tier {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: var(--space-4);
+      text-align: center;
+    }
+    .tier.highlight {
+      border-color: var(--accent);
+    }
+    .tier-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: var(--space-1);
+    }
+    .tier-price {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: var(--space-1);
+    }
+    .tier-limit {
       color: var(--muted);
-      margin-bottom: var(--space-3);
-      font-weight: 600;
+      font-size: 0.8rem;
     }
 
-    .mcp-section {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 var(--space-4) var(--space-8);
+    /* Get started */
+    .get-started-steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+      margin-bottom: var(--space-5);
     }
-    .mcp-section h2 { font-family: var(--font-display); color: var(--text); margin-bottom: var(--space-2); }
+    .get-started-steps li {
+      counter-increment: step;
+      padding: var(--space-2) 0 var(--space-2) var(--space-6);
+      position: relative;
+      color: var(--body);
+      font-size: 0.95rem;
+    }
+    .get-started-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 1.1rem;
+    }
+
+    /* Footer */
+    .api-footer {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-4) var(--space-12);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+    .api-footer a {
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .api-footer a:hover { color: var(--accent); }
+    .footer-links { display: flex; gap: var(--space-5); flex-wrap: wrap; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2rem; }
+      .domain-grid { grid-template-columns: 1fr; }
+      .domain-card.full-width { grid-column: auto; }
+      .envelope-grid { grid-template-columns: 1fr; }
+      .pricing-tiers { grid-template-columns: 1fr 1fr; }
+      .api-footer { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+    @media (max-width: 480px) {
+      .pricing-tiers { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body class="op-page">
 
-  <div class="api-hero">
-    <p class="tagline">Federal data for agents</p>
+  <!-- Hero -->
+  <div class="hero">
+    <p class="hero-eyebrow">Federal data for agents</p>
     <h1>Open Primitive API</h1>
-    <p>7 government data domains. One unified API. Structured for humans and machines.</p>
+    <p>7 government data domains. One unified REST API. Structured for LLMs, agent frameworks, and the humans who build them.</p>
   </div>
 
-  <div class="domains">
-    <p class="section-label">Domains</p>
-
-    <div class="domain-card">
-      <h3>Flights <span class="badge">FAA + Weather</span></h3>
-      <p class="desc">Live airline delays and hub weather for 8 US carriers.</p>
-      <div class="endpoint">GET /v1/flights</div>
-      <div class="example">GET /v1/flights/DL</div>
+  <!-- Live proof -->
+  <div class="live-proof">
+    <div class="proof-stat">
+      <div class="number" id="machine-pct">&mdash;</div>
+      <div class="label">of our traffic is machines</div>
     </div>
+  </div>
+  <script>
+    fetch('/v1/stats')
+      .then(r => r.json())
+      .then(d => {
+        if (d && typeof d.machine_pct === 'number') {
+          document.getElementById('machine-pct').textContent = d.machine_pct + '%';
+        }
+      })
+      .catch(() => {});
+  </script>
 
-    <div class="domain-card">
-      <h3>Cars <span class="badge">NHTSA</span></h3>
-      <p class="desc">Crash safety ratings and recalls for any US vehicle.</p>
-      <div class="endpoint">GET /v1/cars?year=2024&make=Toyota&model=Camry</div>
-    </div>
+  <!-- Domains -->
+  <div class="section">
+    <p class="section-label">7 Domains</p>
+    <div class="domain-grid">
 
-    <div class="domain-card">
-      <h3>Food <span class="badge">FDA</span></h3>
-      <p class="desc">Active food recalls. Search by product or brand.</p>
-      <div class="endpoint">GET /v1/food</div>
-      <div class="example">GET /v1/food?q=peanut+butter</div>
-    </div>
+      <div class="domain-card">
+        <h3>Flights</h3>
+        <p class="source">FAA NAS + Open-Meteo</p>
+        <p class="desc">Live delays and hub weather for 8 US carriers.</p>
+        <div class="curl">curl -H "X-API-Key: KEY" https://api.openprimitive.com/v1/flights/DL</div>
+      </div>
 
-    <div class="domain-card">
-      <h3>Water <span class="badge">EPA</span></h3>
-      <p class="desc">Drinking water systems and violations by ZIP code.</p>
-      <div class="endpoint">GET /v1/water?zip=10001</div>
-      <div class="example">GET /v1/water/NY0000001</div>
-    </div>
+      <div class="domain-card">
+        <h3>Cars</h3>
+        <p class="source">NHTSA</p>
+        <p class="desc">Crash safety ratings and recalls for any US vehicle.</p>
+        <div class="curl">curl "https://api.openprimitive.com/v1/cars?year=2024&amp;make=Toyota&amp;model=Camry&amp;api_key=KEY"</div>
+      </div>
 
-    <div class="domain-card">
-      <h3>Drugs <span class="badge">FDA FAERS</span></h3>
-      <p class="desc">Adverse events, top reactions, and label warnings.</p>
-      <div class="endpoint">GET /v1/drugs?name=ibuprofen</div>
-    </div>
+      <div class="domain-card">
+        <h3>Food</h3>
+        <p class="source">FDA Enforcement</p>
+        <p class="desc">Active food recalls from the last 90 days.</p>
+        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/food?q=peanut+butter"</div>
+      </div>
 
-    <div class="domain-card">
-      <h3>Hospitals <span class="badge">CMS</span></h3>
-      <p class="desc">Quality ratings, mortality, readmissions, patient experience.</p>
-      <div class="endpoint">GET /v1/hospitals?q=mayo+clinic</div>
-      <div class="example">GET /v1/hospitals?id=010001</div>
-    </div>
+      <div class="domain-card">
+        <h3>Water</h3>
+        <p class="source">EPA SDWIS</p>
+        <p class="desc">Drinking water systems and violations by ZIP code.</p>
+        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/water?zip=10001"</div>
+      </div>
 
-    <div class="domain-card">
-      <h3>Health <span class="badge">PubMed</span></h3>
-      <p class="desc">Research evidence for supplements and health claims.</p>
-      <div class="endpoint">GET /v1/health?q=vitamin+d</div>
+      <div class="domain-card">
+        <h3>Drugs</h3>
+        <p class="source">FDA FAERS</p>
+        <p class="desc">Adverse events, top reactions, and label warnings.</p>
+        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/drugs?name=ibuprofen"</div>
+      </div>
+
+      <div class="domain-card">
+        <h3>Hospitals</h3>
+        <p class="source">CMS Care Compare</p>
+        <p class="desc">Quality ratings, mortality, readmissions, patient experience.</p>
+        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/hospitals?q=mayo+clinic"</div>
+      </div>
+
+      <div class="domain-card full-width">
+        <h3>Health</h3>
+        <p class="source">PubMed / MEDLINE</p>
+        <p class="desc">Research evidence for supplements and health claims.</p>
+        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/health?q=vitamin+d"</div>
+      </div>
+
     </div>
   </div>
 
-  <div class="setup">
-    <h2>Get started</h2>
+  <!-- For AI Agents -->
+  <div class="section">
+    <p class="section-label">For AI Agents</p>
+    <h2>Built for the machine layer</h2>
+    <p class="intro">Open Primitive ships as an MCP server, exposes an A2A-compatible agent card, and publishes <a href="/llms.txt" style="color: var(--accent);">llms.txt</a> for LLM discovery. Point any agent framework at it and go.</p>
+
+    <h3 style="color: var(--text); font-family: var(--font-display); margin-bottom: var(--space-2);">MCP Server Config</h3>
+    <div class="code-block">
+<span class="comment">// claude_desktop_config.json</span>
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"open-primitive"</span>: {
+      <span class="key">"command"</span>: <span class="str">"node"</span>,
+      <span class="key">"args"</span>: [<span class="str">"/path/to/open-primitive-api/mcp.js"</span>]
+    }
+  }
+}
+    </div>
+
+    <p style="color: var(--body); margin-bottom: var(--space-3); font-size: 0.95rem;">
+      7 tools registered: <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-flights</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-car-safety</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-food-recalls</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-water-safety</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-drug-safety</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-hospital-quality</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-health-evidence</code>.
+    </p>
+    <p style="color: var(--body); font-size: 0.95rem;">
+      A2A agent card at <a href="/.well-known/agent.json" style="color: var(--accent);">/.well-known/agent.json</a>. OpenAPI spec at <a href="/openapi.json" style="color: var(--accent);">/openapi.json</a>.
+    </p>
+  </div>
+
+  <!-- Every Response -->
+  <div class="section">
+    <p class="section-label">Every Response</p>
+    <h2>One envelope, every domain</h2>
+    <p class="intro">Agents parse it once. Every endpoint returns the same four metadata fields alongside domain-specific data.</p>
+
+    <div class="envelope-grid">
+      <ul class="envelope-list">
+        <li><code>domain</code> &mdash; Which dataset ("flights", "cars", "water"...)</li>
+        <li><code>source</code> &mdash; The federal agency or data provider</li>
+        <li><code>source_url</code> &mdash; Direct link to the upstream source</li>
+        <li><code>freshness</code> &mdash; ISO 8601 timestamp of last data pull</li>
+      </ul>
+      <div class="code-block" style="margin-bottom: 0;">
+{
+  <span class="key">"domain"</span>: <span class="str">"flights"</span>,
+  <span class="key">"source"</span>: <span class="str">"FAA NAS + Open-Meteo"</span>,
+  <span class="key">"source_url"</span>: <span class="str">"https://nasstatus.faa.gov"</span>,
+  <span class="key">"freshness"</span>: <span class="str">"2026-03-19T14:30:00Z"</span>,
+  <span class="comment">// ... domain data</span>
+}
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing -->
+  <div class="section">
+    <p class="section-label">Pricing</p>
+    <h2>Five tiers. All 7 domains on every one.</h2>
+    <div class="pricing-tiers">
+      <div class="tier">
+        <div class="tier-name">Free</div>
+        <div class="tier-price">$0</div>
+        <div class="tier-limit">100 req/day</div>
+      </div>
+      <div class="tier">
+        <div class="tier-name">Builder</div>
+        <div class="tier-price">$19/mo</div>
+        <div class="tier-limit">5,000 req/day</div>
+      </div>
+      <div class="tier highlight">
+        <div class="tier-name">Pro</div>
+        <div class="tier-price">$49/mo</div>
+        <div class="tier-limit">25,000 req/day</div>
+      </div>
+      <div class="tier">
+        <div class="tier-name">Agent</div>
+        <div class="tier-price">$149/mo</div>
+        <div class="tier-limit">100,000 req/day</div>
+      </div>
+      <div class="tier">
+        <div class="tier-name">Enterprise</div>
+        <div class="tier-price">Custom</div>
+        <div class="tier-limit">Unlimited</div>
+      </div>
+    </div>
+    <p style="color: var(--muted); font-size: 0.85rem; margin-top: var(--space-3); text-align: center;">
+      <a href="/pricing.html" style="color: var(--accent);">Full pricing details and feature comparison</a>
+    </p>
+  </div>
+
+  <!-- Get Started -->
+  <div class="section">
+    <p class="section-label">Get Started</p>
+    <h2>Three steps. Under a minute.</h2>
+
+    <ol class="get-started-steps">
+      <li>Sign up at <a href="/pricing.html" style="color: var(--accent);">openprimitive.com/pricing</a> and grab your API key.</li>
+      <li>Pass the key as an <code style="font-family: var(--font-mono); color: var(--text);">X-API-Key</code> header or <code style="font-family: var(--font-mono); color: var(--text);">api_key</code> query parameter.</li>
+      <li>Hit any of the 7 endpoints. That's it.</li>
+    </ol>
 
     <div class="code-block">
-      <span class="comment"># Every response includes source, freshness, and domain metadata</span><br>
-      curl -H <span class="str">"X-API-Key: YOUR_KEY"</span> https://api.openprimitive.com/v1/flights<br><br>
-      <span class="comment"># Or pass the key as a query parameter</span><br>
-      curl https://api.openprimitive.com/v1/drugs?name=metformin&api_key=YOUR_KEY
-    </div>
+<span class="comment"># Check flight delays for Delta</span>
+curl -H <span class="str">"X-API-Key: YOUR_KEY"</span> https://api.openprimitive.com/v1/flights/DL
 
-    <h2>For AI agents</h2>
-    <p style="color: var(--body); margin-bottom: var(--space-4);">
-      Open Primitive runs as an MCP server. Point Claude, GPT, or any MCP-compatible agent at it.
-    </p>
+<span class="comment"># Search hospital quality</span>
+curl -H <span class="str">"X-API-Key: YOUR_KEY"</span> <span class="str">"https://api.openprimitive.com/v1/hospitals?q=mayo+clinic"</span>
 
-    <div class="code-block">
-      <span class="comment">// claude_desktop_config.json</span><br>
-      {<br>
-      &nbsp;&nbsp;<span class="key">"mcpServers"</span>: {<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"open-primitive"</span>: {<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"command"</span>: <span class="str">"node"</span>,<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"args"</span>: [<span class="str">"/path/to/open-primitive-api/mcp.js"</span>]<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;}<br>
-      &nbsp;&nbsp;}<br>
-      }
-    </div>
-
-    <h2>Response shape</h2>
-    <p style="color: var(--body); margin-bottom: var(--space-4);">
-      Every endpoint returns the same envelope. Agents can rely on it.
-    </p>
-    <div class="code-block">
-      {<br>
-      &nbsp;&nbsp;<span class="key">"domain"</span>: <span class="str">"flights"</span>,<br>
-      &nbsp;&nbsp;<span class="key">"source"</span>: <span class="str">"FAA NAS + Open-Meteo"</span>,<br>
-      &nbsp;&nbsp;<span class="key">"source_url"</span>: <span class="str">"https://nasstatus.faa.gov"</span>,<br>
-      &nbsp;&nbsp;<span class="key">"freshness"</span>: <span class="str">"2026-03-19T14:30:00.000Z"</span>,<br>
-      &nbsp;&nbsp;<span class="comment">// ... domain-specific data</span><br>
-      }
+<span class="comment"># Or use a query parameter</span>
+curl <span class="str">"https://api.openprimitive.com/v1/drugs?name=metformin&amp;api_key=YOUR_KEY"</span>
     </div>
   </div>
 
-  <div class="mcp-section">
-    <h2>7 tools. 7 federal sources. One protocol.</h2>
-    <p style="color: var(--body);">
-      Built by <a href="https://openprimitive.com" style="color: var(--accent);">Open Primitive</a>.
-    </p>
-  </div>
+  <!-- Footer -->
+  <footer class="api-footer">
+    <span style="color: var(--muted); font-size: 0.85rem;">Open Primitive API</span>
+    <nav class="footer-links">
+      <a href="https://openprimitive.com">openprimitive.com</a>
+      <a href="/stats.html">Stats</a>
+      <a href="/openapi.json">OpenAPI Spec</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="https://github.com/writesdavid/open-primitive-api">GitHub</a>
+    </nav>
+  </footer>
 
 </body>
 </html>

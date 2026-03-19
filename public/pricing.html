@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing — Open Primitive API</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #e0e0e0;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: #c04010; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .page { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: #888;
+    }
+
+    /* Pricing Grid */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 80px;
+    }
+
+    .card {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: #333; }
+
+    .card.highlight {
+      border-color: #c04010;
+      background: #140a06;
+      box-shadow: 0 0 40px rgba(192, 64, 16, 0.1);
+      position: relative;
+    }
+    .card.highlight::before {
+      content: 'FOR AGENTS';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #c04010;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 14px;
+      border-radius: 4px;
+    }
+
+    .card-tier {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .card.highlight .card-tier { color: #c04010; }
+
+    .card-price {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .card-price span {
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: #666;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: #555;
+      margin-bottom: 24px;
+      min-height: 20px;
+    }
+
+    .card-features {
+      list-style: none;
+      margin-bottom: 32px;
+      flex: 1;
+    }
+    .card-features li {
+      font-size: 0.8rem;
+      color: #999;
+      padding: 6px 0;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .card-features li:last-child { border-bottom: none; }
+
+    .card-cta {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s;
+    }
+    .card-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    .cta-primary {
+      background: #c04010;
+      color: #fff;
+    }
+    .cta-secondary {
+      background: #1a1a1a;
+      color: #888;
+      border: 1px solid #222;
+    }
+    .cta-outline {
+      background: transparent;
+      color: #c04010;
+      border: 1px solid #c04010;
+    }
+
+    /* Included Section */
+    .included {
+      border-top: 1px solid #1a1a1a;
+      padding: 64px 0 80px;
+    }
+    .included h2 {
+      font-size: 1.3rem;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .included .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 48px;
+    }
+    .included-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .included-item {
+      background: #111;
+      border: 1px solid #1a1a1a;
+      border-radius: 8px;
+      padding: 24px;
+    }
+    .included-item h3 {
+      font-size: 0.85rem;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .included-item p {
+      font-size: 0.78rem;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    .page-footer {
+      border-top: 1px solid #1a1a1a;
+      padding: 32px 0;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #444;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .pricing-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 768px) {
+      .hero { padding: 60px 0 40px; }
+      .hero h1 { font-size: 1.6rem; }
+      .pricing-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .included-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <section class="hero">
+      <h1>Federal data for agents. Priced for agents.</h1>
+      <p>Seven domains. Structured JSON. One API.</p>
+    </section>
+
+    <div class="pricing-grid">
+
+      <div class="card">
+        <div class="card-tier">Free</div>
+        <div class="card-price">$0 <span>/mo</span></div>
+        <div class="card-desc">Get started. No credit card.</div>
+        <ul class="card-features">
+          <li>500 calls/month</li>
+          <li>1 API key</li>
+          <li>10 req/min</li>
+          <li>All 7 domains</li>
+          <li>Community support</li>
+        </ul>
+        <a href="/register" class="card-cta cta-primary">Get API Key</a>
+      </div>
+
+      <div class="card">
+        <div class="card-tier">Builder</div>
+        <div class="card-price">$29 <span>/mo</span></div>
+        <div class="card-desc">For side projects and prototypes.</div>
+        <ul class="card-features">
+          <li>10,000 calls/month</li>
+          <li>3 API keys</li>
+          <li>60 req/min</li>
+          <li>Batch endpoints</li>
+          <li>Email support</li>
+        </ul>
+        <a href="#" class="card-cta cta-secondary">Coming Soon</a>
+      </div>
+
+      <div class="card">
+        <div class="card-tier">Pro</div>
+        <div class="card-price">$99 <span>/mo</span></div>
+        <div class="card-desc">For production workloads.</div>
+        <ul class="card-features">
+          <li>100,000 calls/month</li>
+          <li>10 API keys</li>
+          <li>120 req/min</li>
+          <li>Webhooks</li>
+          <li>Historical data</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" class="card-cta cta-secondary">Coming Soon</a>
+      </div>
+
+      <div class="card highlight">
+        <div class="card-tier">Agent</div>
+        <div class="card-price">$0.005 <span>/call</span></div>
+        <div class="card-desc">Pay-per-use. Built for MCP and A2A.</div>
+        <ul class="card-features">
+          <li>No monthly commitment</li>
+          <li>MCP/A2A integration</li>
+          <li>Volume discounts at 1M+ calls</li>
+          <li>All 7 domains</li>
+          <li>Structured JSON</li>
+        </ul>
+        <a href="#" class="card-cta cta-outline">Coming Soon</a>
+      </div>
+
+      <div class="card">
+        <div class="card-tier">Enterprise</div>
+        <div class="card-price">Custom</div>
+        <div class="card-desc">Your infrastructure, your terms.</div>
+        <ul class="card-features">
+          <li>Unlimited calls</li>
+          <li>SLA</li>
+          <li>SSO</li>
+          <li>Custom endpoints</li>
+          <li>Dedicated support</li>
+        </ul>
+        <a href="mailto:david@openprimitive.com" class="card-cta cta-secondary">Contact Us</a>
+      </div>
+
+    </div>
+
+    <section class="included">
+      <h2>Every tier includes</h2>
+      <p class="subtitle">No feature gates on the fundamentals.</p>
+      <div class="included-grid">
+        <div class="included-item">
+          <h3>All 7 domains</h3>
+          <p>Cars, drugs, flights, food, health, hospitals, water. Every endpoint, every tier.</p>
+        </div>
+        <div class="included-item">
+          <h3>Structured JSON</h3>
+          <p>Consistent response format across all domains. Parse once, use everywhere.</p>
+        </div>
+        <div class="included-item">
+          <h3>Source citations</h3>
+          <p>Every response links back to the federal source. Verify anything.</p>
+        </div>
+        <div class="included-item">
+          <h3>Freshness timestamps</h3>
+          <p>Know when the data was last fetched and when the source last updated.</p>
+        </div>
+        <div class="included-item">
+          <h3>MCP server access</h3>
+          <p>Connect any MCP-compatible agent directly. No middleware required.</p>
+        </div>
+        <div class="included-item">
+          <h3>HTTPS only</h3>
+          <p>All traffic encrypted. API keys via header. No query string tokens.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      <a href="https://openprimitive.com">openprimitive.com</a>
+    </footer>
+
+  </div>
+</body>
+</html>

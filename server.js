@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { apiKeyAuth, rateLimitMiddleware, meterUsage } = require('./middleware/auth');
 const { agentDetect, getStats } = require('./middleware/agent-detect');
+const { archiveMiddleware, historyRoute } = require('./middleware/archive');
 
 const flights = require('./sources/flights');
 const cars = require('./sources/cars');
@@ -10,6 +11,12 @@ const water = require('./sources/water');
 const drugs = require('./sources/drugs');
 const hospitals = require('./sources/hospitals');
 const health = require('./sources/health');
+const safety = require('./sources/safety');
+const nutrition = require('./sources/nutrition');
+const jobs = require('./sources/jobs');
+const demographics = require('./sources/demographics');
+const products = require('./sources/products');
+const sec = require('./sources/sec');
 
 const app = express();
 
@@ -29,6 +36,9 @@ app.use(agentDetect);
 
 // Auth + rate limit + meter on all /v1 routes
 app.use('/v1', apiKeyAuth, rateLimitMiddleware, meterUsage);
+
+// Archive every /v1/* response to Upstash Redis (fire-and-forget)
+app.use(archiveMiddleware);
 
 // Response wrapper
 function wrap(res, promise) {
@@ -74,12 +84,42 @@ app.get('/v1/hospitals', (req, res) => {
 // ─── HEALTH ───
 app.get('/v1/health', (req, res) => wrap(res, health.searchHealth(req.query.q)));
 
+// ─── SAFETY (cross-domain) ───
+app.get('/v1/safety', (req, res) => wrap(res, safety.getSafetyProfile(req.query.zip)));
+
+// ─── NUTRITION ───
+app.get('/v1/nutrition', (req, res) => {
+  if (req.query.id) return wrap(res, nutrition.getFood(req.query.id));
+  wrap(res, nutrition.searchFood(req.query.q));
+});
+
+// ─── JOBS ───
+app.get('/v1/jobs', (req, res) => {
+  if (req.query.series) return wrap(res, jobs.getSeriesData(req.query.series));
+  wrap(res, jobs.getUnemployment());
+});
+
+// ─── DEMOGRAPHICS ───
+app.get('/v1/demographics', (req, res) => wrap(res, demographics.getByZip(req.query.zip)));
+
+// ─── PRODUCTS ───
+app.get('/v1/products', (req, res) => {
+  if (req.query.q) return wrap(res, products.search(req.query.q));
+  wrap(res, products.getRecent());
+});
+
+// ─── SEC ───
+app.get('/v1/sec', (req, res) => {
+  if (req.query.cik) return wrap(res, sec.getCompanyFacts(req.query.cik));
+  wrap(res, sec.searchCompany(req.query.q));
+});
+
 // ─── META ───
 app.get('/v1', (req, res) => {
   res.json({
     name: 'Open Primitive API',
     version: '1.0.0',
-    description: 'Federal data for agents. 7 domains, one API.',
+    description: 'Federal data for agents. 13 domains, one API.',
     domains: {
       flights: { endpoint: '/v1/flights', source: 'FAA NAS + Open-Meteo', description: 'Live airline delays and hub weather for 8 US carriers' },
       cars: { endpoint: '/v1/cars?year=&make=&model=', source: 'NHTSA', description: 'Crash safety ratings and recalls for any US vehicle' },
@@ -88,12 +128,21 @@ app.get('/v1', (req, res) => {
       drugs: { endpoint: '/v1/drugs?name=', source: 'FDA FAERS', description: 'Drug adverse events, reactions, and label warnings' },
       hospitals: { endpoint: '/v1/hospitals?q=', source: 'CMS Care Compare', description: 'Hospital quality ratings, mortality, readmissions' },
       health: { endpoint: '/v1/health?q=', source: 'PubMed/MEDLINE', description: 'Research evidence for supplements and health claims' },
+      nutrition: { endpoint: '/v1/nutrition?q=', source: 'USDA FoodData Central', description: 'Nutrition facts for any food: calories, macros, micronutrients' },
+      jobs: { endpoint: '/v1/jobs', source: 'Bureau of Labor Statistics', description: 'Unemployment rate, CPI, employment data, wage statistics' },
+      demographics: { endpoint: '/v1/demographics?zip=', source: 'US Census ACS', description: 'Population, income, poverty, education, housing by ZIP code' },
+      products: { endpoint: '/v1/products', source: 'CPSC', description: 'Consumer product recalls and safety alerts' },
+      sec: { endpoint: '/v1/sec?q=', source: 'SEC EDGAR', description: 'Corporate filings, financial facts, insider trading' },
+      safety: { endpoint: '/v1/safety?zip=', source: 'EPA + CMS', description: 'Cross-domain safety profile: water quality, hospital ratings, composite score' },
     },
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
     rateLimit: '200 requests per hour per key',
     mcp: 'MCP server available at /mcp or via stdio (node mcp.js)',
   });
 });
+
+// ─── HISTORY (placeholder — retrieval layer comes later) ───
+app.get('/v1/history', historyRoute);
 
 // ─── STATS (public — no auth, this is the viral page data) ───
 app.get('/v1/stats', (req, res) => {

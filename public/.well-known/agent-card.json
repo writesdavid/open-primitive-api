@@ -1,0 +1,109 @@
+{
+  "name": "Open Primitive",
+  "description": "Federal public safety and consumer data across 7 US government domains. Real agencies, real numbers, structured for agents.",
+  "url": "https://api.openprimitive.com",
+  "version": "1.0.0",
+  "provider": {
+    "organization": "Open Primitive",
+    "url": "https://openprimitive.com"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["application/json", "text/plain"],
+  "authentication": {
+    "schemes": ["apiKey"]
+  },
+  "skills": [
+    {
+      "id": "flight_status",
+      "name": "Flight Status",
+      "description": "FAA ground delays, weather disruptions, and historical on-time performance for 7 major US airlines across 30 hub airports. Sources: FAA NAS, BTS on-time data, Open-Meteo forecasts.",
+      "examples": [
+        "Are there FAA delays at JFK right now?",
+        "How reliable is Delta out of Atlanta in January?",
+        "What's the weather doing at O'Hare today?"
+      ],
+      "tags": ["aviation", "faa", "delays", "weather", "airlines", "airports"]
+    },
+    {
+      "id": "car_safety",
+      "name": "Car Safety",
+      "description": "NHTSA 5-star crash test ratings and active recall notices for vehicles sold in the US. Covers frontal, side, and rollover ratings plus open recall campaigns with remedy status.",
+      "examples": [
+        "What are the crash ratings for a 2024 Toyota Camry?",
+        "Are there open recalls on my 2021 Ford F-150?",
+        "Which 2024 SUVs have 5-star overall safety ratings?"
+      ],
+      "tags": ["nhtsa", "vehicles", "crash-test", "recalls", "safety-ratings"]
+    },
+    {
+      "id": "food_recalls",
+      "name": "Food Recalls",
+      "description": "Active FDA food recall alerts including reason, severity classification, and distribution scope. Covers Class I (serious health risk) through Class III recalls for products on US shelves.",
+      "examples": [
+        "Any recent Class I food recalls?",
+        "Has peanut butter been recalled this month?",
+        "What food recalls are active in California?"
+      ],
+      "tags": ["fda", "food", "recalls", "contamination", "safety"]
+    },
+    {
+      "id": "water_safety",
+      "name": "Water Safety",
+      "description": "EPA Safe Drinking Water Act violations by water system, county, or ZIP code. Covers contaminant levels, treatment failures, and monitoring gaps reported to the EPA SDWIS database.",
+      "examples": [
+        "Does my ZIP code 48201 have clean drinking water?",
+        "What EPA violations has Detroit's water system had?",
+        "Which contaminants exceed safe levels in Flint, Michigan?"
+      ],
+      "tags": ["epa", "water", "drinking-water", "violations", "contaminants"]
+    },
+    {
+      "id": "drug_safety",
+      "name": "Drug Safety",
+      "description": "FDA adverse event reports (FAERS) and structured product labeling for prescription and OTC drugs. Surfaces reported side effects, black box warnings, and drug interaction signals.",
+      "examples": [
+        "What adverse events are reported for metformin?",
+        "Does lisinopril have a black box warning?",
+        "What are the most common side effects of Ozempic?"
+      ],
+      "tags": ["fda", "drugs", "adverse-events", "labels", "side-effects", "faers"]
+    },
+    {
+      "id": "hospital_quality",
+      "name": "Hospital Quality",
+      "description": "CMS star ratings, mortality rates, readmission rates, and patient experience scores for every Medicare-certified hospital in the US. Direct from Hospital Compare.",
+      "examples": [
+        "What's the CMS star rating for Mayo Clinic?",
+        "Which hospitals near ZIP 10001 have the lowest readmission rates?",
+        "How does Johns Hopkins rank on patient experience?"
+      ],
+      "tags": ["cms", "hospitals", "ratings", "mortality", "readmissions", "medicare"]
+    },
+    {
+      "id": "health_evidence",
+      "name": "Health Evidence",
+      "description": "PubMed research summaries for health claims and supplement questions. Returns study counts, evidence quality tiers, and plain-language summaries so agents can ground health answers in published research.",
+      "examples": [
+        "Is there evidence that turmeric reduces inflammation?",
+        "What does the research say about melatonin for sleep?",
+        "How strong is the evidence for vitamin D and immune function?"
+      ],
+      "tags": ["pubmed", "research", "evidence", "supplements", "health-claims"]
+    },
+    {
+      "id": "location_safety",
+      "name": "Location Safety",
+      "description": "Cross-domain safety profile for any US ZIP code. Pulls water violations, hospital quality, food recall exposure, and air travel reliability into a single composite view. Built for relocation decisions and local risk assessment.",
+      "examples": [
+        "Give me a safety profile for ZIP code 90210.",
+        "How does 60614 compare to 30301 on public safety data?",
+        "What should I know about living in ZIP 02134?"
+      ],
+      "tags": ["location", "zip-code", "cross-domain", "safety-profile", "composite"]
+    }
+  ]
+}
