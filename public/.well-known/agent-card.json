@@ -1,6 +1,6 @@
 {
   "name": "Open Primitive",
-  "description": "Federal public safety and consumer data across 7 US government domains. Real agencies, real numbers, structured for agents.",
+  "description": "Federal public safety and consumer data across 13 US government domains. Real agencies, real numbers, structured for agents.",
   "url": "https://api.openprimitive.com",
   "version": "1.0.0",
   "provider": {
@@ -104,6 +104,61 @@
         "What should I know about living in ZIP 02134?"
       ],
       "tags": ["location", "zip-code", "cross-domain", "safety-profile", "composite"]
+    },
+    {
+      "id": "nutrition_lookup",
+      "name": "Nutrition Facts",
+      "description": "USDA food nutrition data including calories, macronutrients, vitamins, and minerals for thousands of common foods. Direct from the USDA FoodData Central database.",
+      "examples": [
+        "How many calories in a banana?",
+        "Nutrition facts for Greek yogurt",
+        "Is oatmeal high in fiber?"
+      ],
+      "tags": ["nutrition", "usda", "food", "calories", "diet"]
+    },
+    {
+      "id": "employment_data",
+      "name": "Employment & Economic Data",
+      "description": "Bureau of Labor Statistics data covering unemployment rates, consumer price index, average wages, and labor force participation. Monthly and annual series direct from BLS public APIs.",
+      "examples": [
+        "What is the current unemployment rate?",
+        "Show me CPI data for the last year",
+        "Average wages in the US"
+      ],
+      "tags": ["jobs", "employment", "bls", "economy", "wages"]
+    },
+    {
+      "id": "demographics",
+      "name": "Demographics by ZIP Code",
+      "description": "Census American Community Survey data by ZIP code including median household income, population counts, poverty rates, housing occupancy, and educational attainment. Direct from Census ACS 5-year estimates.",
+      "examples": [
+        "What is the median income in 90210?",
+        "Population of ZIP 10001",
+        "Poverty rate in rural Kentucky"
+      ],
+      "tags": ["census", "demographics", "population", "income", "housing"]
+    },
+    {
+      "id": "product_safety",
+      "name": "Consumer Product Recalls",
+      "description": "Consumer Product Safety Commission recall notices for household goods, children's products, and electronics sold in the US. Covers hazard descriptions, remedy actions, and incident counts.",
+      "examples": [
+        "Recent product recalls",
+        "Are there recalls on cribs?",
+        "Safety alerts for children's toys"
+      ],
+      "tags": ["cpsc", "products", "recalls", "consumer", "safety"]
+    },
+    {
+      "id": "corporate_filings",
+      "name": "SEC Corporate Filings",
+      "description": "SEC EDGAR filings including 10-K annual reports, 10-Q quarterly reports, and 8-K current reports for publicly traded US companies. Structured access to financial disclosures and corporate events.",
+      "examples": [
+        "Apple's latest 10-K filing",
+        "Tesla revenue history",
+        "Recent 8-K filings for Microsoft"
+      ],
+      "tags": ["sec", "edgar", "filings", "financial", "corporate"]
     }
   ]
 }

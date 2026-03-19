@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
 const { z } = require('zod');
@@ -9,6 +10,12 @@ const water = require('./sources/water');
 const drugs = require('./sources/drugs');
 const hospitals = require('./sources/hospitals');
 const health = require('./sources/health');
+const nutrition = require('./sources/nutrition');
+const jobs = require('./sources/jobs');
+const demographics = require('./sources/demographics');
+const products = require('./sources/products');
+const sec = require('./sources/sec');
+const safety = require('./sources/safety');
 
 const server = new McpServer({
   name: 'open-primitive',
@@ -100,6 +107,80 @@ server.registerTool('get-health-evidence', {
   }),
 }, async ({ query }) => {
   const data = await health.searchHealth(query);
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── NUTRITION ───
+server.registerTool('get-nutrition', {
+  title: 'Get Nutrition Data',
+  description: 'Search USDA FoodData Central for nutrition facts or get details by FDC ID. Source: USDA.',
+  inputSchema: z.object({
+    query: z.string().optional().describe('Food search term (e.g. "banana", "cheddar cheese"). Omit if using fdcId.'),
+    fdcId: z.string().optional().describe('FDC ID for a specific food item. Omit if using query.'),
+  }),
+}, async ({ query, fdcId }) => {
+  const data = fdcId ? await nutrition.getFood(fdcId) : await nutrition.searchFood(query || '');
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── JOBS ───
+server.registerTool('get-jobs', {
+  title: 'Get Jobs Data',
+  description: 'Get unemployment rate or other BLS time series data. Source: Bureau of Labor Statistics.',
+  inputSchema: z.object({
+    seriesId: z.string().optional().describe('BLS series ID (e.g. "LNS14000000" for unemployment rate). Omit for default unemployment data.'),
+  }),
+}, async ({ seriesId }) => {
+  const data = seriesId ? await jobs.getSeriesData(seriesId) : await jobs.getUnemployment();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── DEMOGRAPHICS ───
+server.registerTool('get-demographics', {
+  title: 'Get Demographics',
+  description: 'Get Census demographics for a ZIP code: population, income, poverty, education, housing. Source: US Census ACS.',
+  inputSchema: z.object({
+    zip: z.string().describe('5-digit ZIP code'),
+  }),
+}, async ({ zip }) => {
+  const data = await demographics.getByZip(zip);
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── PRODUCT RECALLS ───
+server.registerTool('get-product-recalls', {
+  title: 'Get Product Recalls',
+  description: 'Get recent CPSC consumer product recalls or search by keyword. Source: SaferProducts.gov.',
+  inputSchema: z.object({
+    query: z.string().optional().describe('Search term (product type or brand). Omit for recent recalls.'),
+  }),
+}, async ({ query }) => {
+  const data = query ? await products.search(query) : await products.getRecent();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── SEC FILINGS ───
+server.registerTool('get-sec-filings', {
+  title: 'Get SEC Filings',
+  description: 'Search SEC EDGAR for company filings or get structured financial facts by CIK. Source: SEC EDGAR.',
+  inputSchema: z.object({
+    query: z.string().optional().describe('Company name to search (e.g. "Apple"). Omit if using cik.'),
+    cik: z.string().optional().describe('SEC CIK number for detailed company facts. Omit if using query.'),
+  }),
+}, async ({ query, cik }) => {
+  const data = cik ? await sec.getCompanyFacts(cik) : await sec.searchCompany(query || '');
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── SAFETY PROFILE ───
+server.registerTool('get-safety-profile', {
+  title: 'Get Safety Profile',
+  description: 'Get a cross-domain safety composite for a ZIP code combining water quality and hospital ratings. Source: EPA + CMS.',
+  inputSchema: z.object({
+    zip: z.string().describe('5-digit ZIP code'),
+  }),
+}, async ({ zip }) => {
+  const data = await safety.getSafetyProfile(zip);
   return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
 });
 

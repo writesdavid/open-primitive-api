@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Primitive — Investor Memo</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --text: #1a1a1a;
+      --muted: #5a5a5a;
+      --accent: #2a2a2a;
+      --border: #e0e0dc;
+      --section-gap: 3rem;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.7;
+      padding: 2rem 1.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: var(--section-gap);
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.25rem;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    section {
+      margin-bottom: var(--section-gap);
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.3px;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .stat {
+      font-weight: 600;
+    }
+
+    .highlight {
+      background: #f0efeb;
+      border-left: 3px solid var(--accent);
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+      border-radius: 2px;
+    }
+
+    .highlight p {
+      margin-bottom: 0;
+    }
+
+    .tier-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.95rem;
+    }
+
+    .tier-table th,
+    .tier-table td {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tier-table th {
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid var(--accent);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1.25rem 1rem; }
+      header h1 { font-size: 1.6rem; }
+      h2 { font-size: 1.15rem; }
+      p { font-size: 1rem; }
+      .tier-table { font-size: 0.85rem; }
+      .tier-table th, .tier-table td { padding: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Open Primitive</h1>
+  <p>The federal data layer for AI agents and human decisions</p>
+</header>
+
+<section>
+  <h2>The Market</h2>
+  <p>Ten federal agencies produce the data behind $2T+ in annual US consumer decisions. Transportation, food safety, healthcare quality, pharmaceutical risk, financial regulation. Every American touches this data whether they know it or not.</p>
+  <p>53% of Americans now use AI assistants for health and safety decisions. That number climbs every quarter. These assistants need ground truth. Without primary federal sources, they guess. They hallucinate. They get people hurt.</p>
+  <p>AI agents need structured, verified data to function. This is infrastructure, not a feature request.</p>
+  <p>The RegTech and compliance market sits at $23B in 2026 and projects to $77B by 2034. Thomson Reuters and Wolters Kluwer charge six figures annually for structured access to public data. They built those businesses before agents existed. The agent economy needs a native data layer, and nobody has built it.</p>
+</section>
+
+<section>
+  <h2>The Problem</h2>
+  <p>Federal data is scattered across dozens of agencies. Each publishes in different formats, different schemas, different update frequencies. The FDA uses one API pattern. The EPA uses another. The FAA publishes XML. The BTS ships CSV dumps quarterly. CMS changes its endpoints without notice.</p>
+  <p>No unified query layer exists. Enigma raised $130M to try. They pivoted away from government data entirely. The problem beat them.</p>
+  <p>AI models train on summaries of summaries. Fidelity degrades at every layer. When Claude answers "is my water safe?" it has no primary source to reference. It synthesizes fragments from blog posts and news articles. The answer sounds confident. The answer is often wrong.</p>
+  <p>Every developer who wants federal data rebuilds the same parsing, the same error handling, the same caching. Thousands of engineers solving the same problem independently, each with partial coverage.</p>
+</section>
+
+<section>
+  <h2>The Product</h2>
+  <p>Open Primitive connects 13 federal data domains through one unified REST API. Water quality. Food recalls. Drug adverse events. Hospital safety scores. Vehicle complaints. Airline reliability. Nursing home inspections. Each domain normalized to a consistent schema.</p>
+  <p>The MCP server exposes 13 tools. AI agents call them directly. No prompt engineering required. No retrieval-augmented generation workarounds. The agent asks for water violation data in a ZIP code and gets structured federal records with source URLs.</p>
+  <p>The A2A agent card makes Open Primitive discoverable by agent orchestrators. Agents find us without human configuration.</p>
+  <div class="highlight">
+    <p>Cross-domain queries set this apart. A composite safety score for any US ZIP code, joining water quality, hospital ratings, food inspection history, and drug event frequency. Nobody else joins federal datasets across agencies.</p>
+  </div>
+  <p>Every API response includes the domain, source agency, source URL, and freshness timestamp. Provenance is not optional. Historical archiving captures time-series data that federal agencies themselves delete or overwrite. Within 12 months of operation, this archive becomes irreplaceable.</p>
+</section>
+
+<section>
+  <h2>The Traction</h2>
+  <p>The API is live at api.openprimitive.com. Ten federal agencies connected and returning data. Agent traffic detection distinguishes machine callers from human browsers. Webhook alerting pushes new recalls and violations to subscribers the moment federal agencies publish them.</p>
+  <p>Seven consumer-facing tools run at openprimitive.com. Each one demonstrates a data domain: flight reliability, vehicle defects, water violations, food recalls, drug side effects, hospital quality, supplement efficacy. These tools validate the API, generate organic traffic, and prove the data works at the point of decision.</p>
+  <p>The entire platform was built and shipped by one engineer. Every scraper, every parser, every API endpoint, every consumer tool. The technical foundation exists. What comes next is scale.</p>
+</section>
+
+<section>
+  <h2>The Business</h2>
+  <table class="tier-table">
+    <thead>
+      <tr><th>Tier</th><th>Price</th><th>Target</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Free</td><td>$0</td><td>Developers, exploration</td></tr>
+      <tr><td>Builder</td><td>$29/mo</td><td>Indie developers, small apps</td></tr>
+      <tr><td>Pro</td><td>$99/mo</td><td>Startups, production apps</td></tr>
+      <tr><td>Agent</td><td>$0.005/call</td><td>AI agents, orchestrators</td></tr>
+      <tr><td>Enterprise</td><td>Custom</td><td>Compliance teams, large orgs</td></tr>
+    </tbody>
+  </table>
+  <p>The Agent tier is novel. Nobody prices federal data for AI consumption. Pay-per-call aligns with how agents work: high volume, low friction, no subscriptions to manage.</p>
+  <div class="highlight">
+    <p>At $0.005 per call, 277K calls per day produces $500K ARR. AI-native data companies trade at 25-30x revenue. $500K ARR implies a $12-15M valuation.</p>
+  </div>
+  <p>Agent call volume scales with agent adoption. As companies deploy more AI agents, each agent needs verified data for every decision. Open Primitive sits in the critical path. Usage grows with the agent economy, not with our sales team.</p>
+</section>
+
+<section>
+  <h2>The Moat</h2>
+  <p>Four layers protect this business, and each one compounds over time.</p>
+  <p><span class="stat">Cross-domain composites.</span> Joining water quality, hospital scores, drug events, and food inspections per ZIP code requires normalizing data from agencies that were never designed to talk to each other. This integration work is tedious, unglamorous, and essential. Competitors would need to rebuild it from scratch.</p>
+  <p><span class="stat">Historical archive.</span> Federal agencies overwrite current data. They do not maintain accessible time-series. Every day Open Primitive runs, the archive grows. After 12 months, we hold longitudinal federal data that exists nowhere else. After 24 months, the switching cost is permanent.</p>
+  <p><span class="stat">Agent network effects.</span> MCP and A2A registration puts Open Primitive in agent tool registries. Once agents discover and rely on these tools, they route queries here by default. Each new agent integration increases the value for every other agent in the network.</p>
+  <p><span class="stat">Query intelligence.</span> Logs reveal what agents actually ask for. Which domains, which geographies, which cross-references. This data shapes product decisions, surfaces unmet demand, and creates a flywheel that no competitor can replicate without equivalent traffic.</p>
+</section>
+
+<section>
+  <h2>The Competition</h2>
+  <p><span class="stat">Enigma</span> raised $130M to structure government data. They abandoned the mission and pivoted to KYB (know-your-business) verification. The government data problem remains unsolved.</p>
+  <p><span class="stat">Socrata (Tyler Technologies)</span> sells data portals to governments. Their customer is the agency, not the developer. Not the agent.</p>
+  <p><span class="stat">data.gov</span> is a metadata catalog. It points to datasets. It does not serve queryable data.</p>
+  <p><span class="stat">OpenFDA</span> covers a single agency. Dataset updates were suspended in March 2025. Single-agency solutions cannot provide cross-domain intelligence.</p>
+  <p>Nobody builds unified cross-agency APIs designed for agent consumption. The market is open.</p>
+</section>
+
+<section>
+  <h2>The Team</h2>
+  <p>David Hamilton leads content engineering and AI infrastructure at Block. He built all 7 consumer tools and the unified API as a solo engineer. The scrapers, the parsers, the normalization layers, the REST endpoints, the MCP server, the consumer interfaces. Shipped and live.</p>
+  <p>This is a builder who ships. The technical foundation proves the concept works. What comes next requires capital and a team.</p>
+</section>
+
+<section>
+  <h2>The Ask</h2>
+  <p>Seed funding to execute three priorities. First, expand from 13 to 20+ federal data domains, covering financial regulation, environmental compliance, and housing safety. Second, build enterprise features: SSO, audit logs, SLA guarantees, and dedicated support. Third, hire the first engineer and begin go-to-market.</p>
+  <p>The infrastructure exists. The data flows. The agents are calling. This is the moment to scale.</p>
+</section>
+
+<footer>
+  <p>Open Primitive &mdash; openprimitive.com &mdash; March 2026</p>
+</footer>
+
+</body>
+</html>

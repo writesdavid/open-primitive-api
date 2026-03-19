@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.writesdavid/open-primitive",
+  "description": "MCP server for 13 US federal data domains. Cars, food, drugs, water, hospitals, health, nutrition, jobs, demographics, products, SEC filings, flight delays, and cross-domain safety scores.",
+  "repository": {
+    "url": "https://github.com/writesdavid/open-primitive-api",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "open-primitive-mcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

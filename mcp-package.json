@@ -1,0 +1,22 @@
+{
+  "name": "open-primitive-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for 13 federal data domains — flights, cars, food, water, drugs, hospitals, health, nutrition, jobs, demographics, products, SEC, safety",
+  "main": "mcp.js",
+  "bin": {
+    "open-primitive-mcp": "./mcp.js"
+  },
+  "files": ["mcp.js", "sources/", "package.json"],
+  "keywords": ["mcp", "model-context-protocol", "federal-data", "government", "ai-agents", "open-primitive"],
+  "author": "David Hamilton <davehamiltonj@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/writesdavid/open-primitive-api"
+  },
+  "dependencies": {
+    "node-fetch": "^2.7.0",
+    "@modelcontextprotocol/sdk": "^1.27.0",
+    "zod": "^3.24.0"
+  }
+}

@@ -1,6 +1,6 @@
 # Open Primitive API
 
-> Federal data for agents. 7 government data domains, one unified API.
+> Federal data for agents. 13 government data domains, one unified API.
 
 ## Endpoints
 
@@ -15,6 +15,16 @@
 - GET /v1/hospitals?q= — Search hospitals by name or ZIP. Source: CMS Care Compare.
 - GET /v1/hospitals?id= — Hospital quality detail by provider ID.
 - GET /v1/health?q= — Research evidence for health claims. Source: PubMed/MEDLINE.
+- GET /v1/nutrition?q= — Search foods by name. Source: USDA FoodData Central.
+- GET /v1/nutrition?id= — Get detailed nutrition by FDC ID.
+- GET /v1/jobs — Latest unemployment rate. Source: Bureau of Labor Statistics.
+- GET /v1/jobs?series= — Any BLS data series by ID.
+- GET /v1/demographics?zip= — Population, income, poverty, education, housing by ZIP. Source: US Census ACS.
+- GET /v1/products — Recent consumer product recalls. Source: CPSC.
+- GET /v1/products?q= — Search product recalls.
+- GET /v1/sec?q= — Search SEC corporate filings. Source: SEC EDGAR.
+- GET /v1/sec?cik= — Company financial facts by CIK.
+- GET /v1/safety?zip= — Cross-domain safety profile (water + hospitals composite). Source: EPA + CMS.
 
 ## Authentication
 Pass API key via X-API-Key header or ?api_key= query parameter.
@@ -24,7 +34,7 @@ Every response includes: domain, source, source_url, freshness (ISO 8601 timesta
 
 ## MCP Server
 Available as Model Context Protocol server. Install: node mcp.js (stdio transport).
-Tools: get-flights, get-car-safety, get-food-recalls, get-water-safety, get-drug-safety, get-hospital-quality, get-health-evidence.
+Tools: get-flights, get-car-safety, get-food-recalls, get-water-safety, get-drug-safety, get-hospital-quality, get-health-evidence, get-nutrition, get-jobs, get-demographics, get-product-recalls, get-sec-filings, get-safety-profile.
 
 ## About
-Open Primitive translates federal government data into structured, agent-consumable endpoints. Primary sources: FAA, NHTSA, FDA, EPA, CMS, NIH/PubMed.
+Open Primitive translates federal government data into structured, agent-consumable endpoints. Primary sources: FAA, NHTSA, FDA, EPA, CMS, NIH/PubMed, USDA, BLS, Census Bureau, CPSC, SEC.

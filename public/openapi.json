@@ -3,7 +3,7 @@
   "info": {
     "title": "Open Primitive API",
     "version": "1.0.0",
-    "description": "Federal data for agents. 7 government data domains, one unified API.",
+    "description": "Federal data for agents. 13 government data domains, one unified API.",
     "contact": {
       "email": "davehamiltonj@gmail.com"
     }
@@ -490,6 +490,336 @@
                               "pmid": { "type": "string" },
                               "url": { "type": "string", "format": "uri" }
                             }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/nutrition": {
+      "get": {
+        "summary": "Nutrition facts lookup",
+        "description": "Returns nutrition facts from USDA FoodData Central. Search by food name or look up by FDC ID.",
+        "operationId": "getNutrition",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Search term for food name (e.g. chicken breast, cheddar cheese)"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "FDC ID for a specific food item"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nutrition data for matched foods",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "foods": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "fdc_id": { "type": "integer", "description": "USDA FoodData Central ID" },
+                              "description": { "type": "string" },
+                              "brand": { "type": "string" },
+                              "serving_size": { "type": "string" },
+                              "calories": { "type": "number" },
+                              "protein_g": { "type": "number" },
+                              "fat_g": { "type": "number" },
+                              "carbs_g": { "type": "number" },
+                              "fiber_g": { "type": "number" },
+                              "sugar_g": { "type": "number" },
+                              "sodium_mg": { "type": "number" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs": {
+      "get": {
+        "summary": "Employment and economic data",
+        "description": "Returns unemployment rates and economic indicators from the Bureau of Labor Statistics. Optionally filter by BLS series ID.",
+        "operationId": "getJobs",
+        "parameters": [
+          {
+            "name": "series",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "BLS series ID (e.g. LNS14000000 for national unemployment rate). Omit for headline figures."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Employment and economic data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "series_id": { "type": "string" },
+                        "series_title": { "type": "string" },
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "year": { "type": "integer" },
+                              "period": { "type": "string", "description": "Month label (e.g. January)" },
+                              "value": { "type": "number" },
+                              "footnotes": { "type": "array", "items": { "type": "string" } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/demographics": {
+      "get": {
+        "summary": "Census demographic data by ZIP code",
+        "description": "Returns population, income, poverty, education, and housing data from the Census American Community Survey for a given ZIP code.",
+        "operationId": "getDemographics",
+        "parameters": [
+          {
+            "name": "zip",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "5-digit ZIP code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Demographic profile for the ZIP code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "zip": { "type": "string" },
+                        "population": { "type": "integer" },
+                        "median_household_income": { "type": "number" },
+                        "poverty_rate": { "type": "number", "description": "Percentage below poverty line" },
+                        "education": {
+                          "type": "object",
+                          "properties": {
+                            "high_school_or_higher": { "type": "number", "description": "Percentage with high school diploma or higher" },
+                            "bachelors_or_higher": { "type": "number", "description": "Percentage with bachelor's degree or higher" }
+                          }
+                        },
+                        "housing": {
+                          "type": "object",
+                          "properties": {
+                            "total_units": { "type": "integer" },
+                            "median_home_value": { "type": "number" },
+                            "owner_occupied_pct": { "type": "number" }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/products": {
+      "get": {
+        "summary": "Consumer product recalls",
+        "description": "Returns product recall data from the Consumer Product Safety Commission. Search by product name or browse recent recalls.",
+        "operationId": "getProducts",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Search term for product name or type. Omit for recent recalls."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product recall results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "recalls": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "recall_id": { "type": "string" },
+                              "product": { "type": "string" },
+                              "manufacturer": { "type": "string" },
+                              "hazard": { "type": "string" },
+                              "remedy": { "type": "string" },
+                              "date": { "type": "string" },
+                              "units_affected": { "type": "string" },
+                              "url": { "type": "string", "format": "uri" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sec": {
+      "get": {
+        "summary": "SEC company filings and financial facts",
+        "description": "Returns SEC EDGAR filings and financial facts for a company. Search by name or look up by CIK number.",
+        "operationId": "getSec",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Company name search (e.g. Apple, Tesla)"
+          },
+          {
+            "name": "cik",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "SEC Central Index Key for a specific company (e.g. 0000320193)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SEC filings and financial data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "company": {
+                          "type": "object",
+                          "properties": {
+                            "cik": { "type": "string" },
+                            "name": { "type": "string" },
+                            "ticker": { "type": "string" },
+                            "sic": { "type": "string", "description": "Standard Industrial Classification code" }
+                          }
+                        },
+                        "filings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "form": { "type": "string", "description": "Filing type (e.g. 10-K, 10-Q, 8-K)" },
+                              "date": { "type": "string" },
+                              "description": { "type": "string" },
+                              "url": { "type": "string", "format": "uri" }
+                            }
+                          }
+                        },
+                        "facts": {
+                          "type": "object",
+                          "description": "Key financial facts (revenue, net income, assets, etc.)"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/safety": {
+      "get": {
+        "summary": "Cross-domain safety profile by ZIP code",
+        "description": "Returns a composite safety profile for a ZIP code combining EPA environmental data and CMS healthcare quality data. Includes a composite safety score.",
+        "operationId": "getSafety",
+        "parameters": [
+          {
+            "name": "zip",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "5-digit ZIP code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cross-domain safety profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "zip": { "type": "string" },
+                        "composite_score": { "type": "number", "description": "Overall safety score 0-100" },
+                        "environmental": {
+                          "type": "object",
+                          "properties": {
+                            "air_quality_index": { "type": "number" },
+                            "superfund_sites": { "type": "integer", "description": "Number of nearby Superfund sites" },
+                            "toxic_releases": { "type": "integer", "description": "Number of TRI facilities" },
+                            "water_violations": { "type": "integer" }
+                          }
+                        },
+                        "healthcare": {
+                          "type": "object",
+                          "properties": {
+                            "nearest_hospital_rating": { "type": "integer", "description": "CMS star rating 1-5" },
+                            "hospital_count": { "type": "integer", "description": "Hospitals within 25 miles" },
+                            "nursing_home_avg_rating": { "type": "number" }
                           }
                         }
                       }
