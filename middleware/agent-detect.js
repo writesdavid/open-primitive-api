@@ -1,14 +1,17 @@
 const AGENT_PATTERNS = [
-  { pattern: /claudebot|claude-web|anthropic-ai/i, name: 'claude' },
-  { pattern: /chatgpt-user|gptbot|openai/i, name: 'chatgpt' },
-  { pattern: /perplexitybot/i, name: 'perplexity' },
+  { pattern: /claudebot|claude-user|claude-searchbot|claude-web|anthropic-ai/i, name: 'claude' },
+  { pattern: /chatgpt-user|gptbot|oai-searchbot|openai/i, name: 'chatgpt' },
+  { pattern: /perplexitybot|perplexity-user/i, name: 'perplexity' },
   { pattern: /google-extended|googlebot-extended/i, name: 'google' },
   { pattern: /bingbot|bingpreview/i, name: 'bing' },
   { pattern: /meta-externalagent|facebookbot/i, name: 'meta' },
-  { pattern: /bytespider/i, name: 'bytespider' },
+  { pattern: /applebot-extended/i, name: 'apple' },
+  { pattern: /amazonbot/i, name: 'amazon' },
+  { pattern: /bytespider/i, name: 'bytedance' },
   { pattern: /ccbot/i, name: 'ccbot' },
   { pattern: /cohere-ai/i, name: 'cohere' },
-  { pattern: /bot|crawler/i, name: 'unknown-bot' },
+  { pattern: /diffbot/i, name: 'diffbot' },
+  { pattern: /bot|crawler|spider/i, name: 'unknown-bot' },
 ];
 
 const stats = {

@@ -99,11 +99,21 @@ app.get('/v1', (req, res) => {
 app.get('/v1/stats', (req, res) => {
   const stats = getStats();
   const pct = stats.total > 0 ? Math.round((stats.agent / stats.total) * 100) : 0;
+  // Transform objects to arrays for the dashboard
+  const agents = Object.entries(stats.byAgent).map(([name, count]) => ({ name, count }));
+  const endpoints = Object.entries(stats.byEndpoint).map(([name, data]) => ({
+    name,
+    count: (data.agent || 0) + (data.human || 0),
+    agent: data.agent || 0,
+    human: data.human || 0,
+  }));
   res.json({
     agentPercent: pct,
     total: stats.total,
     agent: stats.agent,
     human: stats.human,
+    agents,
+    endpoints,
     byAgent: stats.byAgent,
     byEndpoint: stats.byEndpoint,
     hourly: stats.hourly,
