@@ -17,8 +17,17 @@ const jobs = require('./sources/jobs');
 const demographics = require('./sources/demographics');
 const products = require('./sources/products');
 const sec = require('./sources/sec');
+const weather = require('./sources/weather');
+const location = require('./sources/location');
+const compare = require('./sources/compare');
+const { getStatus } = require('./routes/status');
+const { handleRegister } = require('./routes/register');
+const { addQualityGrade } = require('./middleware/quality');
 
 const app = express();
+
+// JSON body parsing for POST routes
+app.use(express.json());
 
 // Static docs page
 app.use(express.static(path.join(__dirname, 'public')));
@@ -114,12 +123,32 @@ app.get('/v1/sec', (req, res) => {
   wrap(res, sec.searchCompany(req.query.q));
 });
 
+// ─── WEATHER ───
+app.get('/v1/weather', (req, res) => {
+  if (req.query.state) return wrap(res, weather.getAlerts(req.query.state));
+  wrap(res, weather.getForecastByZip(req.query.zip));
+});
+
+// ─── LOCATION (cross-domain profile) ───
+app.get('/v1/location', (req, res) => wrap(res, location.getLocationProfile(req.query.zip)));
+
+// ─── COMPARE ───
+app.get('/v1/compare', (req, res) => {
+  const { type, a, b } = req.query;
+  if (type === 'drugs') return wrap(res, compare.compareDrugs(a, b));
+  if (type === 'hospitals') return wrap(res, compare.compareHospitals(a, b));
+  wrap(res, compare.compareZips(a, b));
+});
+
+// ─── REGISTER (self-service API key) ───
+app.post('/v1/register', handleRegister);
+
 // ─── META ───
 app.get('/v1', (req, res) => {
   res.json({
     name: 'Open Primitive API',
     version: '1.0.0',
-    description: 'Federal data for agents. 13 domains, one API.',
+    description: 'Federal data for agents. 16 domains, one API.',
     domains: {
       flights: { endpoint: '/v1/flights', source: 'FAA NAS + Open-Meteo', description: 'Live airline delays and hub weather for 8 US carriers' },
       cars: { endpoint: '/v1/cars?year=&make=&model=', source: 'NHTSA', description: 'Crash safety ratings and recalls for any US vehicle' },
@@ -134,6 +163,9 @@ app.get('/v1', (req, res) => {
       products: { endpoint: '/v1/products', source: 'CPSC', description: 'Consumer product recalls and safety alerts' },
       sec: { endpoint: '/v1/sec?q=', source: 'SEC EDGAR', description: 'Corporate filings, financial facts, insider trading' },
       safety: { endpoint: '/v1/safety?zip=', source: 'EPA + CMS', description: 'Cross-domain safety profile: water quality, hospital ratings, composite score' },
+      weather: { endpoint: '/v1/weather?zip=', source: 'NOAA NWS', description: '7-day forecast and active alerts' },
+      location: { endpoint: '/v1/location?zip=', source: 'Census + EPA + CMS', description: 'Complete location profile: demographics + safety in one call' },
+      compare: { endpoint: '/v1/compare?type=&a=&b=', source: 'Multiple', description: 'Side-by-side comparison of ZIPs, drugs, or hospitals' },
     },
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
     rateLimit: '200 requests per hour per key',
@@ -168,6 +200,16 @@ app.get('/v1/stats', (req, res) => {
     hourly: stats.hourly,
     upSince: stats.upSince,
   });
+});
+
+// ─── STATUS ───
+app.get('/v1/status', (req, res) => {
+  getStatus()
+    .then(data => res.json(data))
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({ error: 'Status check failed' });
+    });
 });
 
 // Health check

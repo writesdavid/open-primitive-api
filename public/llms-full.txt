@@ -1,0 +1,1016 @@
+# Open Primitive API — Complete Documentation
+
+> 13 US federal data domains. One unified REST API. MCP server. A2A agent card.
+
+Base URL: https://api.openprimitive.com
+
+
+## Authentication
+
+Register at https://api.openprimitive.com/register.html to get a free API key.
+
+Free tier: 200 requests per hour. No credit card required.
+
+Pass your key one of two ways:
+- Header: X-API-Key: YOUR_KEY
+- Query parameter: ?api_key=YOUR_KEY
+
+Missing key returns 401. Invalid key returns 403. Exceeding rate limit returns 429.
+
+Rate limit headers on every response:
+- X-RateLimit-Limit
+- X-RateLimit-Remaining
+- X-RateLimit-Reset
+
+
+## Response Envelope
+
+Every successful response includes these fields:
+
+- domain (string) — which data domain produced the result (e.g. "flights", "cars", "water")
+- source (string) — the federal agency or data source name
+- source_url (string) — URL of the upstream data source
+- freshness (string) — ISO 8601 timestamp of when the data was fetched
+
+Error responses return: { "error": "description of what went wrong" }
+
+
+---
+
+
+## Domain: Flights
+
+Live FAA ground delays and hub airport weather for 8 major US carriers.
+
+Source: FAA National Airspace System Status + Open-Meteo
+Source URL: https://nasstatus.faa.gov
+
+Airlines covered: Delta (DL), United (UA), American (AA), Southwest (WN), Alaska (AS), JetBlue (B6), Allegiant (G4), Frontier (F9)
+
+### GET /v1/flights
+
+Returns all 8 airlines with current delay status and 4-day weather forecast at each primary hub.
+
+No parameters required.
+
+```
+curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/flights
+```
+
+Response:
+```json
+{
+  "domain": "flights",
+  "source": "FAA NAS + Open-Meteo",
+  "source_url": "https://nasstatus.faa.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "airlines": [
+    {
+      "name": "Delta",
+      "iata": "DL",
+      "hubs": ["ATL", "MSP", "DTW", "SLC"],
+      "delays": [
+        { "airport": "ATL", "reason": "TM Initiatives:MIT:VOL", "delay": "16 minutes" }
+      ],
+      "hasDelays": true,
+      "weather": [
+        { "day": 1, "weatherCode": 3, "precipitation": 0.2 },
+        { "day": 2, "weatherCode": 61, "precipitation": 5.1 }
+      ],
+      "primaryHub": "ATL"
+    }
+  ]
+}
+```
+
+### GET /v1/flights/:iata
+
+Returns a single airline by IATA code.
+
+Parameters:
+- iata (path, required) — two-letter IATA airline code: DL, UA, AA, WN, AS, B6, G4, F9
+
+```
+curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/flights/DL
+```
+
+Response:
+```json
+{
+  "domain": "flights",
+  "source": "FAA NAS + Open-Meteo",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "name": "Delta",
+  "iata": "DL",
+  "hubs": ["ATL", "MSP", "DTW", "SLC"],
+  "delays": [],
+  "hasDelays": false,
+  "weather": [
+    { "day": 1, "weatherCode": 0, "precipitation": 0 }
+  ]
+}
+```
+
+What the data means: delays come from FAA NAS real-time status. If an airport has an active ground delay program, ground stop, or traffic management initiative, it appears in the delays array. Weather codes follow WMO standard (0 = clear, 61 = rain, 71 = snow, etc.). Precipitation is in millimeters.
+
+
+---
+
+
+## Domain: Cars
+
+NHTSA crash safety ratings and active recall notices for vehicles sold in the US.
+
+Source: National Highway Traffic Safety Administration
+Source URL: https://api.nhtsa.gov
+
+### GET /v1/cars
+
+Parameters:
+- year (query, required) — model year, e.g. "2024"
+- make (query, required) — manufacturer, e.g. "Toyota"
+- model (query, required) — model name, e.g. "Camry"
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/cars?year=2024&make=Toyota&model=Camry"
+```
+
+Response:
+```json
+{
+  "domain": "cars",
+  "source": "NHTSA",
+  "source_url": "https://api.nhtsa.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "year": "2024",
+  "make": "Toyota",
+  "model": "Camry",
+  "ratings": {
+    "OverallRating": "5",
+    "OverallFrontCrashRating": "4",
+    "FrontCrashDriversideRating": "4",
+    "FrontCrashPassengersideRating": "5",
+    "OverallSideCrashRating": "5",
+    "RolloverRating": "4"
+  },
+  "variants": [
+    { "vehicleId": 12345, "description": "2024 Toyota Camry 4 DR FWD" }
+  ],
+  "recalls": [
+    {
+      "component": "FUEL SYSTEM",
+      "summary": "Fuel pump may fail...",
+      "consequence": "Engine stall while driving...",
+      "remedy": "Dealers will replace the fuel pump..."
+    }
+  ],
+  "recallCount": 1
+}
+```
+
+What the data means: ratings are 1-5 stars (5 = best). Recalls are open campaigns — if your vehicle matches, take it to a dealer. Returns null for ratings if NHTSA has not tested that vehicle.
+
+
+---
+
+
+## Domain: Food
+
+Active FDA food recall enforcement actions.
+
+Source: FDA Enforcement Reports
+Source URL: https://api.fda.gov
+
+### GET /v1/food
+
+Returns the 20 most recent active food recalls from the last 90 days. No parameters required.
+
+```
+curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/food
+```
+
+### GET /v1/food?q=
+
+Search food recalls by product name or brand.
+
+Parameters:
+- q (query, required) — search term, e.g. "peanut butter" or "Trader Joe"
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/food?q=salmonella"
+```
+
+Response:
+```json
+{
+  "domain": "food",
+  "source": "FDA Enforcement",
+  "source_url": "https://api.fda.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "total": 47,
+  "recalls": [
+    {
+      "product": "Organic Peanut Butter, 16 oz jar",
+      "firm": "Example Foods Inc",
+      "classification": "Class I",
+      "status": "Ongoing",
+      "reason": "Salmonella contamination",
+      "distribution": "Nationwide",
+      "date": "20260301",
+      "quantity": "5,000 cases",
+      "recallNumber": "F-0123-2026"
+    }
+  ]
+}
+```
+
+What the data means: classification indicates severity. Class I = serious health risk or death. Class II = temporary or reversible health consequences. Class III = unlikely to cause adverse health effects.
+
+
+---
+
+
+## Domain: Water
+
+EPA Safe Drinking Water Information System — water systems and violations by location.
+
+Source: EPA SDWIS
+Source URL: https://enviro.epa.gov
+
+### GET /v1/water?zip=
+
+Find water systems serving a ZIP code.
+
+Parameters:
+- zip (query, required) — 5-digit US ZIP code
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/water?zip=48201"
+```
+
+Response:
+```json
+{
+  "domain": "water",
+  "source": "EPA SDWIS",
+  "source_url": "https://enviro.epa.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "zip": "48201",
+  "systems": [
+    {
+      "pwsid": "MI0000101",
+      "name": "DETROIT WATER AND SEWERAGE DEPT",
+      "populationServed": 670000,
+      "type": "CWS",
+      "primarySource": "SW",
+      "city": "DETROIT",
+      "state": "MI"
+    }
+  ],
+  "count": 3
+}
+```
+
+### GET /v1/water/:pwsid
+
+Get detailed violations for a specific water system.
+
+Parameters:
+- pwsid (path, required) — Public Water System ID (9-12 alphanumeric characters, e.g. "MI0000101")
+
+```
+curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/water/MI0000101
+```
+
+Response:
+```json
+{
+  "domain": "water",
+  "source": "EPA SDWIS",
+  "source_url": "https://enviro.epa.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "pwsid": "MI0000101",
+  "system": {
+    "pwsid": "MI0000101",
+    "name": "DETROIT WATER AND SEWERAGE DEPT",
+    "populationServed": 670000,
+    "type": "CWS",
+    "primarySource": "SW",
+    "city": "DETROIT",
+    "state": "MI"
+  },
+  "violations": {
+    "healthBased": [
+      {
+        "contaminant": "LEAD",
+        "type": "Maximum Contaminant Level Violation",
+        "category": "MCL",
+        "beginDate": "2025-01-01",
+        "endDate": "2025-06-30",
+        "status": "open",
+        "healthBased": true
+      }
+    ],
+    "monitoring": [],
+    "total": 1
+  }
+}
+```
+
+What the data means: healthBased violations (MCL, MRDL, TT) mean a contaminant exceeded the legal limit or a treatment technique failed. Monitoring violations mean the system failed to test on schedule. Type codes — CWS = community water system, SW = surface water, GW = groundwater.
+
+
+---
+
+
+## Domain: Drugs
+
+FDA adverse event reports and drug label warnings.
+
+Source: FDA FAERS (Adverse Event Reporting System) + FDA Drug Labels
+Source URL: https://api.fda.gov
+
+### GET /v1/drugs?name=
+
+Parameters:
+- name (query, required) — drug name, brand or generic (e.g. "ibuprofen", "Ozempic", "metformin")
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/drugs?name=ibuprofen"
+```
+
+Response:
+```json
+{
+  "domain": "drugs",
+  "source": "FDA FAERS + Drug Labels",
+  "source_url": "https://api.fda.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "drug": "ibuprofen",
+  "totalEvents": 185432,
+  "seriousEvents": 98201,
+  "deathEvents": 4532,
+  "recentEvents": 12300,
+  "topReactions": [
+    { "reaction": "DRUG INEFFECTIVE", "count": 8921 },
+    { "reaction": "NAUSEA", "count": 7654 },
+    { "reaction": "DIZZINESS", "count": 5432 }
+  ],
+  "labelWarnings": {
+    "warnings": "Cardiovascular Risk: NSAIDs may cause an increased risk...",
+    "adverseReactions": "The most common adverse reactions (>1%) are..."
+  }
+}
+```
+
+What the data means: totalEvents is the count of adverse event reports filed with the FDA. These are voluntary reports — a high count does not prove causation. It reflects how widely a drug is used and how actively it is reported. seriousEvents required hospitalization, disability, or were life-threatening. deathEvents had a death outcome. topReactions are the most frequently reported symptoms. labelWarnings come from the FDA-approved drug label.
+
+
+---
+
+
+## Domain: Hospitals
+
+CMS hospital quality ratings, mortality, readmissions, and patient experience.
+
+Source: CMS Care Compare (Centers for Medicare & Medicaid Services)
+Source URL: https://data.cms.gov
+
+### GET /v1/hospitals?q=
+
+Search hospitals by name or ZIP code.
+
+Parameters:
+- q (query, required) — hospital name or 5-digit ZIP code
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/hospitals?q=Mayo"
+```
+
+Response:
+```json
+{
+  "domain": "hospitals",
+  "source": "CMS Care Compare",
+  "source_url": "https://data.cms.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "query": "Mayo",
+  "results": [
+    {
+      "providerId": "240010",
+      "name": "MAYO CLINIC HOSPITAL SAINT MARYS",
+      "city": "ROCHESTER",
+      "state": "MN",
+      "zip": "55905",
+      "overallRating": "5",
+      "type": "Acute Care Hospitals",
+      "phone": "5072845005"
+    }
+  ],
+  "count": 3
+}
+```
+
+### GET /v1/hospitals?id=
+
+Get detailed quality data for a single hospital.
+
+Parameters:
+- id (query, required) — CMS Provider ID (e.g. "240010")
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/hospitals?id=240010"
+```
+
+Response:
+```json
+{
+  "domain": "hospitals",
+  "source": "CMS Care Compare",
+  "source_url": "https://data.cms.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "providerId": "240010",
+  "name": "MAYO CLINIC HOSPITAL SAINT MARYS",
+  "city": "ROCHESTER",
+  "state": "MN",
+  "zip": "55905",
+  "phone": "5072845005",
+  "type": "Acute Care Hospitals",
+  "overallRating": "5",
+  "mortality": [
+    { "measure": "Death rate for heart attack", "score": "11.2", "comparison": "same" }
+  ],
+  "readmissions": [
+    { "measure": "Rate of readmission for heart attack", "score": "15.8", "comparison": "better" }
+  ],
+  "patientExperience": [
+    { "measure": "Overall hospital rating", "score": "4", "comparison": null }
+  ]
+}
+```
+
+What the data means: overallRating is 1-5 stars (5 = best). Comparison values are "better", "worse", or "same" relative to the national average. Mortality and readmission scores are percentages.
+
+
+---
+
+
+## Domain: Health
+
+PubMed research evidence for health claims and supplements.
+
+Source: PubMed/MEDLINE (National Library of Medicine)
+Source URL: https://pubmed.ncbi.nlm.nih.gov
+
+### GET /v1/health?q=
+
+Parameters:
+- q (query, required) — supplement name or health claim (e.g. "vitamin d immune", "turmeric inflammation", "melatonin sleep")
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/health?q=turmeric+inflammation"
+```
+
+Response:
+```json
+{
+  "domain": "health",
+  "source": "PubMed/MEDLINE",
+  "source_url": "https://pubmed.ncbi.nlm.nih.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "query": "turmeric inflammation",
+  "totalStudies": 1842,
+  "evidence": "Strong research signal",
+  "evidenceLevel": "strong",
+  "odsUrl": "https://ods.od.nih.gov/factsheets/Turmeric-HealthProfessional/",
+  "studies": [
+    {
+      "id": "39012345",
+      "title": "Curcumin and inflammatory markers: a systematic review",
+      "journal": "Journal of Clinical Medicine",
+      "pubDate": "2026 Mar",
+      "authors": "Smith J et al.",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39012345/"
+    }
+  ]
+}
+```
+
+What the data means: evidenceLevel tiers — "strong" (500+ studies), "moderate" (50-499), "limited" (10-49), "weak" (1-9), "none" (0). odsUrl links to the NIH Office of Dietary Supplements fact sheet when available. The 5 most recent studies are returned with PubMed links.
+
+
+---
+
+
+## Domain: Nutrition
+
+USDA nutrition data for any food.
+
+Source: USDA FoodData Central
+Source URL: https://fdc.nal.usda.gov
+
+### GET /v1/nutrition?q=
+
+Search foods by name.
+
+Parameters:
+- q (query, required) — food search term (e.g. "banana", "cheddar cheese", "chicken breast")
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/nutrition?q=banana"
+```
+
+Response:
+```json
+{
+  "domain": "nutrition",
+  "source": "USDA FoodData Central",
+  "source_url": "https://fdc.nal.usda.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "query": "banana",
+  "total": 1523,
+  "results": [
+    {
+      "fdcId": 173944,
+      "description": "Bananas, raw",
+      "brandName": null,
+      "dataType": "SR Legacy",
+      "nutrients": [
+        { "name": "Calories", "amount": 89, "unit": "kcal" },
+        { "name": "Protein", "amount": 1.09, "unit": "g" },
+        { "name": "Total Fat", "amount": 0.33, "unit": "g" },
+        { "name": "Carbohydrates", "amount": 22.84, "unit": "g" },
+        { "name": "Fiber", "amount": 2.6, "unit": "g" },
+        { "name": "Sugar", "amount": 12.23, "unit": "g" },
+        { "name": "Sodium", "amount": 1, "unit": "mg" }
+      ]
+    }
+  ]
+}
+```
+
+### GET /v1/nutrition?id=
+
+Get full nutrient profile for a specific food.
+
+Parameters:
+- id (query, required) — FDC ID from a search result (e.g. "173944")
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/nutrition?id=173944"
+```
+
+Response:
+```json
+{
+  "domain": "nutrition",
+  "source": "USDA FoodData Central",
+  "source_url": "https://fdc.nal.usda.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "fdcId": 173944,
+  "description": "Bananas, raw",
+  "brandName": null,
+  "dataType": "SR Legacy",
+  "servingSize": 118,
+  "servingSizeUnit": "g",
+  "nutrients": [
+    { "name": "Energy", "amount": 89, "unit": "KCAL" },
+    { "name": "Protein", "amount": 1.09, "unit": "G" },
+    { "name": "Vitamin C, total ascorbic acid", "amount": 8.7, "unit": "MG" }
+  ]
+}
+```
+
+What the data means: search results include 7 key nutrients (calories, protein, fat, carbs, fiber, sugar, sodium). The detail endpoint returns the complete nutrient profile including all vitamins and minerals. Nutrient values are per 100g unless servingSize is specified.
+
+
+---
+
+
+## Domain: Jobs
+
+Bureau of Labor Statistics economic data — unemployment, CPI, employment, wages.
+
+Source: Bureau of Labor Statistics
+Source URL: https://www.bls.gov
+
+### GET /v1/jobs
+
+Returns the current unemployment rate (seasonally adjusted). No parameters required.
+
+```
+curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/jobs
+```
+
+### GET /v1/jobs?series=
+
+Get any BLS time series by ID.
+
+Parameters:
+- series (query, required) — BLS series ID
+
+Common series IDs:
+- LNS14000000 — Unemployment rate (seasonally adjusted)
+- CUUR0000SA0 — Consumer Price Index, all urban consumers
+- CES0000000001 — Total nonfarm payrolls
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/jobs?series=CUUR0000SA0"
+```
+
+Response:
+```json
+{
+  "domain": "jobs",
+  "source": "Bureau of Labor Statistics",
+  "source_url": "https://www.bls.gov/",
+  "freshness": "2026-02",
+  "series": "LNS14000000",
+  "latest": { "year": "2026", "month": "02", "value": "3.9" },
+  "history": [
+    { "year": "2026", "month": "02", "value": "3.9" },
+    { "year": "2026", "month": "01", "value": "4.0" },
+    { "year": "2025", "month": "12", "value": "4.1" }
+  ]
+}
+```
+
+What the data means: returns the last 2 years of monthly data points, newest first. Values are strings (BLS convention). For unemployment, the value is a percentage of the labor force. For CPI, it is an index level.
+
+
+---
+
+
+## Domain: Demographics
+
+US Census American Community Survey data by ZIP code.
+
+Source: US Census Bureau, ACS 5-Year Estimates (2023)
+Source URL: https://api.census.gov
+
+### GET /v1/demographics?zip=
+
+Parameters:
+- zip (query, required) — 5-digit US ZIP code
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/demographics?zip=90210"
+```
+
+Response:
+```json
+{
+  "domain": "demographics",
+  "source": "US Census ACS 5-Year",
+  "source_url": "https://api.census.gov",
+  "freshness": "2023 5-year estimates",
+  "zip": "90210",
+  "population": 21741,
+  "medianIncome": 153146,
+  "povertyRate": 7.2,
+  "collegeRate": 41.3,
+  "medianHomeValue": 2875000,
+  "medianRent": 2847
+}
+```
+
+What the data means: population is total residents. medianIncome is annual household income in dollars. povertyRate is the percentage below the federal poverty line. collegeRate is the percentage with a bachelor's degree or higher. medianHomeValue and medianRent are in dollars.
+
+
+---
+
+
+## Domain: Products
+
+Consumer Product Safety Commission recall notices.
+
+Source: CPSC SaferProducts.gov
+Source URL: https://www.saferproducts.gov
+
+### GET /v1/products
+
+Returns recent product recalls from the last 90 days. No parameters required.
+
+```
+curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/products
+```
+
+### GET /v1/products?q=
+
+Search product recalls by keyword.
+
+Parameters:
+- q (query, required) — product type or brand (e.g. "crib", "Samsung", "space heater")
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/products?q=space+heater"
+```
+
+Response:
+```json
+{
+  "domain": "products",
+  "source": "CPSC",
+  "source_url": "https://www.saferproducts.gov/RestWebServices/Recall?format=json&RecallDateStart=2025-12-19",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "total": 5,
+  "recalls": [
+    {
+      "recallId": "26-123",
+      "title": "Space Heaters Recalled Due to Fire Hazard",
+      "description": "The heater can overheat and ignite nearby materials...",
+      "products": [{ "name": "Portable Space Heater", "type": "Heating" }],
+      "hazards": ["Fire", "Burn"],
+      "remedies": ["Refund"],
+      "manufacturers": ["Example Corp"],
+      "recallDate": "2026-02-15",
+      "url": "https://www.cpsc.gov/Recalls/2026/..."
+    }
+  ]
+}
+```
+
+What the data means: CPSC recalls cover household goods, children's products, electronics, and outdoor equipment. Hazards describe the risk. Remedies describe what the manufacturer offers (refund, repair, replacement).
+
+
+---
+
+
+## Domain: SEC
+
+SEC EDGAR corporate filings and financial facts.
+
+Source: SEC EDGAR (Securities and Exchange Commission)
+Source URL: https://www.sec.gov
+
+### GET /v1/sec?q=
+
+Search for companies and their recent filings.
+
+Parameters:
+- q (query, required) — company name (e.g. "Apple", "Tesla")
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/sec?q=Apple"
+```
+
+Response:
+```json
+{
+  "domain": "sec",
+  "source": "SEC EDGAR",
+  "source_url": "https://www.sec.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "query": "Apple",
+  "companies": [
+    {
+      "name": "APPLE INC",
+      "cik": "320193",
+      "ticker": "AAPL",
+      "filings": [
+        { "form": "10-K", "date": "2025-11-01", "url": "https://www.sec.gov/cgi-bin/browse-edgar?..." }
+      ]
+    }
+  ]
+}
+```
+
+### GET /v1/sec?cik=
+
+Get structured financial facts for a company by CIK number.
+
+Parameters:
+- cik (query, required) — SEC Central Index Key (e.g. "320193" for Apple)
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/sec?cik=320193"
+```
+
+Response:
+```json
+{
+  "domain": "sec",
+  "source": "SEC EDGAR",
+  "source_url": "https://www.sec.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "cik": "320193",
+  "name": "Apple Inc.",
+  "facts": {
+    "revenue": [
+      { "year": 2025, "value": 394328000000 },
+      { "year": 2024, "value": 383285000000 }
+    ],
+    "netIncome": [
+      { "year": 2025, "value": 96995000000 }
+    ],
+    "totalAssets": [
+      { "year": 2025, "value": 352583000000 }
+    ],
+    "totalLiabilities": [
+      { "year": 2025, "value": 290437000000 }
+    ],
+    "eps": [
+      { "year": 2025, "value": 6.42 }
+    ]
+  }
+}
+```
+
+What the data means: facts are extracted from 10-K annual filings using US GAAP taxonomy. Revenue, netIncome, totalAssets, and totalLiabilities are in USD. EPS is in USD per share. Years are sorted newest first.
+
+
+---
+
+
+## Domain: Safety (Cross-Domain)
+
+Composite safety profile for a US ZIP code combining water quality and hospital ratings.
+
+Source: EPA SDWIS + CMS Care Compare
+Source URL: https://api.openprimitive.com/v1/safety
+
+### GET /v1/safety?zip=
+
+Parameters:
+- zip (query, required) — 5-digit US ZIP code
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/safety?zip=48201"
+```
+
+Response:
+```json
+{
+  "domain": "safety",
+  "source": "EPA SDWIS + CMS Care Compare",
+  "source_url": "https://api.openprimitive.com/v1/safety",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "zip": "48201",
+  "safetyScore": 65,
+  "water": {
+    "systemCount": 3,
+    "healthViolations": 2,
+    "worstContaminants": ["LEAD", "COPPER"],
+    "score": 30
+  },
+  "hospitals": {
+    "count": 8,
+    "averageRating": 3.5,
+    "best": { "name": "HENRY FORD HOSPITAL", "rating": 5 },
+    "worst": { "name": "EXAMPLE MEDICAL CENTER", "rating": 2 },
+    "score": 35
+  }
+}
+```
+
+What the data means: safetyScore is 0-100 (100 = best). Water component is 50 points max: starts at 50, loses 10 points per health-based violation. Hospital component is 50 points max: the average CMS star rating mapped to a 0-50 scale. This is a composite indicator, not a comprehensive safety assessment.
+
+
+---
+
+
+## System Endpoints
+
+### GET /v1
+
+Returns the API index — all 13 domains with endpoint paths, sources, and descriptions.
+
+```
+curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1
+```
+
+### GET /v1/stats
+
+Public endpoint (no auth required). Returns real-time traffic analytics: agent vs. human breakdown, top agents, top endpoints, hourly traffic.
+
+```
+curl https://api.openprimitive.com/v1/stats
+```
+
+Response:
+```json
+{
+  "agentPercent": 72,
+  "total": 1543,
+  "agent": 1111,
+  "human": 432,
+  "agents": [
+    { "name": "Claude", "count": 502 },
+    { "name": "GPT-4", "count": 321 }
+  ],
+  "endpoints": [
+    { "name": "/v1/drugs", "count": 245, "agent": 198, "human": 47 }
+  ],
+  "upSince": "2026-03-19T00:00:00.000Z"
+}
+```
+
+### GET /ping
+
+Health check. Returns { "status": "ok", "timestamp": "..." }
+
+### GET /v1/history
+
+Retrieval layer for archived responses. Placeholder — not yet active.
+
+
+---
+
+
+## MCP Server
+
+Open Primitive runs as a Model Context Protocol server for direct tool use by LLMs.
+
+### Via stdio (local)
+
+```bash
+node mcp.js
+```
+
+The MCP server exposes 13 tools:
+
+| Tool Name | Description |
+|-----------|-------------|
+| get-flights | Airline delays and weather. Optional param: airline (IATA code) |
+| get-car-safety | NHTSA ratings and recalls. Params: year, make, model (all required) |
+| get-food-recalls | FDA food recalls. Optional param: query |
+| get-water-safety | EPA water data. Optional params: zip or pwsid |
+| get-drug-safety | FDA adverse events. Param: name (required) |
+| get-hospital-quality | CMS hospital data. Optional params: query or providerId |
+| get-health-evidence | PubMed research. Param: query (required) |
+| get-nutrition | USDA nutrition. Optional params: query or fdcId |
+| get-jobs | BLS employment data. Optional param: seriesId |
+| get-demographics | Census data by ZIP. Param: zip (required) |
+| get-product-recalls | CPSC recalls. Optional param: query |
+| get-sec-filings | SEC EDGAR. Optional params: query or cik |
+| get-safety-profile | Cross-domain safety. Param: zip (required) |
+
+Each tool returns JSON wrapped in MCP text content format.
+
+
+---
+
+
+## A2A Agent Card
+
+The A2A (Agent-to-Agent) discovery card is at:
+
+```
+https://api.openprimitive.com/.well-known/agent-card.json
+```
+
+The card follows the A2A protocol spec and lists 13 skills corresponding to the 13 data domains. Agents can discover Open Primitive's capabilities by fetching this URL.
+
+
+---
+
+
+## Error Handling
+
+All errors return JSON with an "error" field:
+
+- 401: Missing API key — `{ "error": "Missing API key", "hint": "Pass your key via X-API-Key header or ?api_key= query parameter" }`
+- 403: Invalid or inactive key — `{ "error": "Invalid or inactive API key" }`
+- 429: Rate limit exceeded — `{ "error": "Rate limit exceeded. 200 requests per hour." }`
+- 400: Bad request (missing required params) — `{ "error": "year, make, and model are required" }`
+- 500: Upstream failure — `{ "error": "Internal server error" }`
+
+Domain-specific errors (returned as 400):
+- Cars: "year, make, and model are required"
+- Water: "Invalid ZIP code" or "Invalid PWSID"
+- Drugs: "Drug name required" or "No adverse event reports found for this drug"
+- Hospitals: "Search query required" or "Provider ID required"
+- Health: "Search query required"
+- Nutrition: "query is required" or "fdcId is required"
+- Food: "query is required" (search only)
+- Demographics: throws on invalid ZIP
+
+
+---
+
+
+## CORS
+
+All endpoints return `Access-Control-Allow-Origin: *` and `Access-Control-Allow-Headers: X-API-Key, Content-Type`. Browser requests work without a proxy.
+
+
+---
+
+
+## Source Agencies
+
+| Domain | Federal Agency | Data Program |
+|--------|---------------|--------------|
+| Flights | FAA | National Airspace System Status |
+| Cars | NHTSA | Safety Ratings + Recalls |
+| Food | FDA | Enforcement Reports |
+| Water | EPA | Safe Drinking Water Information System |
+| Drugs | FDA | FAERS + Drug Labels |
+| Hospitals | CMS | Care Compare |
+| Health | NIH/NLM | PubMed/MEDLINE |
+| Nutrition | USDA | FoodData Central |
+| Jobs | BLS | Public Data API |
+| Demographics | Census Bureau | American Community Survey |
+| Products | CPSC | SaferProducts.gov |
+| SEC | SEC | EDGAR |
+| Safety | EPA + CMS | Composite (Water + Hospitals) |

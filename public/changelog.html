@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog — Open Primitive API</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    body {
+      background: #fafafa;
+      color: #1a1a1a;
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .entry {
+      border-left: 2px solid #d0d0d0;
+      padding-left: 1.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .entry::before {
+      content: "";
+      position: absolute;
+      left: -5px;
+      top: 6px;
+      width: 8px;
+      height: 8px;
+      background: #1a1a1a;
+      border-radius: 50%;
+    }
+
+    .entry-date {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.25rem;
+    }
+
+    .entry-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .entry ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .entry li {
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .back-links {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e0e0e0;
+      font-size: 0.9rem;
+    }
+
+    .back-links a {
+      color: #1a1a1a;
+      text-decoration: underline;
+      margin-right: 1.5rem;
+    }
+
+    .back-links a:hover {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Changelog</h1>
+    <p class="subtitle">Build history for the Open Primitive API.</p>
+
+    <div class="entry">
+      <div class="entry-date">March 19, 2026</div>
+      <div class="entry-title">Launch</div>
+      <ul>
+        <li>13 federal data domains live: flights, cars, food, water, drugs, hospitals, health, nutrition, jobs, demographics, products, SEC, safety</li>
+        <li>Cross-domain safety score: composite water + hospital quality per ZIP code</li>
+        <li>Location profile: demographics + safety in one call</li>
+        <li>Compare endpoint: side-by-side comparison of ZIPs, drugs, or hospitals</li>
+        <li>MCP server with 13 tools for Claude, Cursor, and MCP-compatible agents</li>
+        <li>A2A agent card with 13 skills for agent-to-agent discovery</li>
+        <li>Agent traffic detection and real-time stats dashboard</li>
+        <li>Historical data archiving (time-series starts now)</li>
+        <li>Webhook alerting for new recalls and violations</li>
+        <li>API key self-service registration</li>
+        <li>System status page monitoring all 12 upstream federal APIs</li>
+        <li>OpenAPI 3.1 spec, llms.txt, llms-full.txt for agent discovery</li>
+        <li>Data quality grades on every response</li>
+        <li>10 federal agencies connected: FAA, NHTSA, FDA, EPA, CMS, NIH/NLM, USDA, BLS, Census Bureau, SEC</li>
+      </ul>
+    </div>
+
+    <div class="back-links">
+      <a href="https://openprimitive.com">openprimitive.com</a>
+      <a href="/docs">API docs</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -6,6 +6,44 @@
   <title>Open Primitive API — Federal Data for Agents</title>
   <meta name="description" content="7 federal data domains. One unified API. Structured for AI agents, MCP servers, and human developers.">
   <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebAPI",
+      "name": "Open Primitive API",
+      "description": "13 US federal data domains — flights, cars, food, water, drugs, hospitals, health, nutrition, jobs, demographics, products, SEC filings, and cross-domain safety scores",
+      "url": "https://api.openprimitive.com",
+      "documentation": "https://api.openprimitive.com/openapi.json",
+      "provider": {
+        "@type": "Organization",
+        "name": "Open Primitive",
+        "url": "https://openprimitive.com"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "DataCatalog",
+      "name": "Open Primitive Federal Data Catalog",
+      "url": "https://api.openprimitive.com",
+      "dataset": [
+        {"@type": "Dataset", "name": "Flight Delays", "description": "Live FAA airline delays", "url": "https://api.openprimitive.com/v1/flights"},
+        {"@type": "Dataset", "name": "Car Safety", "description": "NHTSA crash ratings and recalls", "url": "https://api.openprimitive.com/v1/cars"},
+        {"@type": "Dataset", "name": "Food Recalls", "description": "FDA food enforcement actions", "url": "https://api.openprimitive.com/v1/food"},
+        {"@type": "Dataset", "name": "Water Safety", "description": "EPA drinking water violations", "url": "https://api.openprimitive.com/v1/water"},
+        {"@type": "Dataset", "name": "Drug Safety", "description": "FDA adverse event reports", "url": "https://api.openprimitive.com/v1/drugs"},
+        {"@type": "Dataset", "name": "Hospital Quality", "description": "CMS hospital ratings and outcomes", "url": "https://api.openprimitive.com/v1/hospitals"},
+        {"@type": "Dataset", "name": "Health Evidence", "description": "PubMed research evidence for health claims", "url": "https://api.openprimitive.com/v1/health"},
+        {"@type": "Dataset", "name": "Nutrition", "description": "USDA food composition and nutrient data", "url": "https://api.openprimitive.com/v1/nutrition"},
+        {"@type": "Dataset", "name": "Jobs", "description": "BLS employment and labor statistics", "url": "https://api.openprimitive.com/v1/jobs"},
+        {"@type": "Dataset", "name": "Demographics", "description": "Census population and demographic data", "url": "https://api.openprimitive.com/v1/demographics"},
+        {"@type": "Dataset", "name": "Products", "description": "CPSC consumer product safety data", "url": "https://api.openprimitive.com/v1/products"},
+        {"@type": "Dataset", "name": "SEC Filings", "description": "SEC EDGAR company filings", "url": "https://api.openprimitive.com/v1/sec"},
+        {"@type": "Dataset", "name": "Safety Scores", "description": "Cross-domain safety composite scores", "url": "https://api.openprimitive.com/v1/safety"}
+      ]
+    }
+  ]
+  </script>
   <style>
     :root {
       --code-bg: #1a1a1a;
