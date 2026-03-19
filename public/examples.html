@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integration Examples — Open Primitive API</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    body {
+      background: #fafafa;
+      color: #1a1a1a;
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      line-height: 1.6;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 3rem;
+      font-size: 0.95rem;
+    }
+    h2 {
+      font-size: 1.15rem;
+      margin-top: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      margin: 0.5rem 0 1rem;
+      font-size: 0.95rem;
+      color: #444;
+    }
+    pre {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      padding: 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    .result {
+      color: #888;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Integration Examples</h1>
+<p class="subtitle">Copy these. Paste them into your agent, tool, or workflow. Each one hits a real endpoint.</p>
+
+<h2>1. Claude Desktop (MCP)</h2>
+<p>Add this to your Claude Desktop config. Claude can now answer: "Is my water safe in 10001?" by calling get-water-safety.</p>
+<pre><code>{
+  "mcpServers": {
+    "open-primitive": {
+      "command": "npx",
+      "args": ["-y", "open-primitive-mcp"]
+    }
+  }
+}</code></pre>
+
+<h2>2. Python agent (LangChain)</h2>
+<p>One function. Wrap it as a LangChain tool or call it directly.</p>
+<pre><code>import requests
+
+def check_drug_safety(drug_name):
+    data = requests.get(f'https://api.openprimitive.com/v1/drugs?name={drug_name}').json()
+    return f"{data['drug']} has {data['totalEvents']} adverse events. Top reaction: {data['topReactions'][0]['reaction']}"</code></pre>
+
+<h2>3. JavaScript agent</h2>
+<p>Fetch a location profile by ZIP. Returns a single summary string your agent can pass to the user.</p>
+<pre><code>async function getLocationProfile(zip) {
+  const res = await fetch(`https://api.openprimitive.com/v1/location?zip=${zip}`);
+  const data = await res.json();
+  return data.summary;
+  // "ZIP 90210, population 19,652, median income $190,382, safety score 75/100"
+}</code></pre>
+
+<h2>4. Natural language query</h2>
+<p>Ask a plain question. Get a plain answer.</p>
+<pre><code>curl "https://api.openprimitive.com/v1/ask?q=is+the+tap+water+safe+in+Flint+Michigan"</code></pre>
+
+<h2>5. Compare two options</h2>
+<p>Pass two items and a domain. The API returns a direct comparison.</p>
+<pre><code>curl "https://api.openprimitive.com/v1/compare?type=drugs&a=ibuprofen&b=acetaminophen"
+
+<span class="result"># Returns: "ibuprofen has fewer adverse events (275,816 vs 655,818)"</span></code></pre>
+
+<h2>6. Webhook for real-time alerts</h2>
+<p>Subscribe your agent to food recalls, drug alerts, or both. You get a POST when something new lands.</p>
+<pre><code>POST /v1/webhooks
+
+{
+  "url": "https://your-agent.com/alerts",
+  "domains": ["food", "drugs"],
+  "events": ["new_recall"]
+}</code></pre>
+
+</body>
+</html></code></pre>

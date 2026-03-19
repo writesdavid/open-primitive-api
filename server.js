@@ -23,6 +23,10 @@ const compare = require('./sources/compare');
 const { getStatus } = require('./routes/status');
 const { handleRegister } = require('./routes/register');
 const { addQualityGrade } = require('./middleware/quality');
+const { citationMiddleware } = require('./middleware/citations');
+const ask = require('./sources/ask');
+const alerts = require('./sources/alerts');
+const alerts = require('./sources/alerts');
 
 const app = express();
 
@@ -48,6 +52,9 @@ app.use('/v1', apiKeyAuth, rateLimitMiddleware, meterUsage);
 
 // Archive every /v1/* response to Upstash Redis (fire-and-forget)
 app.use(archiveMiddleware);
+
+// Citation injection on all /v1/* responses
+app.use(citationMiddleware);
 
 // Response wrapper
 function wrap(res, promise) {
@@ -140,6 +147,12 @@ app.get('/v1/compare', (req, res) => {
   wrap(res, compare.compareZips(a, b));
 });
 
+// ─── ASK (natural language query router) ───
+app.get('/v1/ask', (req, res) => wrap(res, ask.askQuestion(req.query.q)));
+
+// ─── ALERTS (proactive data feed for agents) ───
+app.get('/v1/alerts', (req, res) => wrap(res, alerts.getAlertFeed()));
+
 // ─── REGISTER (self-service API key) ───
 app.post('/v1/register', handleRegister);
 
@@ -166,12 +179,17 @@ app.get('/v1', (req, res) => {
       weather: { endpoint: '/v1/weather?zip=', source: 'NOAA NWS', description: '7-day forecast and active alerts' },
       location: { endpoint: '/v1/location?zip=', source: 'Census + EPA + CMS', description: 'Complete location profile: demographics + safety in one call' },
       compare: { endpoint: '/v1/compare?type=&a=&b=', source: 'Multiple', description: 'Side-by-side comparison of ZIPs, drugs, or hospitals' },
+      ask: { endpoint: '/v1/ask?q=', source: 'All', description: 'Natural language query — ask any question, we route to the right domain(s)' },
     },
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
     rateLimit: '200 requests per hour per key',
     mcp: 'MCP server available at /mcp or via stdio (node mcp.js)',
   });
 });
+
+// ─── ALERTS (agent feed — poll or webhook) ───
+app.get('/v1/alerts', (req, res) => wrap(res, alerts.getAlertFeed()));
+app.post('/v1/alerts/check', (req, res) => wrap(res, alerts.checkForAlerts()));
 
 // ─── HISTORY (placeholder — retrieval layer comes later) ───
 app.get('/v1/history', historyRoute);
