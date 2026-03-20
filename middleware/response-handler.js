@@ -207,6 +207,55 @@ const DOMAIN_TEMPLATES = {
       license: 'US Government Public Domain',
     };
   },
+  weather: (data) => {
+    const zip = data.zip || 'unknown';
+    const periods = (data.forecast && data.forecast.length) || 0;
+    return {
+      statement: `According to NOAA NWS, ${periods}-period forecast retrieved for ZIP ${zip}`,
+      source_name: 'NOAA NWS',
+      source_url: 'https://api.weather.gov',
+      license: 'US Government Public Domain',
+    };
+  },
+  location: (data) => {
+    const zip = data.zip || 'unknown';
+    return {
+      statement: `According to Census, EPA, and CMS data, location profile compiled for ZIP ${zip}`,
+      source_name: 'Census + EPA + CMS',
+      source_url: 'https://api.census.gov',
+      license: 'US Government Public Domain',
+    };
+  },
+  compare: (data) => {
+    const type = data.type || 'ZIP';
+    const a = data.a || 'unknown';
+    const b = data.b || 'unknown';
+    return {
+      statement: `Side-by-side ${type} comparison of ${a} vs ${b}`,
+      source_name: 'Multiple Federal Sources',
+      source_url: 'https://api.openprimitive.com',
+      license: 'US Government Public Domain',
+    };
+  },
+  ask: (data) => {
+    const query = data.query || data.q || 'unknown';
+    const domains = (data.domains && data.domains.join(', ')) || 'unknown';
+    return {
+      statement: `Query "${query}" routed to ${domains}`,
+      source_name: 'Open Primitive',
+      source_url: 'https://api.openprimitive.com',
+      license: 'US Government Public Domain',
+    };
+  },
+  alerts: (data) => {
+    const count = data.count || (data.alerts && data.alerts.length) || 0;
+    return {
+      statement: `${count} active data alerts across federal sources`,
+      source_name: 'Multiple Federal Sources',
+      source_url: 'https://api.openprimitive.com',
+      license: 'US Government Public Domain',
+    };
+  },
 };
 
 function getDomainFromPath(reqPath) {

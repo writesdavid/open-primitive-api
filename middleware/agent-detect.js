@@ -20,9 +20,36 @@ const stats = {
   human: 0,
   byAgent: {},
   byEndpoint: {},
+  topQueries: {},
   hourly: [],
   upSince: new Date().toISOString(),
 };
+
+const QUERY_EXTRACTORS = {
+  drugs:      (q) => q.name,
+  water:      (q) => q.zip,
+  cars:       (q) => [q.make, q.model].filter(Boolean).join(' ') || null,
+  ask:        (q) => q.q ? q.q.substring(0, 50) : null,
+  food:       (q) => q.q,
+  hospitals:  (q) => q.q || q.id,
+  nutrition:  (q) => q.q || q.id,
+  health:     (q) => q.q,
+};
+
+function trackQuery(domain, queryValue) {
+  if (!queryValue) return;
+  const val = String(queryValue).toLowerCase().trim();
+  if (!val) return;
+  if (!stats.topQueries[domain]) stats.topQueries[domain] = {};
+  stats.topQueries[domain][val] = (stats.topQueries[domain][val] || 0) + 1;
+
+  // Prune to top 50
+  const entries = Object.entries(stats.topQueries[domain]);
+  if (entries.length > 50) {
+    entries.sort((a, b) => b[1] - a[1]);
+    stats.topQueries[domain] = Object.fromEntries(entries.slice(0, 50));
+  }
+}
 
 // Initialize 24 hourly buckets
 for (let i = 0; i < 24; i++) {
@@ -69,11 +96,22 @@ function agentDetect(req, res, next) {
   }
   stats.byEndpoint[endpoint][req.isAgent ? 'agent' : 'human']++;
 
+  // Track query parameters
+  const match = endpoint.match(/^\/v1\/(\w+)/);
+  if (match) {
+    const domain = match[1];
+    const extractor = QUERY_EXTRACTORS[domain];
+    if (extractor) {
+      const val = extractor(req.query || {});
+      trackQuery(domain, val);
+    }
+  }
+
   next();
 }
 
 function getStats() {
-  return { ...stats, hourly: stats.hourly.slice() };
+  return { ...stats, topQueries: { ...stats.topQueries }, hourly: stats.hourly.slice() };
 }
 
 module.exports = { agentDetect, getStats };

@@ -19,6 +19,10 @@ const FRESHNESS_THRESHOLDS = {
   products:     6 * 60 * 60,    // 6 hours — continuous
   sec:          1 * 60 * 60,    // 1 hour — real-time source
   weather:      30 * 60,        // 30 minutes — real-time
+  location:     24 * 60 * 60,   // 24 hours — composite of multiple sources
+  compare:      24 * 60 * 60,   // 24 hours — composite of multiple sources
+  ask:          0,              // 0 — real-time, always fetch
+  alerts:       6 * 60 * 60,    // 6 hours — periodic scan
 };
 
 // In-memory store: domain -> timestamp (epoch ms) of last successful fetch

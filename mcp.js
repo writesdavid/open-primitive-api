@@ -16,6 +16,10 @@ const demographics = require('./sources/demographics');
 const products = require('./sources/products');
 const sec = require('./sources/sec');
 const safety = require('./sources/safety');
+const weather = require('./sources/weather');
+const location = require('./sources/location');
+const compare = require('./sources/compare');
+const ask = require('./sources/ask');
 
 const server = new McpServer({
   name: 'open-primitive',
@@ -181,6 +185,60 @@ server.registerTool('get-safety-profile', {
   }),
 }, async ({ zip }) => {
   const data = await safety.getSafetyProfile(zip);
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── WEATHER ───
+server.registerTool('get-weather', {
+  title: 'Get Weather',
+  description: 'Get 7-day forecast by ZIP code or active weather alerts by state. Source: NOAA NWS.',
+  inputSchema: z.object({
+    zip: z.string().optional().describe('5-digit ZIP code for forecast'),
+    state: z.string().optional().describe('2-letter state code for active alerts (e.g. "TX")'),
+  }),
+}, async ({ zip, state }) => {
+  const data = state ? await weather.getAlerts(state) : await weather.getForecastByZip(zip || '');
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── LOCATION ───
+server.registerTool('get-location-profile', {
+  title: 'Get Location Profile',
+  description: 'Get a complete location profile for a ZIP code: demographics, safety, water, hospitals. Source: Census + EPA + CMS.',
+  inputSchema: z.object({
+    zip: z.string().describe('5-digit ZIP code'),
+  }),
+}, async ({ zip }) => {
+  const data = await location.getLocationProfile(zip);
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── COMPARE ───
+server.registerTool('get-comparison', {
+  title: 'Get Comparison',
+  description: 'Side-by-side comparison of two ZIPs, drugs, or hospitals. Source: Multiple.',
+  inputSchema: z.object({
+    type: z.string().optional().describe('Comparison type: "drugs", "hospitals", or omit for ZIP comparison'),
+    a: z.string().describe('First item to compare (ZIP, drug name, or hospital ID)'),
+    b: z.string().describe('Second item to compare'),
+  }),
+}, async ({ type, a, b }) => {
+  let data;
+  if (type === 'drugs') data = await compare.compareDrugs(a, b);
+  else if (type === 'hospitals') data = await compare.compareHospitals(a, b);
+  else data = await compare.compareZips(a, b);
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── ASK ───
+server.registerTool('ask-question', {
+  title: 'Ask a Question',
+  description: 'Ask any question in plain English and get routed to the right federal data domain(s). Source: All.',
+  inputSchema: z.object({
+    q: z.string().describe('Your question (e.g. "Is the water safe in 90210?")'),
+  }),
+}, async ({ q }) => {
+  const data = await ask.askQuestion(q);
   return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
 });
 

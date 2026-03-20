@@ -29,6 +29,7 @@ const { getFreshnessReport } = require('./middleware/freshness');
 const { rateLimitMiddleware } = require('./middleware/rate-limit-memory');
 const ask = require('./sources/ask');
 const alerts = require('./sources/alerts');
+const risk = require('./sources/risk');
 
 const app = express();
 
@@ -153,6 +154,9 @@ app.get('/v1/compare', (req, res) => {
 // ─── ASK (natural language query router) ───
 app.get('/v1/ask', (req, res) => wrap(res, ask.askQuestion(req.query.q)));
 
+// ─── RISK (cross-domain risk assessment) ───
+app.get('/v1/risk', (req, res) => wrap(res, risk.getRiskProfile(req.query.zip)));
+
 // ─── ALERTS (proactive data feed for agents) ───
 app.get('/v1/alerts', (req, res) => wrap(res, alerts.getAlertFeed()));
 
@@ -174,7 +178,7 @@ app.get('/v1', (req, res) => {
   res.json({
     name: 'Open Primitive API',
     version: '1.0.0',
-    description: 'Federal data for agents. 16 domains, one API.',
+    description: 'Federal data for agents. 17 domains, one API.',
     domains: {
       flights: { endpoint: '/v1/flights', source: 'FAA NAS + Open-Meteo', description: 'Live airline delays and hub weather for 8 US carriers' },
       cars: { endpoint: '/v1/cars?year=&make=&model=', source: 'NHTSA', description: 'Crash safety ratings and recalls for any US vehicle' },
@@ -201,7 +205,6 @@ app.get('/v1', (req, res) => {
 });
 
 // ─── ALERTS (agent feed — poll or webhook) ───
-app.get('/v1/alerts', (req, res) => wrap(res, alerts.getAlertFeed()));
 app.post('/v1/alerts/check', (req, res) => wrap(res, alerts.checkForAlerts()));
 
 // ─── HISTORY (placeholder — retrieval layer comes later) ───
@@ -228,6 +231,7 @@ app.get('/v1/stats', (req, res) => {
     endpoints,
     byAgent: stats.byAgent,
     byEndpoint: stats.byEndpoint,
+    topQueries: stats.topQueries,
     hourly: stats.hourly,
     upSince: stats.upSince,
   });
