@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Founding 50 — Open Primitive API</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0a;
+      color: #e0e0e0;
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .founding {
+      max-width: 640px;
+      width: 100%;
+      padding: 80px 24px 60px;
+    }
+
+    .founding h1 {
+      font-size: 3.2rem;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .founding .subtitle {
+      font-size: 1.4rem;
+      color: #a0a0a0;
+      margin-bottom: 48px;
+    }
+
+    .counter {
+      font-size: 4rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      letter-spacing: -0.03em;
+    }
+
+    .counter-label {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 56px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .benefits {
+      margin-bottom: 48px;
+      text-align: left;
+    }
+
+    .benefits h2 {
+      font-size: 1.1rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .benefits ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .benefits li {
+      padding: 10px 0;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 1rem;
+      color: #ccc;
+    }
+
+    .benefits li::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      margin-right: 12px;
+      vertical-align: middle;
+    }
+
+    .pricing {
+      margin-bottom: 48px;
+    }
+
+    .price-normal {
+      font-size: 1.2rem;
+      color: #555;
+      text-decoration: line-through;
+      margin-bottom: 4px;
+    }
+
+    .price-founding {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .price-founding span {
+      font-size: 1rem;
+      color: #888;
+      font-weight: 400;
+    }
+
+    .claim-form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .claim-form input[type="email"] {
+      flex: 1;
+      min-width: 220px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #111;
+      border: 1px solid #333;
+      color: #fff;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .claim-form input[type="email"]:focus {
+      border-color: #fff;
+    }
+
+    .claim-form button {
+      padding: 14px 32px;
+      font-size: 1rem;
+      font-family: inherit;
+      font-weight: 700;
+      background: #fff;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .claim-form button:hover {
+      background: #ccc;
+    }
+
+    .claim-form button:disabled {
+      background: #444;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    .form-note {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 56px;
+    }
+
+    .form-error {
+      color: #e55;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .after-note {
+      font-size: 1rem;
+      color: #666;
+      padding: 24px 0;
+      border-top: 1px solid #1a1a1a;
+      margin-bottom: 48px;
+    }
+
+    footer {
+      font-size: 0.85rem;
+      color: #444;
+      padding: 24px 0;
+      border-top: 1px solid #1a1a1a;
+      width: 100%;
+      text-align: center;
+    }
+
+    footer a {
+      color: #666;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: #fff;
+    }
+
+    footer span {
+      margin: 0 12px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <main class="founding">
+    <h1>Founding 50</h1>
+    <p class="subtitle">$19/month. Locked forever. 50 spots.</p>
+
+    <div class="counter" id="counter">0 of 50</div>
+    <div class="counter-label">claimed</div>
+
+    <div class="benefits">
+      <h2>What you get</h2>
+      <ul>
+        <li>All 17 federal data domains</li>
+        <li>10,000 API calls per day</li>
+        <li>Historical data archive</li>
+        <li>Webhook alerts for new recalls and violations</li>
+        <li>Ed25519 signed responses</li>
+        <li>MCP server access — 17 tools</li>
+      </ul>
+    </div>
+
+    <div class="pricing">
+      <div class="price-normal">$29/month</div>
+      <div class="price-founding">$19/month <span>forever</span></div>
+    </div>
+
+    <div class="form-error" id="form-error"></div>
+    <form class="claim-form" id="claim-form">
+      <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+      <button type="submit">Claim Your Spot</button>
+    </form>
+    <p class="form-note">You'll be redirected to Stripe to complete checkout.</p>
+
+    <p class="after-note">After 50, price goes to $29/month.</p>
+
+    <footer>
+      <a href="https://api.openprimitive.com">api.openprimitive.com</a>
+      <span>/</span>
+      <a href="https://openprimitive.com">openprimitive.com</a>
+    </footer>
+  </main>
+
+  <script>
+    (async function () {
+      try {
+        const res = await fetch('/v1/billing/founding-count');
+        if (res.ok) {
+          const data = await res.json();
+          const count = data.count || 0;
+          document.getElementById('counter').textContent = count + ' of 50';
+        }
+      } catch (e) {
+        // keep hardcoded 0 of 50
+      }
+    })();
+
+    document.getElementById('claim-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn = this.querySelector('button');
+      const errorEl = document.getElementById('form-error');
+      const email = this.querySelector('input[name="email"]').value;
+
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+      errorEl.style.display = 'none';
+
+      try {
+        const res = await fetch('/v1/billing/founding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.url) {
+          window.location.href = data.url;
+        } else {
+          errorEl.textContent = data.error || 'Something went wrong. Try again.';
+          errorEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Claim Your Spot';
+        }
+      } catch (err) {
+        errorEl.textContent = 'Network error. Try again.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Claim Your Spot';
+      }
+    });
+  </script>
+</body>
+</html>

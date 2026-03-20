@@ -23,7 +23,7 @@ const compare = require('./sources/compare');
 const { getStatus } = require('./routes/status');
 const { handleRegister } = require('./routes/register');
 const { registerProvider, listProviders, searchProviders } = require('./routes/registry');
-const { handleCheckout, handleWebhook, handleUsage } = require('./routes/billing');
+const { handleCheckout, handleWebhook, handleUsage, handleFoundingCheckout } = require('./routes/billing');
 const { addQualityGrade } = require('./middleware/quality');
 const { getFreshnessReport } = require('./middleware/freshness');
 const { rateLimitMiddleware } = require('./middleware/rate-limit-memory');
@@ -170,6 +170,7 @@ app.get('/v1/registry', listProviders);
 
 // ─── BILLING ───
 app.post('/v1/billing/checkout', handleCheckout);
+app.post('/v1/billing/founding', handleFoundingCheckout);
 app.post('/v1/billing/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 app.get('/v1/billing/usage', handleUsage);
 

@@ -135,6 +135,12 @@ async function handleWebhook(req, res) {
           upgraded: Date.now().toString(),
         });
 
+        // If this was a Founding 50 checkout, increment the counter
+        if (session.metadata.founding === 'true') {
+          await r.incr('founding:count');
+          console.log(`Founding 50 spot claimed by ${email}`);
+        }
+
         console.log(`Upgraded ${email} to ${tier}, key: ${key.slice(0, 8)}...`);
       } catch (err) {
         console.error('Webhook Redis error:', err.message);
@@ -226,4 +232,58 @@ async function handleUsage(req, res) {
   }
 }
 
-module.exports = { handleCheckout, handleWebhook, handleUsage };
+// POST /v1/billing/founding
+// "Founding 50" — first 50 Builder subscribers get $19/mo forever (34% off $29).
+//
+// SETUP: Create a coupon in Stripe Dashboard:
+//   Coupons → Add → Percent off: 34% → Duration: forever → Name: "Founding 50" → ID: "founding50"
+//
+// Then set env var STRIPE_COUPON_FOUNDING=founding50
+async function handleFoundingCheckout(req, res) {
+  const s = getStripe();
+  if (!s) {
+    return res.status(503).json({ error: 'Billing not configured.' });
+  }
+
+  const r = getRedis();
+  if (!r) {
+    return res.status(503).json({ error: 'Redis not configured.' });
+  }
+
+  const { email } = req.body || {};
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Valid email required.' });
+  }
+
+  try {
+    const count = (await r.get('founding:count')) || 0;
+    if (parseInt(count, 10) >= 50) {
+      return res.status(410).json({ error: 'Founding 50 spots are filled.' });
+    }
+
+    const priceId = process.env[TIER_CONFIG.builder.priceEnv];
+    if (!priceId) {
+      return res.status(503).json({ error: 'Builder price not configured.' });
+    }
+
+    const couponId = process.env.STRIPE_COUPON_FOUNDING || 'founding50';
+
+    const session = await s.checkout.sessions.create({
+      mode: 'subscription',
+      customer_email: email,
+      line_items: [{ price: priceId, quantity: 1 }],
+      discounts: [{ coupon: couponId }],
+      success_url: `${req.protocol}://${req.get('host')}/upgrade.html?success=1&founding=1`,
+      cancel_url: `${req.protocol}://${req.get('host')}/upgrade.html?canceled=1`,
+      metadata: { tier: 'builder', email, founding: 'true' },
+    });
+
+    return res.json({ url: session.url, spotsRemaining: 50 - parseInt(count, 10) });
+  } catch (err) {
+    console.error('Founding checkout error:', err.message);
+    return res.status(500).json({ error: 'Failed to create founding checkout session.' });
+  }
+}
+
+module.exports = { handleCheckout, handleWebhook, handleUsage, handleFoundingCheckout };
