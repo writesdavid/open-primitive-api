@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { recordFetch, getAge, FRESHNESS_THRESHOLDS } = require('./freshness');
+const { buildGuarantee } = require('./freshness-guarantee');
 
 // ─── REDIS (lazy, single instance) ───
 
@@ -350,12 +351,19 @@ function responseHandler(req, res, next) {
       const proof = signData(body);
       if (proof) body.proof = proof;
 
-      // Freshness header
+      // Freshness headers (legacy)
       if (FRESHNESS_THRESHOLDS[domain]) {
         recordFetch(domain);
         const age = getAge(domain);
         res.set('X-Data-Freshness', age !== null ? String(age) : 'unknown');
         res.set('X-Data-Max-Age', String(FRESHNESS_THRESHOLDS[domain]));
+      }
+
+      // Freshness guarantee (OPP extension)
+      const guarantee = buildGuarantee(domain);
+      if (guarantee) {
+        Object.entries(guarantee.headers).forEach(([k, v]) => res.set(k, v));
+        body.freshness_guarantee = guarantee.body;
       }
     }
 

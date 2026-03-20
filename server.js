@@ -28,8 +28,10 @@ const { addQualityGrade } = require('./middleware/quality');
 const { getFreshnessReport } = require('./middleware/freshness');
 const { rateLimitMiddleware } = require('./middleware/rate-limit-memory');
 const ask = require('./sources/ask');
+const { getReferralWithRegistry } = require('./middleware/referrals');
 const alerts = require('./sources/alerts');
 const risk = require('./sources/risk');
+const federation = require('./sources/federation');
 
 const app = express();
 
@@ -154,6 +156,28 @@ app.get('/v1/compare', (req, res) => {
 // ─── ASK (natural language query router) ───
 app.get('/v1/ask', (req, res) => wrap(res, ask.askQuestion(req.query.q)));
 
+// ─── DISCOVER (agent-to-agent referral lookup) ───
+app.get('/v1/discover', (req, res) => {
+  const q = req.query.q;
+  if (!q) return res.status(400).json({ error: 'q parameter is required' });
+  getReferralWithRegistry(q)
+    .then(referrals => {
+      // Also check if Open Primitive covers this domain
+      const internal = ask.detectDomains(q);
+      const ownDomains = internal.filter(d => d !== 'unknown');
+      res.json({
+        query: q,
+        own_domains: ownDomains,
+        referrals,
+        count: ownDomains.length + referrals.length,
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({ error: 'Discovery failed' });
+    });
+});
+
 // ─── RISK (cross-domain risk assessment) ───
 app.get('/v1/risk', (req, res) => wrap(res, risk.getRiskProfile(req.query.zip)));
 
@@ -167,6 +191,9 @@ app.post('/v1/register', handleRegister);
 app.post('/v1/registry/register', registerProvider);
 app.get('/v1/registry/search', searchProviders);
 app.get('/v1/registry', listProviders);
+
+// ─── FEDERATED (cross-provider query engine) ───
+app.get('/v1/federated', (req, res) => wrap(res, federation.federatedQuery(req.query)));
 
 // ─── BILLING ───
 app.post('/v1/billing/checkout', handleCheckout);

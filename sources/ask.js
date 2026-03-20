@@ -13,6 +13,7 @@ const sec = require('./sec');
 const weather = require('./weather');
 const safety = require('./safety');
 const compare = require('./compare');
+const { getReferralWithRegistry } = require('../middleware/referrals');
 
 const DOMAIN_KEYWORDS = {
   water: ['water', 'tap', 'drinking', 'contamination', 'epa', 'violation', 'lead in water', 'pfas'],
@@ -345,6 +346,33 @@ async function askQuestion(question) {
 
   const q = question.trim();
   const domains = detectDomains(q);
+
+  // No internal domain matched — check for external referrals
+  if (domains.length === 1 && domains[0] === 'unknown') {
+    const referrals = await getReferralWithRegistry(q);
+    if (referrals.length > 0) {
+      const providers = referrals.map(r => r.provider).join(', ');
+      return {
+        domain: 'ask',
+        question: q,
+        routed_to: [],
+        freshness: new Date().toISOString(),
+        results: [],
+        referrals,
+        answer: `Open Primitive does not cover this domain. ${providers} may have what you need.`,
+      };
+    }
+
+    return {
+      domain: 'ask',
+      question: q,
+      routed_to: [],
+      freshness: new Date().toISOString(),
+      results: [],
+      referrals: [],
+      answer: `No matching data found for: "${q}"`,
+    };
+  }
 
   const calls = domains.map(async (domain) => {
     const data = await callDomain(domain, q);
