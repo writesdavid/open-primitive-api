@@ -32,10 +32,11 @@ async function apiKeyAuth(req, res, next) {
 
   const key = req.headers['x-api-key'] || req.query.api_key;
   if (!key) {
-    return res.status(401).json({
-      error: 'Missing API key',
-      hint: 'Pass your key via X-API-Key header or ?api_key= query parameter',
-    });
+    // Allow unauthenticated access on free tier
+    req.apiKey = 'anonymous';
+    req.keyOwner = 'anonymous';
+    req.keyTier = 'free';
+    return next();
   }
 
   try {
