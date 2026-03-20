@@ -1,9 +1,8 @@
 const express = require('express');
 const path = require('path');
-const { apiKeyAuth, rateLimitMiddleware, meterUsage } = require('./middleware/auth');
 const { agentDetect, getStats } = require('./middleware/agent-detect');
-const { archiveMiddleware, historyRoute } = require('./middleware/archive');
-const { signingMiddleware } = require('./middleware/signing');
+const { historyRoute } = require('./middleware/archive');
+const { responseHandler } = require('./middleware/response-handler');
 
 const flights = require('./sources/flights');
 const cars = require('./sources/cars');
@@ -25,8 +24,7 @@ const { getStatus } = require('./routes/status');
 const { handleRegister } = require('./routes/register');
 const { registerProvider, listProviders, searchProviders } = require('./routes/registry');
 const { addQualityGrade } = require('./middleware/quality');
-const { citationMiddleware } = require('./middleware/citations');
-const { freshnessMiddleware, getFreshnessReport } = require('./middleware/freshness');
+const { getFreshnessReport } = require('./middleware/freshness');
 const ask = require('./sources/ask');
 const alerts = require('./sources/alerts');
 
@@ -49,8 +47,7 @@ app.use((req, res, next) => {
 // Agent detection on ALL requests
 app.use(agentDetect);
 
-// Auth + rate limit + meter — disabled until Redis cold start issues resolved
-// app.use('/v1', apiKeyAuth, rateLimitMiddleware, meterUsage);
+// Auth passthrough — no Redis on reads
 app.use('/v1', (req, res, next) => {
   req.apiKey = 'anonymous';
   req.keyOwner = 'anonymous';
@@ -58,9 +55,9 @@ app.use('/v1', (req, res, next) => {
   next();
 });
 
-// NOTE: archiveMiddleware, signingMiddleware, freshnessMiddleware, citationMiddleware
-// are disabled temporarily — multiple res.json wrappers cause hangs on Vercel serverless.
-// TODO: refactor into a single post-response hook instead of 4 separate middleware wraps.
+// Single response handler: citations, signing, freshness headers BEFORE send;
+// archive + metering AFTER send (fire-and-forget, 3s Redis timeout)
+app.use(responseHandler);
 
 // Response wrapper
 function wrap(res, promise) {

@@ -1,4 +1,4 @@
-# Show HN: Open Primitive Protocol -- A data envelope standard for AI agents
+# Show HN: Open Primitive Protocol -- a response envelope standard for AI agents
 
 **URL:** https://api.openprimitive.com
 
@@ -8,7 +8,7 @@
 
 AI agents consume data with no provenance, no freshness guarantee, and no way to verify what they got. Every API returns raw JSON. The agent trusts it blindly. That trust is the vulnerability.
 
-I built the Open Primitive Protocol to fix this. OPP is an envelope standard for agent-consumable data. Every response carries a signed payload with four fields no current API provides: source authority, observation timestamp, confidence score, and verification chain. The agent does not have to trust the data. It can check.
+The Open Primitive Protocol is an envelope standard for agent-consumable data. Every response carries a signed payload with four fields no current API provides: source authority, observation timestamp, confidence score, and verification chain. The agent does not have to trust the data. It can check.
 
 The reference implementation covers 16 federal data domains. EPA water violations. FDA adverse drug events. CMS hospital ratings. NHTSA vehicle defects. 10 agencies, 16 domains, one envelope format. Every response follows the same protocol structure regardless of which agency produced the underlying data.
 
@@ -21,11 +21,12 @@ What the protocol solves:
 
 Three agent protocols ship today. MCP server for Claude and compatible clients. A2A agent card for Google's Agent-to-Agent framework. Standard REST for everything else.
 
-Solo build. I work in content engineering at Block during the day. This started as a question about whether federal data gets better when AI translates it. The answer led to infrastructure. The infrastructure led to a protocol.
+Stack: Node.js. Vercel serverless. No framework. No build step.
 
-Node.js. Vercel serverless. No framework. No build step.
+The question that started this: does federal data get better when AI translates it? The answer led to infrastructure. The infrastructure led to a protocol.
 
-The protocol spec: https://api.openprimitive.com/protocol
-GitHub: https://github.com/writesdavid/open-primitive-api
+The protocol spec: https://openprimitive.com/protocol.html
+API: https://api.openprimitive.com
+npm: npx open-primitive-mcp
 
-The data layer of the agent internet does not exist yet. This is a draft of what it could look like. Feedback on the envelope format matters more to me than feedback on the endpoints.
+Feedback on the envelope format matters more than feedback on the endpoints. The data layer of the agent internet does not exist yet. This is a draft of what it could look like.

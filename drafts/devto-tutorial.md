@@ -1,16 +1,20 @@
-# Make your API agent-readable in 50 lines of code
+---
+title: Make your API agent-readable in 50 lines of code
+published: false
+tags: ai, agents, protocol, api
+---
 
-AI agents call your API and get raw JSON back. No source. No timestamp. No way to know if the data is 3 seconds old or 3 months old. The agent trusts it anyway, because it has no other option.
+AI agents call APIs and get raw JSON back. No source. No timestamp. No way to know if the data is 3 seconds old or 3 months old. The agent trusts it anyway, because it has no other option.
 
-This breaks down fast. An agent building a flight recommendation pulls weather data from your endpoint. The JSON says 72 degrees. But 72 degrees *when*? From *where*? Your API doesn't say, so the agent can't evaluate it. It treats every response as equally trustworthy, which means none of them are.
+This breaks down fast. An agent building a flight recommendation pulls weather data from an endpoint. The JSON says 72 degrees. But 72 degrees *when*? From *where*? The API doesn't say, so the agent can't evaluate it. Every response gets treated as equally trustworthy, which means none of them are.
 
-The Open Primitive Protocol fixes this. OPP wraps your existing API responses in a signed envelope that carries provenance, freshness, and confidence. Agents that speak OPP can verify your data before they use it. Three additions to your codebase. About 50 lines of code.
+The Open Primitive Protocol fixes this. OPP wraps existing API responses in a signed envelope that carries provenance, freshness, and confidence. Agents that speak OPP can verify data before they use it. Three additions to a codebase. About 50 lines of code.
 
 ## What is OPP?
 
 Three components:
 
-1. **Manifest** -- a JSON file at `/.well-known/opp.json` that declares your endpoints and sources.
+1. **Manifest** -- a JSON file at `/.well-known/opp.json` that declares endpoints and sources.
 2. **Envelope** -- a standard wrapper around every response that carries metadata.
 3. **Signature** -- an Ed25519 signature so agents can verify the envelope hasn't been tampered with.
 
@@ -18,7 +22,7 @@ Full spec: [openprimitive.com/protocol.html](https://openprimitive.com/protocol.
 
 ## Step 1: The manifest
 
-Create `/.well-known/opp.json` at the root of your API. This tells agents what you serve and where the data comes from.
+Create `/.well-known/opp.json` at the root of the API. This tells agents what gets served and where the data comes from.
 
 ```json
 {
@@ -40,7 +44,7 @@ Serve it as `application/json`. That's 10 lines and the first thing any OPP-awar
 
 ## Step 2: The envelope
 
-Your current response probably looks like this:
+A typical response probably looks like this:
 
 ```json
 {
@@ -74,7 +78,7 @@ function wrapInEnvelope(data, source) {
   };
 }
 
-// In your route handler:
+// In the route handler:
 app.get("/v1/weather/current", async (req, res) => {
   const raw = await fetchFromNOAA(req.query.city);
   const envelope = wrapInEnvelope(raw, sources.weather);
@@ -86,7 +90,7 @@ app.get("/v1/weather/current", async (req, res) => {
 
 ## Step 3: Signing
 
-Generate an Ed25519 keypair once. Sign every envelope before you send it.
+Generate an Ed25519 keypair once. Sign every envelope before sending it.
 
 ```js
 const crypto = require("crypto");
@@ -115,15 +119,29 @@ app.get("/v1/weather/current", async (req, res) => {
 });
 ```
 
-Agents verify the signature against the public key in your manifest. Tampered responses fail verification. 20 lines.
+Agents verify the signature against the public key in the manifest. Tampered responses fail verification. 20 lines.
 
-## Validate it
+## See it live
 
-Paste your API base URL at [api.openprimitive.com/validate.html](https://api.openprimitive.com/validate.html). The validator fetches your manifest, calls each endpoint, checks envelope structure, and verifies signatures. Green across the board means you're conformant.
+The reference implementation at [api.openprimitive.com](https://api.openprimitive.com) covers 16 federal data domains across 10 agencies. Every endpoint returns a signed OPP envelope. Try it:
+
+```bash
+curl https://api.openprimitive.com/v1/water?zip=48502
+```
+
+The response carries EPA source authority, observation timestamp, confidence level, and a verification signature. Same envelope format across all 16 domains.
+
+## Connect via MCP
+
+OPP ships as an MCP server. Install it and Claude (or any compatible client) gets native access to all 16 tools:
+
+```bash
+npx open-primitive-mcp
+```
 
 ## Join the registry
 
-Register your API so agents can discover it:
+Register an API so agents can discover it:
 
 ```bash
 curl -X POST https://api.openprimitive.com/v1/registry/register \
@@ -131,16 +149,14 @@ curl -X POST https://api.openprimitive.com/v1/registry/register \
   -d '{"manifest_url": "https://your-weather-api.com/.well-known/opp.json"}'
 ```
 
-The registry crawls your manifest, indexes your domains and endpoints, and makes you discoverable to any agent querying the OPP network.
+The registry crawls the manifest, indexes domains and endpoints, and makes the API discoverable to any agent querying the OPP network.
 
 ## Why bother
 
 Agents pick providers they can verify. An OPP envelope tells an agent exactly where data came from, when it was fetched, and whether anyone altered it in transit. APIs without this metadata get used as a last resort.
 
-Your API becomes discoverable in the OPP registry. MCP-compatible agents auto-discover OPP endpoints by domain. You stop competing on documentation alone and start competing on trust signals that agents evaluate programmatically.
-
-50 lines of code. Three files. Your API goes from opaque to verifiable.
+50 lines of code. Three files. An API goes from opaque to verifiable.
 
 ---
 
-*Open Primitive Protocol is open source. Full spec, reference implementations, and registry at [openprimitive.com](https://openprimitive.com).*
+Full spec: [openprimitive.com/protocol.html](https://openprimitive.com/protocol.html) | API: [api.openprimitive.com](https://api.openprimitive.com) | npm: [open-primitive-mcp](https://www.npmjs.com/package/open-primitive-mcp)
