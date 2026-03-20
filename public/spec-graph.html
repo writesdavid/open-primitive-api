@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPP Graph Extension — Data Graph Specification v0.2.0</title>
+  <meta name="description" content="OPP Graph extends the Open Primitive Protocol with entity resolution and cross-domain traversal. Agents follow connections between ZIP codes, hospitals, drugs, water systems, and more.">
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    .spec-page {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 var(--space-6) 96px;
+    }
+
+    .spec-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-8) 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-12);
+    }
+    .spec-header a {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .spec-header a:hover {
+      color: var(--accent);
+    }
+
+    .spec-title-block {
+      margin-bottom: var(--space-16);
+      padding-bottom: var(--space-10);
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-title-block h1 {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: var(--space-3);
+    }
+    .spec-title-block .spec-version {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-6);
+    }
+    .spec-title-block .spec-date {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .spec-toc {
+      margin-bottom: var(--space-16);
+      padding: var(--space-6) var(--space-8);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .spec-toc h2 {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: var(--space-4);
+    }
+    .spec-toc ol {
+      list-style: none;
+      counter-reset: toc;
+    }
+    .spec-toc ol li {
+      counter-increment: toc;
+      margin-bottom: var(--space-2);
+    }
+    .spec-toc ol li a {
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--body);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .spec-toc ol li a:hover {
+      color: var(--accent);
+    }
+    .spec-toc ol li a::before {
+      content: counter(toc) ". ";
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      margin-right: var(--space-2);
+    }
+
+    .spec-section {
+      margin-bottom: var(--space-16);
+    }
+    .spec-section h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-section h2 .sec-num {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-right: var(--space-3);
+    }
+    .spec-section h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-4);
+    }
+    .spec-section p {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--body);
+      margin-bottom: var(--space-4);
+    }
+    .spec-section ul, .spec-section ol {
+      margin-bottom: var(--space-4);
+      padding-left: var(--space-6);
+    }
+    .spec-section li {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--body);
+      margin-bottom: var(--space-2);
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      background: rgba(0,0,0,0.05);
+      padding: 2px 6px;
+      color: var(--text);
+    }
+
+    pre {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      padding: var(--space-5) var(--space-6);
+      overflow-x: auto;
+      margin-bottom: var(--space-6);
+      border: 1px solid var(--border);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    .field-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--space-6);
+      font-size: 15px;
+    }
+    .field-table th {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 2px solid var(--border);
+      background: var(--bg);
+    }
+    .field-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.5;
+      color: var(--body);
+    }
+    .field-table td:first-child {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .graph-diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: var(--space-8);
+      margin-bottom: var(--space-6);
+      text-align: center;
+    }
+    .graph-diagram svg {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="spec-page">
+
+    <nav class="spec-header">
+      <a href="/">Open Primitive</a>
+      <a href="/spec.html">Base Spec v0.1</a>
+    </nav>
+
+    <div class="spec-title-block">
+      <h1>OPP Graph Extension</h1>
+      <div class="spec-version">EXTENSION v0.2.0 — DRAFT</div>
+      <div class="spec-date">2026-03-19</div>
+    </div>
+
+    <nav class="spec-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#entity-identifiers">Entity Identifiers</a></li>
+        <li><a href="#adjacency">Adjacency Declaration</a></li>
+        <li><a href="#graph-query">Graph Query Endpoint</a></li>
+        <li><a href="#federation">Federation</a></li>
+        <li><a href="#use-cases">Use Cases</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1. OVERVIEW -->
+    <section class="spec-section" id="overview">
+      <h2><span class="sec-num">1</span> Overview</h2>
+      <p>OPP Graph extends the Open Primitive Protocol with entity resolution and cross-domain traversal. The base protocol defines how a single provider exposes structured data. Graph defines how agents move between providers, following connections that exist in the real world.</p>
+      <p>A ZIP code contains water systems and hospitals. A hospital prescribes drugs. A drug has adverse events. These relationships exist whether we model them or not. OPP Graph makes them machine-readable so an agent can walk the chain without human instruction.</p>
+      <p>The extension adds three capabilities to any OPP-conformant provider:</p>
+      <ul>
+        <li><strong>Entity identifiers</strong> — a standard format for naming things across domains</li>
+        <li><strong>Adjacency declarations</strong> — providers declare which entity types connect to which</li>
+        <li><strong>Graph queries</strong> — agents request all connections for a given entity at a specified depth</li>
+      </ul>
+    </section>
+
+    <!-- 2. ENTITY IDENTIFIERS -->
+    <section class="spec-section" id="entity-identifiers">
+      <h2><span class="sec-num">2</span> Entity Identifiers</h2>
+      <p>Every entity in the graph has a canonical identifier. The format is <code>namespace:value</code>, where the namespace identifies the authority and the value is the entity's ID within that authority.</p>
+
+      <table class="field-table">
+        <thead>
+          <tr>
+            <th>Entity Type</th>
+            <th>Format</th>
+            <th>Example</th>
+            <th>Authority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>zip:value</td>
+            <td>5-digit ZIP code</td>
+            <td><code>zip:10001</code></td>
+            <td>USPS</td>
+          </tr>
+          <tr>
+            <td>cms:value</td>
+            <td>CMS provider ID</td>
+            <td><code>cms:330214</code></td>
+            <td>CMS</td>
+          </tr>
+          <tr>
+            <td>fda:value</td>
+            <td>Drug name (lowercase)</td>
+            <td><code>fda:aspirin</code></td>
+            <td>FDA</td>
+          </tr>
+          <tr>
+            <td>epa:value</td>
+            <td>Public Water System ID</td>
+            <td><code>epa:NY0100123</code></td>
+            <td>EPA</td>
+          </tr>
+          <tr>
+            <td>sec:value</td>
+            <td>CIK number</td>
+            <td><code>sec:0000320193</code></td>
+            <td>SEC</td>
+          </tr>
+          <tr>
+            <td>iata:value</td>
+            <td>IATA airline code</td>
+            <td><code>iata:DL</code></td>
+            <td>IATA</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Resolution rules</h3>
+      <p>Identifiers are case-sensitive. <code>fda:aspirin</code> and <code>fda:Aspirin</code> are different entities. Providers must normalize to lowercase for drug names. ZIP codes retain leading zeros. CIK numbers are zero-padded to 10 digits.</p>
+      <p>New namespaces can be registered through the OPP registry. Each namespace maps to exactly one federal or international authority.</p>
+    </section>
+
+    <!-- 3. ADJACENCY DECLARATION -->
+    <section class="spec-section" id="adjacency">
+      <h2><span class="sec-num">3</span> Adjacency Declaration</h2>
+      <p>Providers declare their entity graph in the OPP manifest. The <code>graph</code> field lists which entity types the provider knows about and which connections it can resolve.</p>
+
+<pre><code>{
+  "opp": "0.2.0",
+  "name": "water-safety",
+  "domain": "water",
+  "graph": {
+    "entities": ["zip-code", "water-system"],
+    "adjacency": {
+      "zip-code": ["water-system"],
+      "water-system": ["zip-code"]
+    }
+  }
+}</code></pre>
+
+      <p>A hospital provider declares a broader set of connections:</p>
+
+<pre><code>{
+  "opp": "0.2.0",
+  "name": "hospital-quality",
+  "domain": "hospitals",
+  "graph": {
+    "entities": ["zip-code", "hospital", "drug"],
+    "adjacency": {
+      "zip-code": ["hospital"],
+      "hospital": ["zip-code", "drug"],
+      "drug": ["hospital"]
+    }
+  }
+}</code></pre>
+
+      <h3>Adjacency rules</h3>
+      <ul>
+        <li>Adjacency is directional. If a provider declares <code>"zip-code": ["hospital"]</code>, it means "given a ZIP code, I can return hospitals." The reverse is a separate declaration.</li>
+        <li>A provider only declares adjacencies it can resolve. The water provider does not declare <code>"zip-code": ["hospital"]</code> even though that relationship exists — it belongs to the hospital provider.</li>
+        <li>Entity type names use lowercase kebab-case: <code>zip-code</code>, <code>water-system</code>, <code>hospital</code>, <code>drug</code>, <code>demographics</code>, <code>weather</code>.</li>
+      </ul>
+    </section>
+
+    <!-- 4. GRAPH QUERY ENDPOINT -->
+    <section class="spec-section" id="graph-query">
+      <h2><span class="sec-num">4</span> Graph Query Endpoint</h2>
+      <p>The graph query returns all connected entities for a given entity identifier at a specified traversal depth.</p>
+
+      <h3>Request</h3>
+<pre><code>GET /v1/graph?entity=zip:10001&depth=1</code></pre>
+
+      <table class="field-table">
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>entity</td>
+            <td>string</td>
+            <td>Yes</td>
+            <td>Entity identifier in <code>namespace:value</code> format</td>
+          </tr>
+          <tr>
+            <td>depth</td>
+            <td>integer</td>
+            <td>No</td>
+            <td>Traversal depth. Default: 1. Maximum: 3.</td>
+          </tr>
+          <tr>
+            <td>types</td>
+            <td>string</td>
+            <td>No</td>
+            <td>Comma-separated entity types to filter. Returns only these connection types.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Response — depth 1</h3>
+      <p>At depth 1, the response lists all directly connected entity types and their resolved IDs.</p>
+
+<pre><code>{
+  "entity": "zip:10001",
+  "depth": 1,
+  "connections": [
+    {
+      "type": "water-system",
+      "ids": ["epa:NY0100123"],
+      "domain": "water",
+      "provider": "water-safety"
+    },
+    {
+      "type": "hospital",
+      "ids": ["cms:330214", "cms:330101"],
+      "domain": "hospitals",
+      "provider": "hospital-quality"
+    },
+    {
+      "type": "demographics",
+      "domain": "demographics",
+      "provider": "demographics"
+    },
+    {
+      "type": "weather",
+      "domain": "weather",
+      "provider": "weather"
+    }
+  ]
+}</code></pre>
+
+      <h3>Response — depth 2</h3>
+      <p>At depth 2, the query follows each connection one step further. The hospital connection expands to include drugs prescribed at those hospitals.</p>
+
+<pre><code>{
+  "entity": "zip:10001",
+  "depth": 2,
+  "connections": [
+    {
+      "type": "water-system",
+      "ids": ["epa:NY0100123"],
+      "domain": "water",
+      "provider": "water-safety",
+      "connections": []
+    },
+    {
+      "type": "hospital",
+      "ids": ["cms:330214", "cms:330101"],
+      "domain": "hospitals",
+      "provider": "hospital-quality",
+      "connections": [
+        {
+          "type": "drug",
+          "ids": ["fda:metformin", "fda:lisinopril", "fda:atorvastatin"],
+          "domain": "drugs",
+          "provider": "drug-effects"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+
+      <h3>Depth limits</h3>
+      <p>Maximum depth is 3. Each depth level multiplies the number of provider calls. At depth 1, the registry resolves which providers serve the root entity type. At depth 2, the registry resolves providers for each connected entity type. Providers should set reasonable timeouts — 5 seconds per depth level.</p>
+    </section>
+
+    <!-- 5. FEDERATION -->
+    <section class="spec-section" id="federation">
+      <h2><span class="sec-num">5</span> Federation</h2>
+      <p>Multiple OPP providers can serve data about the same entity type. Two hospital providers might both resolve <code>zip-code</code> to <code>hospital</code>. The graph query handles this through the registry.</p>
+
+      <h3>Resolution order</h3>
+      <ol>
+        <li>The agent sends <code>GET /v1/graph?entity=zip:10001&depth=1</code> to the registry.</li>
+        <li>The registry looks up all providers whose manifests declare adjacency from <code>zip-code</code>.</li>
+        <li>The registry fans out requests to each provider in parallel.</li>
+        <li>Responses are merged. If two providers return the same entity ID, it appears once. If they return different IDs, both appear.</li>
+        <li>The merged response includes <code>provider</code> fields so the agent knows which provider resolved each connection.</li>
+      </ol>
+
+      <h3>Conflict resolution</h3>
+      <p>When two providers return conflicting data for the same entity ID, the registry does not pick a winner. Both responses are included with their provider attribution. The agent decides which to trust.</p>
+
+      <h3>Provider ownership</h3>
+      <p>The registry tracks which provider is the canonical source for each entity type. The canonical provider appears first in merged results. Non-canonical providers are marked with <code>"canonical": false</code>.</p>
+
+<pre><code>{
+  "type": "hospital",
+  "ids": ["cms:330214"],
+  "domain": "hospitals",
+  "provider": "hospital-quality",
+  "canonical": true
+}</code></pre>
+    </section>
+
+    <!-- 6. USE CASES -->
+    <section class="spec-section" id="use-cases">
+      <h2><span class="sec-num">6</span> Use Cases</h2>
+
+      <h3>Full profile of a ZIP code</h3>
+      <p>An agent receives the prompt: "Tell me everything about ZIP 10001." It sends a depth-1 graph query and gets back water systems, hospitals, demographics, and weather. Each connection includes the provider endpoint. The agent calls each provider for full data and assembles a complete profile.</p>
+<pre><code>GET /v1/graph?entity=zip:10001&depth=1
+// Returns: water, hospitals, demographics, weather
+// Agent follows each connection to its provider</code></pre>
+
+      <h3>Multi-hop safety query</h3>
+      <p>An agent receives: "Which hospitals near 10001 prescribe drugs with more than 1000 adverse events?" This requires two hops. ZIP to hospitals, then hospitals to drugs.</p>
+<pre><code>GET /v1/graph?entity=zip:10001&depth=2&types=hospital,drug
+// Returns: hospitals in 10001, drugs at each hospital
+// Agent filters drugs by adverse event count from the drugs provider</code></pre>
+
+      <h3>Parallel comparison</h3>
+      <p>An agent receives: "Compare the full profile of ZIP 10001 and ZIP 90210." It sends two graph queries in parallel. The results share the same structure, so the agent can diff them field by field.</p>
+<pre><code>// Parallel requests:
+GET /v1/graph?entity=zip:10001&depth=1
+GET /v1/graph?entity=zip:90210&depth=1
+// Agent diffs the two response trees</code></pre>
+
+      <h3>Entity discovery</h3>
+      <p>An agent does not know what data exists for a given entity. The graph query at depth 1 acts as a discovery mechanism. The agent learns what domains connect to that entity without prior knowledge of the OPP ecosystem.</p>
+    </section>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Primitive Protocol — Events Extension v0.2.0</title>
+  <meta name="description" content="Event-driven extension to the Open Primitive Protocol (OPP). Defines Server-Sent Events and webhook transports for real-time data push from OPP providers to agent subscribers.">
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    /* Spec document styles */
+    .spec-page {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 var(--space-6) 96px;
+    }
+
+    /* Header bar */
+    .spec-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-8) 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-12);
+    }
+
+    /* Title block */
+    .spec-title-block {
+      margin-bottom: var(--space-16);
+      padding-bottom: var(--space-10);
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-title-block h1 {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: var(--space-3);
+    }
+    .spec-title-block .spec-version {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-6);
+    }
+    .spec-title-block .spec-date {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* TOC */
+    .spec-toc {
+      margin-bottom: var(--space-16);
+      padding: var(--space-6) var(--space-8);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .spec-toc h2 {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: var(--space-4);
+    }
+    .spec-toc ol {
+      list-style: none;
+      counter-reset: toc;
+    }
+    .spec-toc ol li {
+      counter-increment: toc;
+      margin-bottom: var(--space-2);
+    }
+    .spec-toc ol li a {
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--body);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .spec-toc ol li a:hover {
+      color: var(--accent);
+    }
+    .spec-toc ol li a::before {
+      content: counter(toc) ". ";
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      margin-right: var(--space-2);
+    }
+
+    /* Sections */
+    .spec-section {
+      margin-bottom: var(--space-16);
+    }
+    .spec-section h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-section h2 .sec-num {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-right: var(--space-3);
+    }
+    .spec-section h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-4);
+    }
+    .spec-section p {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--body);
+      margin-bottom: var(--space-4);
+    }
+    .spec-section ul, .spec-section ol {
+      margin-bottom: var(--space-4);
+      padding-left: var(--space-6);
+    }
+    .spec-section li {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--body);
+      margin-bottom: var(--space-2);
+    }
+
+    /* Inline code */
+    code {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      background: rgba(0,0,0,0.05);
+      padding: 2px 6px;
+      color: var(--text);
+    }
+
+    /* Code blocks */
+    pre {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      padding: var(--space-5) var(--space-6);
+      overflow-x: auto;
+      margin-bottom: var(--space-6);
+      border: 1px solid var(--border);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    /* Field tables */
+    .field-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--space-6);
+      font-size: 15px;
+    }
+    .field-table th {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 2px solid var(--border);
+      background: var(--bg);
+    }
+    .field-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.5;
+      color: var(--body);
+    }
+    .field-table td:first-child {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .field-table .req {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border: 1px solid;
+    }
+    .field-table .req.required {
+      color: var(--accent);
+      border-color: rgba(192, 64, 16, 0.3);
+      background: var(--accent-bg);
+    }
+    .field-table .req.optional {
+      color: var(--dim);
+      border-color: var(--border);
+      background: transparent;
+    }
+
+    /* RFC keywords */
+    .rfc-keyword {
+      font-variant: small-caps;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* Status banner */
+    .spec-status {
+      background: var(--warn-bg);
+      border-left: 2px solid var(--warn);
+      padding: var(--space-4) var(--space-5);
+      font-size: 14px;
+      color: var(--body);
+      line-height: 1.6;
+      margin-bottom: var(--space-6);
+    }
+    .spec-status a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .spec-status a:hover {
+      text-decoration: underline;
+    }
+
+    /* Use case cards */
+    .use-case {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-4);
+    }
+    .use-case h4 {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: var(--space-3);
+    }
+    .use-case p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--body);
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 640px) {
+      .spec-page { padding: 0 var(--space-4) 72px; }
+      .spec-title-block h1 { font-size: 28px; }
+      .field-table { font-size: 13px; }
+      .field-table td:first-child { white-space: normal; }
+      pre { font-size: 12px; padding: var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+  <div class="spec-page">
+
+    <!-- Header -->
+    <header class="spec-header">
+      <a href="/" class="op-wordmark">OPEN PRIMITIVE API</a>
+      <div class="op-header-right">
+        <a href="/spec.html">Spec v0.1</a>
+        <span class="op-header-sep">/</span>
+        <a href="/spec-events.html" style="color: var(--accent);">Events</a>
+        <span class="op-header-sep">/</span>
+        <a href="/examples.html">Examples</a>
+      </div>
+    </header>
+
+    <!-- Title block -->
+    <div class="spec-title-block">
+      <div class="spec-version">OPP v0.2.0 — Events Extension</div>
+      <h1>Event-Driven Data</h1>
+      <div class="spec-date">Draft — March 2026</div>
+    </div>
+
+    <!-- Status -->
+    <div class="spec-status">
+      Extension to the <a href="/spec.html">OPP v0.1.0 specification</a>. This document defines how providers push data changes to subscribers in real time. Agents stay current without polling.
+    </div>
+
+    <!-- Table of Contents -->
+    <nav class="spec-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#manifest">Event Manifest</a></li>
+        <li><a href="#envelope">Event Envelope</a></li>
+        <li><a href="#sse">SSE Transport</a></li>
+        <li><a href="#webhook">Webhook Transport</a></li>
+        <li><a href="#use-cases">Use Cases</a></li>
+        <li><a href="#security">Security</a></li>
+        <li><a href="#conformance">Conformance</a></li>
+        <li><a href="#references">References</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1. Overview -->
+    <section id="overview" class="spec-section">
+      <h2><span class="sec-num">1</span> Overview</h2>
+      <p>OPP v0.1.0 is request-response. A consumer asks for data. A provider returns it. That model works when the consumer knows what to ask and when to ask it. It breaks when data changes unpredictably.</p>
+      <p>Food recalls appear without warning. Water violations surface at odd intervals. Drug safety alerts publish on their own schedule. An agent that polls every hour misses the first 59 minutes. An agent that polls every minute wastes 59 out of 60 requests.</p>
+      <p>OPP Events solve this. Providers declare what events they emit. Consumers subscribe. When data changes, the provider pushes an event envelope to every subscriber. The envelope carries the same source, freshness, confidence, citations, and proof fields defined in the base spec. No new trust model. No new data format. Just a new direction: provider to consumer.</p>
+      <p>Two transports are defined: Server-Sent Events (SSE) for lightweight streaming, and webhooks for durable delivery.</p>
+    </section>
+
+    <!-- 2. Event Manifest -->
+    <section id="manifest" class="spec-section">
+      <h2><span class="sec-num">2</span> Event Manifest</h2>
+      <p>Providers declare event capabilities by adding an <code>events</code> object to their <code>opp.json</code> manifest. This tells consumers what events exist before they subscribe.</p>
+
+      <h3>Schema</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>endpoint</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Relative path to the SSE stream endpoint (e.g., <code>/v1/stream</code>).</td>
+          </tr>
+          <tr>
+            <td>webhookEndpoint</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Relative path to the webhook subscription endpoint (e.g., <code>/v1/subscribe</code>). Omit if the provider does not support webhooks.</td>
+          </tr>
+          <tr>
+            <td>supported</td>
+            <td>array of strings</td>
+            <td><span class="req required">Required</span></td>
+            <td>Event types this provider emits. <span class="rfc-keyword">MUST</span> contain at least one of: <code>new_record</code>, <code>updated_record</code>, <code>deleted_record</code>, <code>alert</code>.</td>
+          </tr>
+          <tr>
+            <td>domains</td>
+            <td>array of strings</td>
+            <td><span class="req required">Required</span></td>
+            <td>Domain IDs that emit events. Each <span class="rfc-keyword">MUST</span> match a <code>domains[].id</code> in the manifest.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Example manifest with events</h3>
+      <pre><code>{
+  "@context": "https://openprimitive.com/ns/opp/v1",
+  "name": "Open Primitive API",
+  "description": "US federal data across 16 domains from 11 agencies.",
+  "version": "1.1.0",
+  "protocolVersion": "0.2.0",
+  "provider": {
+    "name": "Open Primitive",
+    "url": "https://openprimitive.com",
+    "contact": "david@openprimitive.com"
+  },
+  "domains": [
+    {
+      "id": "food-recalls",
+      "name": "Food Recalls",
+      "source": "FDA openFDA API",
+      "entityTypes": ["recall", "enforcement"],
+      "freshness": "daily",
+      "license": "US-PD",
+      "endpoint": "/api/food-recalls"
+    },
+    {
+      "id": "drug-effects",
+      "name": "Drug Adverse Events",
+      "source": "FDA FAERS",
+      "entityTypes": ["adverse_event"],
+      "freshness": "weekly",
+      "license": "US-PD",
+      "endpoint": "/api/drug-effects"
+    }
+  ],
+  "events": {
+    "endpoint": "/v1/stream",
+    "webhookEndpoint": "/v1/subscribe",
+    "supported": ["new_record", "updated_record", "deleted_record", "alert"],
+    "domains": ["food-recalls", "drug-effects"]
+  },
+  "endpoints": {
+    "base": "https://api.openprimitive.com",
+    "query": "/api/query"
+  },
+  "authentication": {
+    "type": "none"
+  },
+  "lastUpdated": "2026-03-19T00:00:00Z"
+}</code></pre>
+    </section>
+
+    <!-- 3. Event Envelope -->
+    <section id="envelope" class="spec-section">
+      <h2><span class="sec-num">3</span> Event Envelope</h2>
+      <p>Every event uses the standard OPP response envelope with additional event-specific fields. This means agents parse events and query responses with the same code. No separate model.</p>
+
+      <h3>Event-specific fields</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>event</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Event type. One of: <code>new_record</code>, <code>updated_record</code>, <code>deleted_record</code>, <code>alert</code>.</td>
+          </tr>
+          <tr>
+            <td>event_id</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Unique identifier for this event. UUIDv4 or equivalent. Used for deduplication and resumption.</td>
+          </tr>
+          <tr>
+            <td>event_time</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>ISO 8601 datetime of when the event was generated by the provider.</td>
+          </tr>
+          <tr>
+            <td>domain</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Domain identifier. Same as the base envelope.</td>
+          </tr>
+          <tr>
+            <td>source</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Upstream data source name.</td>
+          </tr>
+          <tr>
+            <td>source_url</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Direct URL to the upstream data source.</td>
+          </tr>
+          <tr>
+            <td>freshness</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>ISO 8601 datetime of when this data was fetched from upstream.</td>
+          </tr>
+          <tr>
+            <td>data</td>
+            <td>object</td>
+            <td><span class="req required">Required</span></td>
+            <td>The domain-specific payload. For <code>deleted_record</code>, this <span class="rfc-keyword">MUST</span> contain at least an identifier for the deleted record.</td>
+          </tr>
+          <tr>
+            <td>confidence</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Data quality metadata. Same schema as the base envelope.</td>
+          </tr>
+          <tr>
+            <td>citations</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Source citation. Same schema as the base envelope.</td>
+          </tr>
+          <tr>
+            <td>proof</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Cryptographic proof. Same schema as the base envelope. Covers the entire event envelope excluding the <code>proof</code> field itself.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Event types</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Type</th><th>Meaning</th><th>data payload</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>new_record</td>
+            <td>A record appeared in the upstream source that was not there before.</td>
+            <td>Full record.</td>
+          </tr>
+          <tr>
+            <td>updated_record</td>
+            <td>An existing record changed in the upstream source.</td>
+            <td>Full updated record. Providers <span class="rfc-keyword">MAY</span> include a <code>changes</code> field listing which fields changed.</td>
+          </tr>
+          <tr>
+            <td>deleted_record</td>
+            <td>A record was removed from the upstream source.</td>
+            <td>Record identifier and reason (if available).</td>
+          </tr>
+          <tr>
+            <td>alert</td>
+            <td>A high-priority condition detected by the provider. Not tied to a single record.</td>
+            <td>Alert details: <code>severity</code>, <code>title</code>, <code>description</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Example event envelope</h3>
+      <pre><code>{
+  "event": "new_record",
+  "event_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "event_time": "2026-03-20T01:00:00Z",
+  "domain": "food-recalls",
+  "source": "FDA openFDA API",
+  "source_url": "https://api.fda.gov/food/enforcement.json",
+  "freshness": "2026-03-20T00:55:00Z",
+  "data": {
+    "product": "Frozen Chicken Tenders",
+    "reason": "Undeclared allergen: milk",
+    "classification": "Class I",
+    "status": "Ongoing",
+    "date": "2026-03-19",
+    "recalling_firm": "National Foods Inc.",
+    "distribution": "Nationwide"
+  },
+  "confidence": {
+    "completeness": 1.0,
+    "methodology": "Direct FDA API poll, 5-minute interval"
+  },
+  "citations": {
+    "statement": "Data from the FDA openFDA enforcement database",
+    "source_name": "FDA openFDA",
+    "source_url": "https://open.fda.gov/apis/food/enforcement/",
+    "accessed": "2026-03-20T00:55:00Z",
+    "license": "US-PD"
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "eddsa-jcs-2022",
+    "verificationMethod": "https://api.openprimitive.com/.well-known/opp.json#provider",
+    "created": "2026-03-20T01:00:01Z",
+    "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndTn..."
+  }
+}</code></pre>
+    </section>
+
+    <!-- 4. SSE Transport -->
+    <section id="sse" class="spec-section">
+      <h2><span class="sec-num">4</span> SSE Transport</h2>
+      <p>Server-Sent Events provide a lightweight, HTTP-native streaming connection. The consumer opens a single GET request. The provider holds it open and writes events as they occur. No WebSocket upgrade. No binary framing. Standard HTTP.</p>
+
+      <h3>Connection</h3>
+      <pre><code>GET /v1/stream?domains=food-recalls,drug-effects HTTP/1.1
+Accept: text/event-stream</code></pre>
+
+      <p>The server <span class="rfc-keyword">MUST</span> respond with:</p>
+      <pre><code>HTTP/1.1 200 OK
+Content-Type: text/event-stream
+Cache-Control: no-cache
+Connection: keep-alive
+Access-Control-Allow-Origin: *</code></pre>
+
+      <h3>Query parameters</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Parameter</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>domains</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Comma-separated list of domain IDs to subscribe to. Omit to receive events from all domains.</td>
+          </tr>
+          <tr>
+            <td>events</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Comma-separated list of event types to receive. Omit to receive all event types.</td>
+          </tr>
+          <tr>
+            <td>last_event_id</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Resume from after this event ID. The provider <span class="rfc-keyword">SHOULD</span> replay missed events if they are still available.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Event format</h3>
+      <p>Each event follows the SSE specification (W3C). The <code>id</code> field maps to <code>event_id</code>. The <code>event</code> field maps to the OPP event type. The <code>data</code> field contains the full JSON event envelope on a single line.</p>
+      <pre><code>id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+event: new_record
+data: {"event":"new_record","event_id":"a1b2c3d4-e5f6-7890-abcd-ef1234567890","event_time":"2026-03-20T01:00:00Z","domain":"food-recalls","source":"FDA openFDA API","source_url":"https://api.fda.gov/food/enforcement.json","freshness":"2026-03-20T00:55:00Z","data":{"product":"Frozen Chicken Tenders","reason":"Undeclared allergen: milk","classification":"Class I","status":"Ongoing","date":"2026-03-19"},"confidence":{"completeness":1.0,"methodology":"Direct FDA API poll, 5-minute interval"},"citations":{"statement":"Data from the FDA openFDA enforcement database","source_name":"FDA openFDA","source_url":"https://open.fda.gov/apis/food/enforcement/","accessed":"2026-03-20T00:55:00Z","license":"US-PD"}}
+
+</code></pre>
+
+      <h3>Heartbeat</h3>
+      <p>Providers <span class="rfc-keyword">SHOULD</span> send a comment line every 30 seconds when no events are pending. This keeps the connection alive through proxies and load balancers.</p>
+      <pre><code>: heartbeat 2026-03-20T01:05:30Z
+
+</code></pre>
+
+      <h3>Reconnection</h3>
+      <p>If the connection drops, the consumer <span class="rfc-keyword">SHOULD</span> reconnect and pass the last received <code>event_id</code> via the <code>last_event_id</code> query parameter or the standard <code>Last-Event-ID</code> header. The provider <span class="rfc-keyword">SHOULD</span> buffer events for at least 5 minutes to support reconnection. Providers <span class="rfc-keyword">MAY</span> send a <code>retry</code> field to suggest a reconnection interval in milliseconds.</p>
+    </section>
+
+    <!-- 5. Webhook Transport -->
+    <section id="webhook" class="spec-section">
+      <h2><span class="sec-num">5</span> Webhook Transport</h2>
+      <p>Webhooks provide durable event delivery for consumers that cannot maintain a persistent connection. The consumer registers a URL. The provider POSTs event envelopes to that URL when events occur.</p>
+
+      <h3>Subscribe</h3>
+      <pre><code>POST /v1/subscribe HTTP/1.1
+Content-Type: application/json
+
+{
+  "url": "https://agent.example.com/webhook",
+  "domains": ["food-recalls"],
+  "events": ["new_record", "alert"],
+  "secret": "whsec_a1b2c3d4e5f6..."
+}</code></pre>
+
+      <h3>Subscribe request fields</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>url</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>HTTPS URL where the provider will POST events. <span class="rfc-keyword">MUST</span> be HTTPS.</td>
+          </tr>
+          <tr>
+            <td>domains</td>
+            <td>array of strings</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Domain IDs to subscribe to. Omit to receive all domains.</td>
+          </tr>
+          <tr>
+            <td>events</td>
+            <td>array of strings</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Event types to receive. Omit to receive all types.</td>
+          </tr>
+          <tr>
+            <td>secret</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Shared secret for HMAC-SHA256 signature verification. If provided, the provider <span class="rfc-keyword">MUST</span> include an <code>X-OPP-Signature</code> header on every webhook delivery.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Subscribe response</h3>
+      <pre><code>HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "subscription_id": "sub_9f8e7d6c5b4a3210",
+  "url": "https://agent.example.com/webhook",
+  "domains": ["food-recalls"],
+  "events": ["new_record", "alert"],
+  "created": "2026-03-20T01:00:00Z",
+  "status": "active"
+}</code></pre>
+
+      <h3>Delivery</h3>
+      <p>When an event matches a subscription, the provider sends an HTTP POST to the subscriber's URL. The body is the OPP event envelope as JSON. The headers include:</p>
+      <table class="field-table">
+        <thead>
+          <tr><th>Header</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Content-Type</td>
+            <td><code>application/json</code></td>
+          </tr>
+          <tr>
+            <td>X-OPP-Event</td>
+            <td>The event type (e.g., <code>new_record</code>).</td>
+          </tr>
+          <tr>
+            <td>X-OPP-Event-ID</td>
+            <td>The unique event ID.</td>
+          </tr>
+          <tr>
+            <td>X-OPP-Signature</td>
+            <td>HMAC-SHA256 hex digest of the request body, keyed with the subscription secret. Present only when a secret was provided.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Delivery expectations</h3>
+      <p>The consumer <span class="rfc-keyword">MUST</span> respond with a 2xx status code within 10 seconds to acknowledge receipt. If the provider receives a non-2xx response or a timeout, it <span class="rfc-keyword">SHOULD</span> retry with exponential backoff: 1 minute, 5 minutes, 30 minutes, 2 hours. After 5 consecutive failures, the provider <span class="rfc-keyword">MAY</span> deactivate the subscription and <span class="rfc-keyword">SHOULD</span> notify the consumer if a contact mechanism is available.</p>
+
+      <h3>Unsubscribe</h3>
+      <pre><code>DELETE /v1/subscribe/sub_9f8e7d6c5b4a3210 HTTP/1.1</code></pre>
+      <p>Returns <code>204 No Content</code> on success.</p>
+    </section>
+
+    <!-- 6. Use Cases -->
+    <section id="use-cases" class="spec-section">
+      <h2><span class="sec-num">6</span> Use Cases</h2>
+
+      <div class="use-case">
+        <h4>Food recall monitoring</h4>
+        <p>An agent subscribes to <code>food-recalls</code> with event type <code>new_record</code>. When the FDA publishes a Class I recall for contaminated peanut butter, the provider detects the new record within 5 minutes and pushes an event envelope. The agent reads the classification, checks the distribution scope, and triggers a notification to affected supply chain partners. No polling. 5-minute latency instead of 60.</p>
+      </div>
+
+      <div class="use-case">
+        <h4>Water violation alerts</h4>
+        <p>A compliance agent watches <code>water-quality</code> for a specific ZIP code. It subscribes via webhook, filtering for <code>alert</code> events. When a new MCL violation appears in EPA SDWIS data for that water system, the provider fires an alert event. The agent logs the violation, cross-references the contaminant against health thresholds, and files an internal report. The human learns about it from the agent, not from checking a website.</p>
+      </div>
+
+      <div class="use-case">
+        <h4>Drug safety surveillance</h4>
+        <p>A pharmacovigilance agent subscribes to <code>drug-effects</code> with event types <code>new_record</code> and <code>alert</code>. When FAERS data shows a spike in adverse event reports for a specific drug, the provider emits an alert. The agent compares the spike against historical baselines, assesses whether it exceeds 2 standard deviations, and escalates to a human reviewer. Continuous monitoring without continuous polling.</p>
+      </div>
+    </section>
+
+    <!-- 7. Security -->
+    <section id="security" class="spec-section">
+      <h2><span class="sec-num">7</span> Security</h2>
+
+      <h3>SSE authentication</h3>
+      <p>Providers that require authentication for SSE streams <span class="rfc-keyword">MUST</span> accept credentials via the <code>Authorization</code> header on the initial GET request. Token-based authentication is preferred because SSE does not support custom headers after the initial request.</p>
+
+      <h3>Webhook verification</h3>
+      <p>Consumers <span class="rfc-keyword">SHOULD</span> provide a shared secret when creating a webhook subscription. The provider computes <code>HMAC-SHA256(secret, request_body)</code> and includes the hex-encoded result in the <code>X-OPP-Signature</code> header. The consumer verifies the signature before processing the event. This prevents spoofed deliveries.</p>
+
+      <h3>Webhook URL validation</h3>
+      <p>Providers <span class="rfc-keyword">MUST</span> require HTTPS for webhook URLs. Providers <span class="rfc-keyword">SHOULD</span> verify webhook URLs by sending a challenge request before activating the subscription. The challenge is a GET request to the URL with a <code>challenge</code> query parameter. The consumer responds with the challenge value in the response body.</p>
+
+      <h3>Event proof</h3>
+      <p>Providers at Level 3 conformance <span class="rfc-keyword">MUST</span> include an Ed25519 <code>proof</code> object on every event envelope. This allows consumers to verify events independently of the transport layer. A webhook with a valid OPP proof is trustworthy even if the consumer cannot verify the HMAC signature.</p>
+    </section>
+
+    <!-- 8. Conformance -->
+    <section id="conformance" class="spec-section">
+      <h2><span class="sec-num">8</span> Conformance</h2>
+      <p>The events extension adds a fourth conformance dimension. Providers claim an events conformance level independently from their base OPP level.</p>
+
+      <table class="field-table">
+        <thead>
+          <tr><th>Level</th><th>Transport</th><th>Requirements</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Events L1</td>
+            <td>SSE only</td>
+            <td>Valid <code>events</code> object in manifest. SSE endpoint returns well-formed event envelopes. Heartbeat every 30 seconds. Supports <code>domains</code> filter.</td>
+          </tr>
+          <tr>
+            <td>Events L2</td>
+            <td>SSE + Webhook</td>
+            <td>All Events L1 requirements. Webhook subscribe/unsubscribe endpoints. HMAC signature support. Retry with exponential backoff on failed deliveries.</td>
+          </tr>
+          <tr>
+            <td>Events L3</td>
+            <td>SSE + Webhook + Proof</td>
+            <td>All Events L2 requirements. Every event envelope includes an Ed25519 <code>proof</code> object. Supports <code>last_event_id</code> resumption on SSE. Buffers events for at least 5 minutes.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>A provider can be Base OPP Level 2 (Cited) and Events L1 (SSE only). The levels are independent. A provider that claims Events L3 without Base Level 3 still signs event envelopes but does not sign query responses.</p>
+    </section>
+
+    <!-- 9. References -->
+    <section id="references" class="spec-section">
+      <h2><span class="sec-num">9</span> References</h2>
+      <ul style="list-style: none; padding-left: 0;">
+        <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border);">
+          <span style="font-family: var(--font-mono); font-size: 13px; color: var(--accent); margin-right: var(--space-3);">[OPP-SPEC]</span>
+          Open Primitive Protocol Specification v0.1.0, March 2026.
+          <a href="/spec.html" style="color: var(--accent); text-decoration: none;">/spec.html</a>
+        </li>
+        <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border);">
+          <span style="font-family: var(--font-mono); font-size: 13px; color: var(--accent); margin-right: var(--space-3);">[SSE]</span>
+          W3C, "Server-Sent Events", W3C Recommendation, 2015.
+          <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html" style="color: var(--accent); text-decoration: none;">https://html.spec.whatwg.org/multipage/server-sent-events.html</a>
+        </li>
+        <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border);">
+          <span style="font-family: var(--font-mono); font-size: 13px; color: var(--accent); margin-right: var(--space-3);">[RFC2119]</span>
+          Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP 14, RFC 2119, March 1997.
+          <a href="https://www.rfc-editor.org/rfc/rfc2119" style="color: var(--accent); text-decoration: none;">https://www.rfc-editor.org/rfc/rfc2119</a>
+        </li>
+        <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--border);">
+          <span style="font-family: var(--font-mono); font-size: 13px; color: var(--accent); margin-right: var(--space-3);">[RFC8785]</span>
+          Rundgren, A., Jordan, B., and S. Erdtman, "JSON Canonicalization Scheme (JCS)", RFC 8785, June 2020.
+          <a href="https://www.rfc-editor.org/rfc/rfc8785" style="color: var(--accent); text-decoration: none;">https://www.rfc-editor.org/rfc/rfc8785</a>
+        </li>
+        <li style="padding: var(--space-3) 0;">
+          <span style="font-family: var(--font-mono); font-size: 13px; color: var(--accent); margin-right: var(--space-3);">[DI-EDDSA]</span>
+          W3C, "Data Integrity EdDSA Cryptosuites v1.0", W3C Recommendation, 2024.
+          <a href="https://www.w3.org/TR/vc-di-eddsa/" style="color: var(--accent); text-decoration: none;">https://www.w3.org/TR/vc-di-eddsa/</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="op-footer">
+      <span class="op-footer-text">OPP v0.2.0 — Events Extension — Draft</span>
+      <span class="op-footer-text">
+        <a href="https://openprimitive.com">Open Primitive</a>
+      </span>
+    </footer>
+
+  </div>
+</body>
+</html>

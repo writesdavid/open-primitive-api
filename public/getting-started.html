@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get started with OPP</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --border: #e2e2e2;
+      --text: #1a1a1a;
+      --muted: #666666;
+      --accent: #1a1a1a;
+      --code-bg: #f4f4f4;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    header {
+      padding: 48px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .paths {
+      display: flex;
+      flex-direction: column;
+      gap: 64px;
+      padding-bottom: 80px;
+    }
+
+    .path {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 40px;
+      border-radius: 4px;
+    }
+
+    .path-header {
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .path-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .path-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .path-header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .step {
+      margin-bottom: 28px;
+    }
+
+    .step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .step p {
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+    }
+
+    p code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .integration-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .integration {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 16px;
+    }
+
+    .integration h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .integration pre {
+      margin-bottom: 0;
+      font-size: 0.8rem;
+    }
+
+    .links-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .links-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    .links-list li:last-child {
+      border-bottom: none;
+    }
+
+    .links-list a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .links-list a:hover {
+      text-decoration: underline;
+    }
+
+    .links-list span {
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .integration-group {
+        grid-template-columns: 1fr;
+      }
+
+      .path {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Get started with OPP</h1>
+      <p>Three paths. Pick the one that fits. Each gets you to a working result in 10 minutes.</p>
+    </header>
+
+    <div class="paths">
+
+      <!-- PATH 1: USE DATA -->
+      <section class="path">
+        <div class="path-header">
+          <div class="path-label">Path 1 — Use Data</div>
+          <h2>For agent builders</h2>
+          <p>Query any OPP provider. Get verified data with provenance.</p>
+        </div>
+
+        <div class="step">
+          <h3>1. Pick an endpoint</h3>
+          <p>Every OPP provider exposes domain-specific endpoints. Hit one.</p>
+          <pre><code>curl https://api.openprimitive.com/v1/drugs?name=aspirin</code></pre>
+        </div>
+
+        <div class="step">
+          <h3>2. Read the envelope</h3>
+          <p>Every response wraps data in a standard envelope. Six fields you can trust.</p>
+          <pre><code>{
+  "domain": "drugs",
+  "source": "FDA Adverse Event Reporting System",
+  "freshness": "2026-03-18T00:00:00Z",
+  "confidence": 0.94,
+  "citations": [
+    "https://api.fda.gov/drug/event.json"
+  ],
+  "proof": "sha256:9f86d081884c7d659a2feaa0..."
+}</code></pre>
+          <p><code>domain</code> tells you the data category. <code>source</code> names the federal origin. <code>freshness</code> marks when the provider last pulled from source. <code>confidence</code> scores data completeness. <code>citations</code> link to raw federal endpoints. <code>proof</code> is a content hash you can verify independently.</p>
+        </div>
+
+        <div class="step">
+          <h3>3. Integrate</h3>
+          <div class="integration-group">
+            <div class="integration">
+              <h4>MCP</h4>
+              <pre><code>// claude_desktop_config.json
+{
+  "mcpServers": {
+    "opp": {
+      "command": "npx",
+      "args": ["@opp/mcp-server"],
+      "env": {
+        "OPP_API_URL": "https://api.openprimitive.com"
+      }
+    }
+  }
+}</code></pre>
+            </div>
+            <div class="integration">
+              <h4>Python</h4>
+              <pre><code>pip install opp-client
+
+from opp_client import OPP
+client = OPP()
+result = client.query("drugs", name="aspirin")
+print(result.envelope.source)</code></pre>
+            </div>
+            <div class="integration">
+              <h4>JavaScript</h4>
+              <pre><code>const res = await fetch(
+  "https://api.openprimitive.com/v1/drugs?name=aspirin"
+);
+const { data, envelope } = await res.json();
+
+// Verify proof before using data
+console.log(envelope.source);
+console.log(envelope.confidence);</code></pre>
+            </div>
+            <div class="integration">
+              <h4>LangChain</h4>
+              <pre><code>from langchain_opp import OPPToolkit
+
+toolkit = OPPToolkit(
+    base_url="https://api.openprimitive.com"
+)
+tools = toolkit.get_tools()</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PATH 2: PROVIDE DATA -->
+      <section class="path">
+        <div class="path-header">
+          <div class="path-label">Path 2 — Provide Data</div>
+          <h2>For data publishers</h2>
+          <p>Make your API agent-readable in 50 lines.</p>
+        </div>
+
+        <div class="step">
+          <h3>1. Create your manifest</h3>
+          <p>Add <code>/.well-known/opp.json</code> to your domain. This tells agents what you serve.</p>
+          <pre><code>{
+  "opp_version": "0.1",
+  "provider": "your-org-name",
+  "domains": ["water"],
+  "endpoints": [
+    {
+      "path": "/v1/water/contaminants",
+      "method": "GET",
+      "description": "Returns contaminant levels for a water system by ID.",
+      "params": {
+        "system_id": "string, required"
+      }
+    }
+  ],
+  "source": "EPA Safe Drinking Water Information System",
+  "contact": "data-team@your-org.com"
+}</code></pre>
+        </div>
+
+        <div class="step">
+          <h3>2. Add the envelope to responses</h3>
+          <p>Before: raw data. After: data with provenance. Agents need both.</p>
+          <pre><code>// BEFORE — bare response
+app.get("/v1/water/contaminants", (req, res) => {
+  const data = getContaminants(req.query.system_id);
+  res.json(data);
+});
+
+// AFTER — OPP envelope
+app.get("/v1/water/contaminants", (req, res) => {
+  const data = getContaminants(req.query.system_id);
+  res.json({
+    data,
+    envelope: {
+      domain: "water",
+      source: "EPA SDWIS",
+      freshness: lastFetchTimestamp,
+      confidence: computeConfidence(data),
+      citations: ["https://sdwis.epa.gov/..."],
+      proof: sha256(JSON.stringify(data))
+    }
+  });
+});</code></pre>
+        </div>
+
+        <div class="step">
+          <h3>3. Sign responses</h3>
+          <p>Signing lets consumers verify your data was not altered in transit.</p>
+          <pre><code>import { generateKeyPairSync, sign } from "crypto";
+
+// Generate once, store the private key securely
+const { publicKey, privateKey } = generateKeyPairSync("ed25519");
+
+function signEnvelope(envelope) {
+  const payload = JSON.stringify(envelope);
+  const signature = sign(null, Buffer.from(payload), privateKey);
+  return {
+    ...envelope,
+    signature: signature.toString("base64"),
+    publicKey: publicKey.export({ type: "spki", format: "pem" })
+  };
+}</code></pre>
+        </div>
+
+        <div class="step">
+          <h3>4. Register</h3>
+          <p>Tell the registry your provider exists.</p>
+          <pre><code>curl -X POST https://api.openprimitive.com/v1/registry/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-domain.com",
+    "manifest": "https://your-domain.com/.well-known/opp.json",
+    "contact": "data-team@your-org.com"
+  }'</code></pre>
+        </div>
+
+        <div class="step">
+          <h3>5. Validate</h3>
+          <p>Paste your domain into the validator. It checks your manifest, envelope structure, and signature chain.</p>
+          <pre><code>https://openprimitive.com/validate.html</code></pre>
+          <p>The validator returns pass/fail for each requirement. Fix what fails. Ship when it passes.</p>
+        </div>
+      </section>
+
+      <!-- PATH 3: BUILD ON THE PROTOCOL -->
+      <section class="path">
+        <div class="path-header">
+          <div class="path-label">Path 3 — Build on the Protocol</div>
+          <h2>For contributors</h2>
+          <p>Extend OPP. Propose spec changes. Build the ecosystem.</p>
+        </div>
+
+        <div class="step">
+          <h3>Start here</h3>
+          <ul class="links-list">
+            <li>
+              <a href="https://github.com/writesdavid/open-primitive-api">GitHub repository</a>
+              <span>Source code, issues, pull requests</span>
+            </li>
+            <li>
+              <a href="https://openprimitive.com/protocol.html">Protocol specification</a>
+              <span>Envelope format, discovery, signing, verification</span>
+            </li>
+            <li>
+              <a href="https://github.com/writesdavid/open-primitive-api/tree/main/sdk">SDK directory</a>
+              <span>Client libraries for Python, JavaScript, and Go</span>
+            </li>
+            <li>
+              <a href="https://github.com/writesdavid/open-primitive-api/blob/main/CONTRIBUTING.md">Contributing guide</a>
+              <span>How to propose changes, submit providers, report bugs</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="step">
+          <h3>Clone and run locally</h3>
+          <pre><code>git clone git@github.com:writesdavid/open-primitive-api.git
+cd open-primitive-api
+npm install
+npm run dev</code></pre>
+          <p>The API runs at <code>http://localhost:3000</code>. Every endpoint documented in the spec works locally with bundled test data.</p>
+        </div>
+
+        <div class="step">
+          <h3>What needs building</h3>
+          <p>Open issues tagged <code>good-first-issue</code> on GitHub. Priority areas: new domain providers, SDK improvements, envelope verification tooling, and test coverage for edge cases in signature validation.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</body>
+</html>
