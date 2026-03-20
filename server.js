@@ -26,7 +26,6 @@ const { addQualityGrade } = require('./middleware/quality');
 const { citationMiddleware } = require('./middleware/citations');
 const ask = require('./sources/ask');
 const alerts = require('./sources/alerts');
-const alerts = require('./sources/alerts');
 
 const app = express();
 
