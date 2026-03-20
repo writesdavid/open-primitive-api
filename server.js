@@ -49,8 +49,14 @@ app.use((req, res, next) => {
 // Agent detection on ALL requests
 app.use(agentDetect);
 
-// Auth + rate limit + meter on all /v1 routes
-app.use('/v1', apiKeyAuth, rateLimitMiddleware, meterUsage);
+// Auth + rate limit + meter — disabled until Redis cold start issues resolved
+// app.use('/v1', apiKeyAuth, rateLimitMiddleware, meterUsage);
+app.use('/v1', (req, res, next) => {
+  req.apiKey = 'anonymous';
+  req.keyOwner = 'anonymous';
+  req.keyTier = 'free';
+  next();
+});
 
 // NOTE: archiveMiddleware, signingMiddleware, freshnessMiddleware, citationMiddleware
 // are disabled temporarily — multiple res.json wrappers cause hangs on Vercel serverless.
