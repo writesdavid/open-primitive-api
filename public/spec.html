@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Primitive Protocol — Specification v0.1.0</title>
+  <meta name="description" content="Full protocol specification for the Open Primitive Protocol (OPP) v0.1.0. Defines the manifest, response envelope, query interface, verification, and conformance levels for structured federal data access.">
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    /* Spec document styles */
+    .spec-page {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 var(--space-6) 96px;
+    }
+
+    /* Header bar */
+    .spec-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-8) 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-12);
+    }
+
+    /* Title block */
+    .spec-title-block {
+      margin-bottom: var(--space-16);
+      padding-bottom: var(--space-10);
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-title-block h1 {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: var(--space-3);
+    }
+    .spec-title-block .spec-version {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-bottom: var(--space-6);
+    }
+    .spec-title-block .spec-date {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* TOC */
+    .spec-toc {
+      margin-bottom: var(--space-16);
+      padding: var(--space-6) var(--space-8);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .spec-toc h2 {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: var(--space-4);
+    }
+    .spec-toc ol {
+      list-style: none;
+      counter-reset: toc;
+    }
+    .spec-toc ol li {
+      counter-increment: toc;
+      margin-bottom: var(--space-2);
+    }
+    .spec-toc ol li a {
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--body);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .spec-toc ol li a:hover {
+      color: var(--accent);
+    }
+    .spec-toc ol li a::before {
+      content: counter(toc) ". ";
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      margin-right: var(--space-2);
+    }
+
+    /* Sections */
+    .spec-section {
+      margin-bottom: var(--space-16);
+    }
+    .spec-section h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-section h2 .sec-num {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-right: var(--space-3);
+    }
+    .spec-section h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-4);
+    }
+    .spec-section p {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--body);
+      margin-bottom: var(--space-4);
+    }
+    .spec-section ul, .spec-section ol {
+      margin-bottom: var(--space-4);
+      padding-left: var(--space-6);
+    }
+    .spec-section li {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--body);
+      margin-bottom: var(--space-2);
+    }
+
+    /* Inline code */
+    code {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      background: rgba(0,0,0,0.05);
+      padding: 2px 6px;
+      color: var(--text);
+    }
+
+    /* Code blocks */
+    pre {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      padding: var(--space-5) var(--space-6);
+      overflow-x: auto;
+      margin-bottom: var(--space-6);
+      border: 1px solid var(--border);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    /* Field tables */
+    .field-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--space-6);
+      font-size: 15px;
+    }
+    .field-table th {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 2px solid var(--border);
+      background: var(--bg);
+    }
+    .field-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.5;
+      color: var(--body);
+    }
+    .field-table td:first-child {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .field-table .req {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border: 1px solid;
+    }
+    .field-table .req.required {
+      color: var(--accent);
+      border-color: rgba(192, 64, 16, 0.3);
+      background: var(--accent-bg);
+    }
+    .field-table .req.optional {
+      color: var(--dim);
+      border-color: var(--border);
+      background: transparent;
+    }
+
+    /* RFC keywords */
+    .rfc-keyword {
+      font-variant: small-caps;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* Status banner */
+    .spec-status {
+      background: var(--warn-bg);
+      border-left: 2px solid var(--warn);
+      padding: var(--space-4) var(--space-5);
+      font-size: 14px;
+      color: var(--body);
+      line-height: 1.6;
+      margin-bottom: var(--space-6);
+    }
+    .spec-status a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .spec-status a:hover {
+      text-decoration: underline;
+    }
+
+    /* Conformance levels */
+    .conformance-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: var(--space-6);
+    }
+    .conformance-level {
+      background: var(--bg-card);
+      padding: var(--space-5) var(--space-6);
+    }
+    .conformance-level h4 {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: var(--space-3);
+    }
+    .conformance-level p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--body);
+      margin-bottom: 0;
+    }
+
+    /* References */
+    .ref-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    .ref-list li {
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ref-list li:last-child {
+      border-bottom: none;
+    }
+    .ref-id {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      margin-right: var(--space-3);
+    }
+    .ref-list a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .ref-list a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .spec-page { padding: 0 var(--space-4) 72px; }
+      .spec-title-block h1 { font-size: 28px; }
+      .conformance-grid { grid-template-columns: 1fr; }
+      .field-table { font-size: 13px; }
+      .field-table td:first-child { white-space: normal; }
+      pre { font-size: 12px; padding: var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+  <div class="spec-page">
+
+    <!-- Header -->
+    <header class="spec-header">
+      <a href="/" class="op-wordmark">OPEN PRIMITIVE API</a>
+      <div class="op-header-right">
+        <a href="/protocol.html">Protocol</a>
+        <span class="op-header-sep">/</span>
+        <a href="/spec.html" style="color: var(--accent);">Spec</a>
+        <span class="op-header-sep">/</span>
+        <a href="/examples.html">Examples</a>
+      </div>
+    </header>
+
+    <!-- Title block -->
+    <div class="spec-title-block">
+      <div class="spec-version">OPP v0.1.0</div>
+      <h1>Open Primitive Protocol Specification</h1>
+      <div class="spec-date">Draft — March 2026</div>
+    </div>
+
+    <!-- Table of Contents -->
+    <nav class="spec-toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#abstract">Abstract</a></li>
+        <li><a href="#status">Status</a></li>
+        <li><a href="#terminology">Terminology</a></li>
+        <li><a href="#overview">Protocol Overview</a></li>
+        <li><a href="#manifest">Provider Manifest</a></li>
+        <li><a href="#envelope">Response Envelope</a></li>
+        <li><a href="#query">Query Interface</a></li>
+        <li><a href="#discovery">Discovery</a></li>
+        <li><a href="#verification">Verification</a></li>
+        <li><a href="#federation">Federation</a></li>
+        <li><a href="#versioning">Versioning</a></li>
+        <li><a href="#conformance">Conformance</a></li>
+        <li><a href="#references">References</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1. Abstract -->
+    <section id="abstract" class="spec-section">
+      <h2><span class="sec-num">1</span> Abstract</h2>
+      <p>The Open Primitive Protocol (OPP) defines a standard interface for serving public government data to both human readers and autonomous agents. It solves the problem of fragmented, undocumented, and unsourced federal data APIs by requiring every response to carry its source, freshness, and optional cryptographic proof. OPP is designed for data providers who publish public-interest information and for agent developers who need structured, verifiable data without scraping or guesswork.</p>
+    </section>
+
+    <!-- 2. Status -->
+    <section id="status" class="spec-section">
+      <h2><span class="sec-num">2</span> Status</h2>
+      <div class="spec-status">
+        Draft specification, v0.1.0. This document describes a protocol under active development. Fields and behaviors may change before 1.0. Feedback welcome at <a href="https://github.com/writesdavid/open-primitive-protocol">github.com/writesdavid/open-primitive-protocol</a>.
+      </div>
+    </section>
+
+    <!-- 3. Terminology -->
+    <section id="terminology" class="spec-section">
+      <h2><span class="sec-num">3</span> Terminology</h2>
+      <p>The key words <span class="rfc-keyword">MUST</span>, <span class="rfc-keyword">MUST NOT</span>, <span class="rfc-keyword">REQUIRED</span>, <span class="rfc-keyword">SHALL</span>, <span class="rfc-keyword">SHALL NOT</span>, <span class="rfc-keyword">SHOULD</span>, <span class="rfc-keyword">SHOULD NOT</span>, <span class="rfc-keyword">RECOMMENDED</span>, <span class="rfc-keyword">MAY</span>, and <span class="rfc-keyword">OPTIONAL</span> in this document are to be interpreted as described in <a href="https://www.rfc-editor.org/rfc/rfc2119" style="color: var(--accent);">RFC 2119</a>.</p>
+      <p>Additional terms used in this specification:</p>
+      <ul>
+        <li><strong>Provider</strong> — An organization or service that publishes data through an OPP-compliant endpoint.</li>
+        <li><strong>Consumer</strong> — Any client that reads data from an OPP endpoint. This includes browsers, scripts, LLM agents, and orchestration frameworks.</li>
+        <li><strong>Manifest</strong> — A JSON document at <code>/.well-known/opp.json</code> that describes the provider's domains, endpoints, and capabilities.</li>
+        <li><strong>Envelope</strong> — The standard response wrapper that every OPP endpoint returns, containing source metadata alongside the data payload.</li>
+        <li><strong>Domain</strong> — A distinct category of public data (e.g., food-recalls, vehicle-complaints, water-quality).</li>
+        <li><strong>Registry</strong> — An optional index service that aggregates manifests from multiple providers for discovery.</li>
+      </ul>
+    </section>
+
+    <!-- 4. Protocol Overview -->
+    <section id="overview" class="spec-section">
+      <h2><span class="sec-num">4</span> Protocol Overview</h2>
+      <p>OPP defines three components:</p>
+      <ol>
+        <li><strong>Provider Manifest</strong> — A machine-readable declaration of what data a provider serves, where to find it, and how to verify it.</li>
+        <li><strong>Response Envelope</strong> — A standard wrapper around every data response that includes source attribution, freshness timestamps, and optional cryptographic proof.</li>
+        <li><strong>Query Interface</strong> — Conventions for requesting data via HTTP GET, including parameter naming, error handling, and CORS policy.</li>
+      </ol>
+
+      <h3>Design principles</h3>
+      <ul>
+        <li>Every response carries its own provenance. A consumer never needs to guess where data came from.</li>
+        <li>Verification is optional but standardized. Providers that sign responses all use the same cryptosuite.</li>
+        <li>The protocol is transport-layer simple. HTTP/HTTPS only. JSON payloads. No WebSocket, no streaming, no binary framing.</li>
+      </ul>
+
+      <h3>Interoperability</h3>
+      <p>OPP is designed for compatibility with existing protocols and standards:</p>
+      <ul>
+        <li><strong>MCP</strong> (Model Context Protocol) — An OPP provider can expose its domains as MCP tools. The manifest includes an optional <code>mcpServer</code> discovery URL.</li>
+        <li><strong>A2A</strong> (Agent-to-Agent Protocol) — An OPP provider can publish an A2A agent card. The manifest includes an optional <code>agentCard</code> discovery URL.</li>
+        <li><strong>OpenAPI</strong> — Providers <span class="rfc-keyword">SHOULD</span> publish an OpenAPI 3.x specification alongside the manifest.</li>
+        <li><strong>W3C Data Integrity</strong> — The proof object in the response envelope follows the W3C Data Integrity EdDSA Cryptosuites specification.</li>
+        <li><strong>JSON-LD</strong> — The manifest and response envelope use JSON-LD <code>@context</code> for semantic interoperability.</li>
+      </ul>
+
+      <h3>Transport and format</h3>
+      <p>All OPP endpoints <span class="rfc-keyword">MUST</span> be served over HTTP or HTTPS. Public providers <span class="rfc-keyword">SHOULD</span> use HTTPS. All request and response bodies <span class="rfc-keyword">MUST</span> be JSON. Providers <span class="rfc-keyword">MAY</span> include a JSON-LD <code>@context</code> field for linked data compatibility.</p>
+    </section>
+
+    <!-- 5. Provider Manifest -->
+    <section id="manifest" class="spec-section">
+      <h2><span class="sec-num">5</span> Provider Manifest</h2>
+
+      <h3>Location</h3>
+      <p>The provider manifest <span class="rfc-keyword">MUST</span> be served at <code>/.well-known/opp.json</code> relative to the provider's base URL. The <code>Content-Type</code> header <span class="rfc-keyword">MUST</span> be <code>application/json</code>.</p>
+
+      <h3>Schema</h3>
+      <table class="field-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>@context</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>JSON-LD context URL. <span class="rfc-keyword">MUST</span> be <code>"https://openprimitive.com/ns/opp/v1"</code>.</td>
+          </tr>
+          <tr>
+            <td>name</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Human-readable name of this OPP instance.</td>
+          </tr>
+          <tr>
+            <td>description</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>One-sentence description of what this provider serves.</td>
+          </tr>
+          <tr>
+            <td>version</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Version of this manifest (semver). Distinct from <code>protocolVersion</code>.</td>
+          </tr>
+          <tr>
+            <td>protocolVersion</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>OPP protocol version implemented. <span class="rfc-keyword">MUST</span> be <code>"0.1.0"</code> for this specification.</td>
+          </tr>
+          <tr>
+            <td>provider</td>
+            <td>object</td>
+            <td><span class="req required">Required</span></td>
+            <td>Information about the organization operating this provider. See <a href="#manifest-provider" style="color: var(--accent);">provider object</a>.</td>
+          </tr>
+          <tr>
+            <td>domains</td>
+            <td>array</td>
+            <td><span class="req required">Required</span></td>
+            <td>List of data domains served. <span class="rfc-keyword">MUST</span> contain at least one entry. See <a href="#manifest-domains" style="color: var(--accent);">domain object</a>.</td>
+          </tr>
+          <tr>
+            <td>endpoints</td>
+            <td>object</td>
+            <td><span class="req required">Required</span></td>
+            <td>See <a href="#manifest-endpoints" style="color: var(--accent);">endpoints object</a>.</td>
+          </tr>
+          <tr>
+            <td>discovery</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>URLs for additional discovery mechanisms. See <a href="#manifest-discovery" style="color: var(--accent);">discovery object</a>.</td>
+          </tr>
+          <tr>
+            <td>geographic</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Geographic coverage metadata. See <a href="#manifest-geographic" style="color: var(--accent);">geographic object</a>.</td>
+          </tr>
+          <tr>
+            <td>authentication</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Authentication requirements. See <a href="#manifest-auth" style="color: var(--accent);">authentication object</a>.</td>
+          </tr>
+          <tr>
+            <td>lastUpdated</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>ISO 8601 datetime of the last manifest update.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="manifest-provider">provider object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>name</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Organization name.</td>
+          </tr>
+          <tr>
+            <td>url</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Organization website. <span class="rfc-keyword">MUST</span> be a valid URL.</td>
+          </tr>
+          <tr>
+            <td>contact</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Contact email or URL for protocol-related inquiries.</td>
+          </tr>
+          <tr>
+            <td>publicKey</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Base64url-encoded Ed25519 public key used for response signing. <span class="rfc-keyword">REQUIRED</span> for Level 3 (Verified) conformance.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="manifest-domains">domains[] object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>id</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Unique identifier for this domain. Lowercase, hyphenated (e.g., <code>food-recalls</code>).</td>
+          </tr>
+          <tr>
+            <td>name</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Human-readable domain name.</td>
+          </tr>
+          <tr>
+            <td>source</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Name of the upstream data source (e.g., "FDA openFDA API").</td>
+          </tr>
+          <tr>
+            <td>entityTypes</td>
+            <td>array of strings</td>
+            <td><span class="req required">Required</span></td>
+            <td>Types of entities returned (e.g., <code>["recall", "enforcement"]</code>).</td>
+          </tr>
+          <tr>
+            <td>freshness</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Expected update cadence. One of: <code>realtime</code>, <code>hourly</code>, <code>daily</code>, <code>weekly</code>, <code>monthly</code>, <code>quarterly</code>, <code>annual</code>.</td>
+          </tr>
+          <tr>
+            <td>license</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>SPDX license identifier or URL for the upstream data license.</td>
+          </tr>
+          <tr>
+            <td>endpoint</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Relative path to this domain's query endpoint (e.g., <code>/api/food-recalls</code>).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="manifest-endpoints">endpoints object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>base</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Base URL for all API endpoints. <span class="rfc-keyword">MUST</span> be a valid URL without a trailing slash.</td>
+          </tr>
+          <tr>
+            <td>query</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Relative path to the general query endpoint (e.g., <code>/api/query</code>).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="manifest-discovery">discovery object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>openapi</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>URL to an OpenAPI 3.x specification document.</td>
+          </tr>
+          <tr>
+            <td>llms</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>URL to an <code>llms.txt</code> file describing the provider for LLM consumption.</td>
+          </tr>
+          <tr>
+            <td>mcpServer</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>URL to an MCP server endpoint.</td>
+          </tr>
+          <tr>
+            <td>agentCard</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>URL to an A2A agent card.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="manifest-geographic">geographic object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>scope</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Geographic scope of the data. Examples: <code>"US"</code>, <code>"US-CA"</code>, <code>"global"</code>.</td>
+          </tr>
+          <tr>
+            <td>granularity</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Finest geographic resolution available. One of: <code>national</code>, <code>state</code>, <code>county</code>, <code>city</code>, <code>zip</code>, <code>address</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="manifest-auth">authentication object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>type</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Authentication type. One of: <code>none</code>, <code>apiKey</code>, <code>bearer</code>.</td>
+          </tr>
+          <tr>
+            <td>header</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>HTTP header name for the authentication credential. Defaults to <code>Authorization</code>. Only applicable when <code>type</code> is <code>apiKey</code> or <code>bearer</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Example manifest</h3>
+      <pre><code>{
+  "@context": "https://openprimitive.com/ns/opp/v1",
+  "name": "Open Primitive API",
+  "description": "US federal data across 16 domains from 11 agencies.",
+  "version": "1.0.0",
+  "protocolVersion": "0.1.0",
+  "provider": {
+    "name": "Open Primitive",
+    "url": "https://openprimitive.com",
+    "contact": "david@openprimitive.com",
+    "publicKey": "z6MkhaXg..."
+  },
+  "domains": [
+    {
+      "id": "food-recalls",
+      "name": "Food Recalls",
+      "source": "FDA openFDA API",
+      "entityTypes": ["recall", "enforcement"],
+      "freshness": "daily",
+      "license": "US-PD",
+      "endpoint": "/api/food-recalls"
+    }
+  ],
+  "endpoints": {
+    "base": "https://api.openprimitive.com",
+    "query": "/api/query"
+  },
+  "discovery": {
+    "openapi": "https://api.openprimitive.com/openapi.json",
+    "llms": "https://api.openprimitive.com/llms.txt",
+    "mcpServer": "https://api.openprimitive.com/mcp",
+    "agentCard": "https://api.openprimitive.com/.well-known/agent.json"
+  },
+  "geographic": {
+    "scope": "US",
+    "granularity": "zip"
+  },
+  "authentication": {
+    "type": "none"
+  },
+  "lastUpdated": "2026-03-19T00:00:00Z"
+}</code></pre>
+    </section>
+
+    <!-- 6. Response Envelope -->
+    <section id="envelope" class="spec-section">
+      <h2><span class="sec-num">6</span> Response Envelope</h2>
+      <p>Every response from an OPP endpoint <span class="rfc-keyword">MUST</span> return a JSON object conforming to the envelope schema. The envelope carries source metadata alongside the domain-specific payload, so that no response exists without provenance.</p>
+
+      <h3>Top-level fields</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>domain</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Domain identifier matching a <code>domains[].id</code> in the manifest.</td>
+          </tr>
+          <tr>
+            <td>source</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Name of the upstream data source.</td>
+          </tr>
+          <tr>
+            <td>source_url</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Direct URL to the upstream data source. <span class="rfc-keyword">MUST</span> be a valid URL.</td>
+          </tr>
+          <tr>
+            <td>freshness</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>ISO 8601 datetime indicating when this data was last fetched from the upstream source.</td>
+          </tr>
+          <tr>
+            <td>data</td>
+            <td>object</td>
+            <td><span class="req required">Required</span></td>
+            <td>The domain-specific payload. Structure varies by domain. Providers <span class="rfc-keyword">SHOULD</span> document the schema per domain.</td>
+          </tr>
+          <tr>
+            <td>confidence</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Data quality metadata. See <a href="#envelope-confidence" style="color: var(--accent);">confidence object</a>.</td>
+          </tr>
+          <tr>
+            <td>citations</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Source citation for the data. See <a href="#envelope-citations" style="color: var(--accent);">citations object</a>.</td>
+          </tr>
+          <tr>
+            <td>version</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Version information for data, schema, and protocol. See <a href="#envelope-version" style="color: var(--accent);">version object</a>.</td>
+          </tr>
+          <tr>
+            <td>proof</td>
+            <td>object</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Cryptographic proof of data integrity. See <a href="#envelope-proof" style="color: var(--accent);">proof object</a>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="envelope-confidence">confidence object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>completeness</td>
+            <td>number</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>A value between 0 and 1 indicating how complete the data is relative to the full upstream dataset. <code>1.0</code> means full coverage. <code>0.5</code> means roughly half of available records are represented.</td>
+          </tr>
+          <tr>
+            <td>methodology</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Brief description of how the data was collected, filtered, or transformed.</td>
+          </tr>
+          <tr>
+            <td>note</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Any caveats or known limitations of this particular response.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="envelope-citations">citations object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>statement</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>A human-readable attribution statement (e.g., "Data from the FDA openFDA enforcement database").</td>
+          </tr>
+          <tr>
+            <td>source_name</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Name of the cited source.</td>
+          </tr>
+          <tr>
+            <td>source_url</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>URL to the cited source. <span class="rfc-keyword">MUST</span> be a valid URL when present.</td>
+          </tr>
+          <tr>
+            <td>accessed</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>ISO 8601 datetime of when the source was last accessed.</td>
+          </tr>
+          <tr>
+            <td>license</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>SPDX license identifier or URL for the data license.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="envelope-version">version object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>data</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Temporal version of the data (e.g., <code>"2026-03-19"</code> or <code>"Q1-2026"</code>).</td>
+          </tr>
+          <tr>
+            <td>schema</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>Semver of the domain-specific schema (e.g., <code>"2.1.0"</code>).</td>
+          </tr>
+          <tr>
+            <td>protocol</td>
+            <td>string</td>
+            <td><span class="req optional">Optional</span></td>
+            <td>OPP protocol version used to generate this response. <span class="rfc-keyword">MUST</span> match the manifest's <code>protocolVersion</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="envelope-proof">proof object</h3>
+      <table class="field-table">
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Status</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>type</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td><span class="rfc-keyword">MUST</span> be <code>"DataIntegrityProof"</code>.</td>
+          </tr>
+          <tr>
+            <td>cryptosuite</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td><span class="rfc-keyword">MUST</span> be <code>"eddsa-jcs-2022"</code>.</td>
+          </tr>
+          <tr>
+            <td>verificationMethod</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>URL resolving to the provider's public key. This <span class="rfc-keyword">SHOULD</span> reference the manifest's <code>provider.publicKey</code> or a DID document.</td>
+          </tr>
+          <tr>
+            <td>created</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>ISO 8601 datetime of when the proof was generated.</td>
+          </tr>
+          <tr>
+            <td>proofValue</td>
+            <td>string</td>
+            <td><span class="req required">Required</span></td>
+            <td>Base64url-encoded Ed25519 signature over the canonicalized JSON response (excluding the <code>proof</code> field itself).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Example response</h3>
+      <pre><code>{
+  "domain": "food-recalls",
+  "source": "FDA openFDA API",
+  "source_url": "https://api.fda.gov/food/enforcement.json",
+  "freshness": "2026-03-19T08:00:00Z",
+  "data": {
+    "results": [
+      {
+        "product": "Organic Peanut Butter",
+        "reason": "Salmonella contamination",
+        "classification": "Class I",
+        "status": "Ongoing",
+        "date": "2026-03-18"
+      }
+    ],
+    "total": 1
+  },
+  "confidence": {
+    "completeness": 0.95,
+    "methodology": "Direct FDA API query, filtered to last 30 days",
+    "note": "FDA data may lag 24-48 hours behind actual recall announcements"
+  },
+  "citations": {
+    "statement": "Data from the FDA openFDA enforcement database",
+    "source_name": "FDA openFDA",
+    "source_url": "https://open.fda.gov/apis/food/enforcement/",
+    "accessed": "2026-03-19T08:00:00Z",
+    "license": "US-PD"
+  },
+  "version": {
+    "data": "2026-03-19",
+    "schema": "1.0.0",
+    "protocol": "0.1.0"
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "eddsa-jcs-2022",
+    "verificationMethod": "https://api.openprimitive.com/.well-known/opp.json#provider",
+    "created": "2026-03-19T08:00:01Z",
+    "proofValue": "z58DAdFfa9SkqZMVPxAQpic7ndTn..."
+  }
+}</code></pre>
+    </section>
+
+    <!-- 7. Query Interface -->
+    <section id="query" class="spec-section">
+      <h2><span class="sec-num">7</span> Query Interface</h2>
+
+      <h3>HTTP method</h3>
+      <p>All OPP data endpoints <span class="rfc-keyword">MUST</span> accept <code>GET</code> requests. Providers <span class="rfc-keyword">MAY</span> additionally support <code>POST</code> for complex queries, but <code>GET</code> is the baseline.</p>
+
+      <h3>Query parameters</h3>
+      <p>Query parameter names <span class="rfc-keyword">SHOULD</span> use lowercase, with words separated by underscores (e.g., <code>zip_code</code>, <code>date_from</code>). Providers <span class="rfc-keyword">MUST</span> document accepted parameters per domain in their OpenAPI specification or equivalent documentation.</p>
+
+      <h3>Pagination</h3>
+      <p>Providers that return lists <span class="rfc-keyword">SHOULD</span> support pagination using <code>limit</code> and <code>offset</code> parameters. Default <code>limit</code> <span class="rfc-keyword">SHOULD</span> be between 10 and 100. Providers <span class="rfc-keyword">MUST</span> document the maximum allowed <code>limit</code>.</p>
+
+      <h3>Error responses</h3>
+      <p>When a request fails, the response <span class="rfc-keyword">MUST</span> return a JSON object with an <code>error</code> field containing a human-readable error message. The HTTP status code <span class="rfc-keyword">MUST</span> be appropriate to the error:</p>
+      <table class="field-table">
+        <thead>
+          <tr><th>Status</th><th>Meaning</th><th>Use when</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>400</td>
+            <td>Bad Request</td>
+            <td>Invalid or missing query parameters.</td>
+          </tr>
+          <tr>
+            <td>404</td>
+            <td>Not Found</td>
+            <td>The requested domain or entity does not exist.</td>
+          </tr>
+          <tr>
+            <td>429</td>
+            <td>Too Many Requests</td>
+            <td>Rate limit exceeded.</td>
+          </tr>
+          <tr>
+            <td>500</td>
+            <td>Internal Server Error</td>
+            <td>Upstream source failure or internal error.</td>
+          </tr>
+          <tr>
+            <td>502</td>
+            <td>Bad Gateway</td>
+            <td>Upstream data source returned an invalid response.</td>
+          </tr>
+          <tr>
+            <td>503</td>
+            <td>Service Unavailable</td>
+            <td>Upstream data source is temporarily unreachable.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Example error response:</p>
+      <pre><code>{
+  "error": "Missing required parameter: zip_code"
+}</code></pre>
+
+      <h3>CORS</h3>
+      <p>Public providers <span class="rfc-keyword">MUST</span> set the <code>Access-Control-Allow-Origin</code> header to <code>*</code> on all responses. Providers that require authentication <span class="rfc-keyword">MAY</span> restrict the origin list, but <span class="rfc-keyword">MUST</span> still support CORS preflight requests.</p>
+
+      <h3>Content-Type</h3>
+      <p>All responses <span class="rfc-keyword">MUST</span> include the header <code>Content-Type: application/json</code>.</p>
+    </section>
+
+    <!-- 8. Discovery -->
+    <section id="discovery" class="spec-section">
+      <h2><span class="sec-num">8</span> Discovery</h2>
+      <p>The manifest at <code>/.well-known/opp.json</code> serves as the primary discovery mechanism for OPP providers. Any client that knows a provider's base URL can fetch the manifest and learn what domains are available, where to query them, and how to verify responses.</p>
+
+      <p>Providers <span class="rfc-keyword">SHOULD</span> publish at least one additional discovery mechanism to maximize reachability across different consumer types:</p>
+
+      <ul>
+        <li><strong>OpenAPI specification</strong> — For traditional API consumers and developer tooling. List the URL in <code>discovery.openapi</code>.</li>
+        <li><strong>llms.txt</strong> — A plain-text file describing the provider's capabilities in natural language, optimized for LLM consumption. List the URL in <code>discovery.llms</code>.</li>
+        <li><strong>MCP server</strong> — An MCP-compatible server endpoint that exposes domains as tools. List the URL in <code>discovery.mcpServer</code>.</li>
+        <li><strong>A2A agent card</strong> — An Agent-to-Agent protocol agent card for agent orchestration frameworks. List the URL in <code>discovery.agentCard</code>.</li>
+      </ul>
+
+      <p>Consumers <span class="rfc-keyword">SHOULD</span> check for <code>/.well-known/opp.json</code> first. If it exists, the consumer has everything needed to interact with the provider. The additional discovery URLs are convenience entry points for ecosystems that do not natively understand OPP.</p>
+    </section>
+
+    <!-- 9. Verification -->
+    <section id="verification" class="spec-section">
+      <h2><span class="sec-num">9</span> Verification</h2>
+      <p>Verification is optional. Providers that choose to sign responses gain Level 3 (Verified) conformance and give consumers a way to detect tampering between the provider and the end user.</p>
+
+      <h3>Algorithm</h3>
+      <p>Providers that sign responses <span class="rfc-keyword">MUST</span> use Ed25519 with the <code>eddsa-jcs-2022</code> cryptosuite, as defined in the W3C Data Integrity EdDSA Cryptosuites specification.</p>
+
+      <h3>Key management</h3>
+      <p>The Ed25519 public key <span class="rfc-keyword">MUST</span> be included in the provider manifest at <code>provider.publicKey</code>, encoded as a base64url string. Providers <span class="rfc-keyword">SHOULD</span> rotate keys by publishing a new manifest with the updated key and re-signing subsequent responses. Old responses signed with the previous key remain valid against that key.</p>
+
+      <h3>Signing process</h3>
+      <ol>
+        <li>Construct the complete response object (all fields except <code>proof</code>).</li>
+        <li>Canonicalize the JSON using JCS (JSON Canonicalization Scheme, RFC 8785).</li>
+        <li>Sign the canonicalized bytes with the provider's Ed25519 private key.</li>
+        <li>Encode the signature as a base64url string.</li>
+        <li>Attach the <code>proof</code> object to the response with <code>type</code>, <code>cryptosuite</code>, <code>verificationMethod</code>, <code>created</code>, and <code>proofValue</code> fields.</li>
+      </ol>
+
+      <h3>Verification process</h3>
+      <p>A consumer verifies a signed response with these steps:</p>
+      <ol>
+        <li>Fetch the provider manifest from <code>/.well-known/opp.json</code>.</li>
+        <li>Extract the public key from <code>provider.publicKey</code>.</li>
+        <li>Remove the <code>proof</code> field from the response object.</li>
+        <li>Canonicalize the remaining JSON using JCS (RFC 8785).</li>
+        <li>Decode <code>proof.proofValue</code> from base64url.</li>
+        <li>Verify the signature against the canonicalized bytes using the Ed25519 public key.</li>
+      </ol>
+
+      <p>If verification fails, the consumer <span class="rfc-keyword">SHOULD</span> treat the response as untrusted. The consumer <span class="rfc-keyword">MAY</span> still use the data but <span class="rfc-keyword">MUST NOT</span> represent it as verified.</p>
+    </section>
+
+    <!-- 10. Federation -->
+    <section id="federation" class="spec-section">
+      <h2><span class="sec-num">10</span> Federation</h2>
+      <p>OPP is designed to work without centralized coordination. Any organization can publish a manifest and serve data. Federation adds an optional layer for discovery across providers.</p>
+
+      <h3>Registries</h3>
+      <p>Providers <span class="rfc-keyword">MAY</span> register with one or more OPP registries. A registry is a service that indexes provider manifests and exposes a search interface.</p>
+
+      <p>Registries <span class="rfc-keyword">SHOULD</span> support search by:</p>
+      <ul>
+        <li><strong>Domain</strong> — Find providers that serve a specific domain (e.g., <code>food-recalls</code>).</li>
+        <li><strong>Entity type</strong> — Find providers that serve a specific entity type (e.g., <code>recall</code>).</li>
+        <li><strong>Geographic scope</strong> — Find providers that cover a specific region (e.g., <code>US</code>, <code>EU</code>).</li>
+      </ul>
+
+      <h3>Authority</h3>
+      <p>No registry is authoritative. Multiple registries <span class="rfc-keyword">MAY</span> index the same provider. Consumers <span class="rfc-keyword">MAY</span> query multiple registries and merge results. When two providers serve the same domain, the consumer decides which to trust based on freshness, conformance level, and verification status.</p>
+
+      <h3>Registry protocol</h3>
+      <p>The registry protocol is not defined in this version of the specification. A future version will specify the registry manifest format, search API, and registration process.</p>
+    </section>
+
+    <!-- 11. Versioning -->
+    <section id="versioning" class="spec-section">
+      <h2><span class="sec-num">11</span> Versioning</h2>
+      <p>OPP uses three distinct version numbers, each tracking a different rate of change.</p>
+
+      <h3>Protocol version</h3>
+      <p>Tracked in <code>manifest.protocolVersion</code>. Uses semantic versioning (semver). The current protocol version is <code>0.1.0</code>.</p>
+      <ul>
+        <li><strong>Patch</strong> (0.1.x) — Clarifications, typo fixes, non-behavioral changes to the spec text.</li>
+        <li><strong>Minor</strong> (0.x.0) — New optional fields added. Existing fields unchanged. Backwards compatible.</li>
+        <li><strong>Major</strong> (x.0.0) — Removed or renamed fields. Changed semantics of existing fields. Not backwards compatible.</li>
+      </ul>
+
+      <h3>Schema version</h3>
+      <p>Tracked per domain in <code>response.version.schema</code>. Each domain defines its own payload structure, and that structure versions independently from the protocol. A provider <span class="rfc-keyword">MAY</span> update a domain schema without changing the protocol version.</p>
+
+      <h3>Data version</h3>
+      <p>Tracked temporally in <code>response.version.data</code>. This represents the vintage of the data, not the structure. A data version of <code>"2026-03-19"</code> means the data reflects the state of the upstream source as of that date.</p>
+
+      <h3>Backwards compatibility</h3>
+      <p>New fields added to the envelope or manifest are always additive and constitute a minor version bump. Consumers <span class="rfc-keyword">MUST</span> ignore fields they do not recognize. Removing a field or changing the type or semantics of an existing field requires a major version bump.</p>
+    </section>
+
+    <!-- 12. Conformance -->
+    <section id="conformance" class="spec-section">
+      <h2><span class="sec-num">12</span> Conformance</h2>
+      <p>OPP defines three conformance levels. Each level builds on the previous one. A provider claims a level by meeting all of its requirements.</p>
+
+      <div class="conformance-grid">
+        <div class="conformance-level">
+          <h4>Level 1: Basic</h4>
+          <p>Provider publishes a valid manifest at <code>/.well-known/opp.json</code>. Every response includes the required envelope fields: <code>domain</code>, <code>source</code>, <code>source_url</code>, <code>freshness</code>, and <code>data</code>.</p>
+        </div>
+        <div class="conformance-level">
+          <h4>Level 2: Cited</h4>
+          <p>All Level 1 requirements, plus every response includes a <code>confidence</code> object and a <code>citations</code> object. Consumers can assess data quality and trace information back to the original source.</p>
+        </div>
+        <div class="conformance-level">
+          <h4>Level 3: Verified</h4>
+          <p>All Level 2 requirements, plus every response includes an Ed25519 <code>proof</code> object. The provider's public key is published in the manifest. Consumers can cryptographically verify that the response has not been altered.</p>
+        </div>
+      </div>
+
+      <h3>Claiming conformance</h3>
+      <p>Providers <span class="rfc-keyword">SHOULD</span> indicate their conformance level in their documentation and <code>llms.txt</code>. There is no certification process. Conformance is self-declared and verifiable by any consumer that checks the manifest and response structure.</p>
+
+      <h3>Partial conformance</h3>
+      <p>A provider that includes <code>proof</code> on some responses but not all <span class="rfc-keyword">MUST NOT</span> claim Level 3. Conformance applies to the provider as a whole, across all domains and endpoints.</p>
+    </section>
+
+    <!-- 13. References -->
+    <section id="references" class="spec-section">
+      <h2><span class="sec-num">13</span> References</h2>
+      <ul class="ref-list">
+        <li>
+          <span class="ref-id">[RFC2119]</span>
+          Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP 14, RFC 2119, March 1997.
+          <a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>
+        </li>
+        <li>
+          <span class="ref-id">[RFC8785]</span>
+          Rundgren, A., Jordan, B., and S. Erdtman, "JSON Canonicalization Scheme (JCS)", RFC 8785, June 2020.
+          <a href="https://www.rfc-editor.org/rfc/rfc8785">https://www.rfc-editor.org/rfc/rfc8785</a>
+        </li>
+        <li>
+          <span class="ref-id">[DI-EDDSA]</span>
+          W3C, "Data Integrity EdDSA Cryptosuites v1.0", W3C Recommendation, 2024.
+          <a href="https://www.w3.org/TR/vc-di-eddsa/">https://www.w3.org/TR/vc-di-eddsa/</a>
+        </li>
+        <li>
+          <span class="ref-id">[VC-2.0]</span>
+          W3C, "Verifiable Credentials Data Model v2.0", W3C Recommendation, 2024.
+          <a href="https://www.w3.org/TR/vc-data-model-2.0/">https://www.w3.org/TR/vc-data-model-2.0/</a>
+        </li>
+        <li>
+          <span class="ref-id">[JSON-LD]</span>
+          W3C, "JSON-LD 1.1", W3C Recommendation, 2020.
+          <a href="https://www.w3.org/TR/json-ld11/">https://www.w3.org/TR/json-ld11/</a>
+        </li>
+        <li>
+          <span class="ref-id">[MCP]</span>
+          Anthropic, "Model Context Protocol Specification", 2024.
+          <a href="https://modelcontextprotocol.io/specification">https://modelcontextprotocol.io/specification</a>
+        </li>
+        <li>
+          <span class="ref-id">[A2A]</span>
+          Google, "Agent-to-Agent Protocol Specification", 2025.
+          <a href="https://a2a-protocol.org/latest/specification/">https://a2a-protocol.org/latest/specification/</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="op-footer">
+      <span class="op-footer-text">OPP v0.1.0 — Draft</span>
+      <span class="op-footer-text">
+        <a href="https://openprimitive.com">Open Primitive</a>
+      </span>
+    </footer>
+
+  </div>
+</body>
+</html>
