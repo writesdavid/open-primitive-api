@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How OPP Compares</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    :root {
+      --bg: #fafaf9;
+      --surface: #ffffff;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-muted: #6b6b6b;
+      --accent: #2563eb;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 3rem 1.5rem;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section {
+      margin-bottom: 3.5rem;
+    }
+
+    .section h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .section p {
+      margin-bottom: 1rem;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .section p.muted {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #f5f5f4;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    td:first-child {
+      font-weight: 500;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .complement {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .complement p {
+      margin-bottom: 0.5rem;
+    }
+
+    .complement p:last-child {
+      margin-bottom: 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+  <a href="/" class="back-link">&larr; Back</a>
+
+  <h1>How OPP compares</h1>
+
+  <!-- OPP vs Raw Federal APIs -->
+  <div class="section">
+    <h2>OPP vs Raw Federal APIs</h2>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Raw Federal API</th>
+          <th>OPP Provider</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Schema consistency</td>
+          <td>Each agency different</td>
+          <td>Standard envelope</td>
+        </tr>
+        <tr>
+          <td>Provenance</td>
+          <td>None</td>
+          <td>Source, freshness, confidence</td>
+        </tr>
+        <tr>
+          <td>Cross-domain</td>
+          <td>Impossible</td>
+          <td>Built-in (safety, location, compare)</td>
+        </tr>
+        <tr>
+          <td>Agent discovery</td>
+          <td>Read agency docs</td>
+          <td>/.well-known/opp.json</td>
+        </tr>
+        <tr>
+          <td>Verification</td>
+          <td>Trust the URL</td>
+          <td>Ed25519 signature</td>
+        </tr>
+        <tr>
+          <td>Citation</td>
+          <td>Build your own</td>
+          <td>Pre-formatted</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- OPP vs us-gov-open-data-mcp -->
+  <div class="section">
+    <h2>OPP vs us-gov-open-data-mcp</h2>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>us-gov-open-data-mcp</th>
+          <th>OPP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tools</td>
+          <td>300+ raw wrappers</td>
+          <td>16 with editorial intelligence</td>
+        </tr>
+        <tr>
+          <td>Protocol spec</td>
+          <td>None</td>
+          <td>RFC-style v0.1.0</td>
+        </tr>
+        <tr>
+          <td>Provenance</td>
+          <td>None</td>
+          <td>Every response</td>
+        </tr>
+        <tr>
+          <td>Signing</td>
+          <td>None</td>
+          <td>Ed25519</td>
+        </tr>
+        <tr>
+          <td>Cross-domain</td>
+          <td>None</td>
+          <td>Safety, location, compare</td>
+        </tr>
+        <tr>
+          <td>Human layer</td>
+          <td>None</td>
+          <td>openprimitive.com</td>
+        </tr>
+        <tr>
+          <td>SDK</td>
+          <td>None</td>
+          <td>JS client + provider + validator</td>
+        </tr>
+        <tr>
+          <td>Python SDK</td>
+          <td>None</td>
+          <td>opp-client + LangChain wrapper</td>
+        </tr>
+        <tr>
+          <td>Natural language</td>
+          <td>None</td>
+          <td>/v1/ask routes to correct domain</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- OPP vs MCP -->
+  <div class="section">
+    <h2>OPP vs MCP</h2>
+    <div class="complement">
+      <p><strong>OPP and MCP are complementary, not competing.</strong></p>
+      <p>MCP defines how agents connect to tools. The plug.</p>
+      <p>OPP defines how data travels between sources and agents. The wire.</p>
+      <p>An OPP provider can also be an MCP server. The OPP-MCP bridge does this automatically.</p>
+    </div>
+  </div>
+
+  <!-- OPP vs A2A -->
+  <div class="section">
+    <h2>OPP vs A2A</h2>
+    <div class="complement">
+      <p><strong>OPP provides the data that A2A agents exchange.</strong></p>
+      <p>A2A defines how agents talk to each other.</p>
+      <p>OPP defines what they talk about: verified data with provenance.</p>
+    </div>
+  </div>
+
+</body>
+</html>

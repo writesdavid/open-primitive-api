@@ -26,6 +26,7 @@ const { handleRegister } = require('./routes/register');
 const { registerProvider, listProviders, searchProviders } = require('./routes/registry');
 const { addQualityGrade } = require('./middleware/quality');
 const { citationMiddleware } = require('./middleware/citations');
+const { freshnessMiddleware, getFreshnessReport } = require('./middleware/freshness');
 const ask = require('./sources/ask');
 const alerts = require('./sources/alerts');
 
@@ -56,6 +57,9 @@ app.use(archiveMiddleware);
 
 // Ed25519 response signing (runs before citations so citations get signed too)
 app.use(signingMiddleware);
+
+// Data freshness tracking on all /v1/* responses
+app.use(freshnessMiddleware);
 
 // Citation injection on all /v1/* responses
 app.use(citationMiddleware);
@@ -232,7 +236,10 @@ app.get('/v1/stats', (req, res) => {
 // ─── STATUS ───
 app.get('/v1/status', (req, res) => {
   getStatus()
-    .then(data => res.json(data))
+    .then(data => {
+      const freshness = getFreshnessReport();
+      res.json({ upstreamHealth: data, freshness });
+    })
     .catch(err => {
       console.error(err);
       res.status(500).json({ error: 'Status check failed' });
