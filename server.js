@@ -25,6 +25,7 @@ const { handleRegister } = require('./routes/register');
 const { registerProvider, listProviders, searchProviders } = require('./routes/registry');
 const { addQualityGrade } = require('./middleware/quality');
 const { getFreshnessReport } = require('./middleware/freshness');
+const { rateLimitMiddleware } = require('./middleware/rate-limit-memory');
 const ask = require('./sources/ask');
 const alerts = require('./sources/alerts');
 
@@ -47,13 +48,8 @@ app.use((req, res, next) => {
 // Agent detection on ALL requests
 app.use(agentDetect);
 
-// Auth passthrough — no Redis on reads
-app.use('/v1', (req, res, next) => {
-  req.apiKey = 'anonymous';
-  req.keyOwner = 'anonymous';
-  req.keyTier = 'free';
-  next();
-});
+// Rate limiting: in-memory for free tier, Redis with 2s timeout for paid
+app.use('/v1', rateLimitMiddleware);
 
 // Single response handler: citations, signing, freshness headers BEFORE send;
 // archive + metering AFTER send (fire-and-forget, 3s Redis timeout)
@@ -190,7 +186,7 @@ app.get('/v1', (req, res) => {
       ask: { endpoint: '/v1/ask?q=', source: 'All', description: 'Natural language query — ask any question, we route to the right domain(s)' },
     },
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
-    rateLimit: '200 requests per hour per key',
+    rateLimit: '500 requests per day (free), higher with API key',
     mcp: 'MCP server available at /mcp or via stdio (node mcp.js)',
   });
 });

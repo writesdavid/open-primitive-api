@@ -1,0 +1,8 @@
+{
+  "name": "opp-check",
+  "version": "1.0.0",
+  "bin": {
+    "opp-check": "./opp-check.js"
+  },
+  "description": "Check OPP protocol compliance for any API"
+}

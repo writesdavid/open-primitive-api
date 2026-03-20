@@ -1,6 +1,7 @@
 {
   "name": "open-primitive-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "mcpName": "io.github.writesdavid/open-primitive",
   "description": "MCP server for 13 federal data domains — flights, cars, food, water, drugs, hospitals, health, nutrition, jobs, demographics, products, SEC, safety",
   "main": "mcp.js",
   "bin": {
