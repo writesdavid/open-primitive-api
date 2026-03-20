@@ -1,8 +1,54 @@
-# Open Primitive API — Complete Documentation
+# Open Primitive Protocol — Complete Documentation
 
-> 13 US federal data domains. One unified REST API. MCP server. A2A agent card.
+> The data layer of the agent internet. 16 US federal data domains, signed responses, cross-domain intelligence. Every response carries provenance, confidence, and citation metadata.
 
 Base URL: https://api.openprimitive.com
+
+
+## The Open Primitive Protocol (OPP)
+
+Open Primitive is the reference implementation of OPP — an open standard for serving government data to AI agents with built-in provenance, confidence scoring, and cryptographic proof.
+
+Any data provider can implement OPP. The spec lives at https://openprimitive.com/protocol.html.
+
+### Protocol Manifest
+
+Every OPP-compliant server publishes a manifest at `/.well-known/opp.json`. The manifest declares:
+- Supported domains
+- Available endpoints
+- Response signing method
+- Data freshness guarantees
+
+### Response Envelope
+
+Every OPP response carries a standard envelope:
+
+```json
+{
+  "domain": "water",
+  "source": "EPA SDWIS",
+  "source_url": "https://enviro.epa.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "confidence": 0.95,
+  "citations": [
+    { "title": "EPA SDWIS Federal Reports", "url": "https://enviro.epa.gov/..." }
+  ],
+  "proof": {
+    "algorithm": "Ed25519",
+    "publicKey": "...",
+    "signature": "..."
+  }
+}
+```
+
+Fields:
+- **domain** — which data domain produced the result
+- **source** — the federal agency or data program name
+- **source_url** — URL of the upstream data source
+- **freshness** — ISO 8601 timestamp of when the data was fetched
+- **confidence** — 0.0 to 1.0 score reflecting data completeness and recency
+- **citations** — array of source references with title and URL
+- **proof** — Ed25519 signature over the response body, verifiable against the public key in the manifest
 
 
 ## Authentication
@@ -21,18 +67,6 @@ Rate limit headers on every response:
 - X-RateLimit-Limit
 - X-RateLimit-Remaining
 - X-RateLimit-Reset
-
-
-## Response Envelope
-
-Every successful response includes these fields:
-
-- domain (string) — which data domain produced the result (e.g. "flights", "cars", "water")
-- source (string) — the federal agency or data source name
-- source_url (string) — URL of the upstream data source
-- freshness (string) — ISO 8601 timestamp of when the data was fetched
-
-Error responses return: { "error": "description of what went wrong" }
 
 
 ---
@@ -111,7 +145,7 @@ Response:
 }
 ```
 
-What the data means: delays come from FAA NAS real-time status. If an airport has an active ground delay program, ground stop, or traffic management initiative, it appears in the delays array. Weather codes follow WMO standard (0 = clear, 61 = rain, 71 = snow, etc.). Precipitation is in millimeters.
+What the data means: delays come from FAA NAS real-time status. If an airport has an active ground delay program, ground stop, or traffic management initiative, it appears in the delays array. Weather codes follow WMO standard (0 = clear, 61 = rain, 71 = snow). Precipitation is in millimeters.
 
 
 ---
@@ -711,7 +745,7 @@ Response:
 {
   "domain": "products",
   "source": "CPSC",
-  "source_url": "https://www.saferproducts.gov/RestWebServices/Recall?format=json&RecallDateStart=2025-12-19",
+  "source_url": "https://www.saferproducts.gov",
   "freshness": "2026-03-19T14:00:00.000Z",
   "total": 5,
   "recalls": [
@@ -822,6 +856,59 @@ What the data means: facts are extracted from 10-K annual filings using US GAAP 
 ---
 
 
+## Domain: Weather
+
+NOAA National Weather Service 7-day forecast by coordinates.
+
+Source: NOAA National Weather Service
+Source URL: https://api.weather.gov
+
+### GET /v1/weather?lat=&lng=
+
+Parameters:
+- lat (query, required) — latitude (e.g. "40.7128")
+- lng (query, required) — longitude (e.g. "-74.0060")
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/weather?lat=40.7128&lng=-74.0060"
+```
+
+Response:
+```json
+{
+  "domain": "weather",
+  "source": "NOAA National Weather Service",
+  "source_url": "https://api.weather.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "forecast": [
+    {
+      "name": "Tonight",
+      "temperature": 42,
+      "temperatureUnit": "F",
+      "windSpeed": "8 mph",
+      "windDirection": "NW",
+      "shortForecast": "Partly Cloudy",
+      "detailedForecast": "Partly cloudy, with a low around 42..."
+    },
+    {
+      "name": "Thursday",
+      "temperature": 58,
+      "temperatureUnit": "F",
+      "windSpeed": "12 mph",
+      "windDirection": "S",
+      "shortForecast": "Sunny",
+      "detailedForecast": "Sunny, with a high near 58..."
+    }
+  ]
+}
+```
+
+What the data means: returns up to 14 periods (7 days, day and night). Temperature is in Fahrenheit. Wind speed includes units. The NWS API covers US locations only.
+
+
+---
+
+
 ## Domain: Safety (Cross-Domain)
 
 Composite safety profile for a US ZIP code combining water quality and hospital ratings.
@@ -869,11 +956,151 @@ What the data means: safetyScore is 0-100 (100 = best). Water component is 50 po
 ---
 
 
+## Cross-Domain Intelligence Endpoints
+
+These endpoints combine data from multiple federal sources into unified responses. They represent the core value of OPP — structured intelligence that spans agency boundaries.
+
+
+### POST /v1/ask
+
+Natural language query routed to the right federal data domain. Send a question in plain English; the API identifies which domain to query, fetches the data, and returns a structured answer.
+
+Parameters (JSON body):
+- q (string, required) — natural language question
+
+```
+curl -X POST -H "X-API-Key: YOUR_KEY" -H "Content-Type: application/json" \
+  -d '{"q": "Is the tap water safe in Detroit?"}' \
+  https://api.openprimitive.com/v1/ask
+```
+
+Response:
+```json
+{
+  "domain": "water",
+  "source": "EPA SDWIS",
+  "source_url": "https://enviro.epa.gov",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "query": "Is the tap water safe in Detroit?",
+  "routed_to": "water",
+  "data": { ... }
+}
+```
+
+The router matches keywords in your question to the 16 data domains. It handles queries like "What are the side effects of metformin?", "Any food recalls this week?", "How safe is ZIP 90210?", and "What's the unemployment rate?"
+
+
+### GET /v1/alerts
+
+Active federal alerts across food recalls and consumer product recalls. Surfaces Class I food recalls from FDA and active product hazards from CPSC.
+
+No parameters required.
+
+```
+curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/alerts
+```
+
+Response:
+```json
+{
+  "domain": "alerts",
+  "source": "FDA + CPSC",
+  "source_url": "https://api.openprimitive.com/v1/alerts",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "alerts": [
+    {
+      "domain": "food",
+      "severity": "Class I",
+      "product": "Organic Peanut Butter",
+      "reason": "Salmonella contamination",
+      "date": "20260301"
+    },
+    {
+      "domain": "products",
+      "severity": "high",
+      "product": "Portable Space Heater",
+      "hazards": ["Fire", "Burn"],
+      "recallDate": "2026-02-15"
+    }
+  ]
+}
+```
+
+
+### GET /v1/location?zip=
+
+Full location profile combining demographics, safety score, water systems, and nearby hospitals for a single ZIP code.
+
+Parameters:
+- zip (query, required) — 5-digit US ZIP code
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/location?zip=48201"
+```
+
+Response:
+```json
+{
+  "domain": "location",
+  "source": "Census + EPA + CMS",
+  "source_url": "https://api.openprimitive.com",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "zip": "48201",
+  "summary": "ZIP 48201, population 670,000, median income $31,283, safety score 65/100",
+  "demographics": {
+    "population": 670000,
+    "medianIncome": 31283,
+    "povertyRate": 35.1,
+    "collegeRate": 14.2
+  },
+  "safety": {
+    "safetyScore": 65,
+    "water": { "healthViolations": 2, "worstContaminants": ["LEAD"] },
+    "hospitals": { "averageRating": 3.5 }
+  }
+}
+```
+
+
+### GET /v1/compare?zip1=&zip2=
+
+Side-by-side comparison of two US ZIP codes across demographics, safety, and quality of life metrics.
+
+Parameters:
+- zip1 (query, required) — first 5-digit US ZIP code
+- zip2 (query, required) — second 5-digit US ZIP code
+
+```
+curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/compare?zip1=48201&zip2=90210"
+```
+
+Response:
+```json
+{
+  "domain": "compare",
+  "source": "Census + EPA + CMS",
+  "source_url": "https://api.openprimitive.com",
+  "freshness": "2026-03-19T14:00:00.000Z",
+  "zip1": "48201",
+  "zip2": "90210",
+  "comparison": {
+    "population": { "48201": 670000, "90210": 21741 },
+    "medianIncome": { "48201": 31283, "90210": 153146, "winner": "90210" },
+    "safetyScore": { "48201": 65, "90210": 88, "winner": "90210" }
+  },
+  "summary": "90210 has higher income ($153,146 vs $31,283) and a better safety score (88 vs 65)."
+}
+```
+
+
+---
+
+
 ## System Endpoints
 
 ### GET /v1
 
-Returns the API index — all 13 domains with endpoint paths, sources, and descriptions.
+Returns the API index — all domains with endpoint paths, sources, and descriptions.
 
 ```
 curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1
@@ -885,24 +1112,6 @@ Public endpoint (no auth required). Returns real-time traffic analytics: agent v
 
 ```
 curl https://api.openprimitive.com/v1/stats
-```
-
-Response:
-```json
-{
-  "agentPercent": 72,
-  "total": 1543,
-  "agent": 1111,
-  "human": 432,
-  "agents": [
-    { "name": "Claude", "count": 502 },
-    { "name": "GPT-4", "count": 321 }
-  ],
-  "endpoints": [
-    { "name": "/v1/drugs", "count": 245, "agent": 198, "human": 47 }
-  ],
-  "upSince": "2026-03-19T00:00:00.000Z"
-}
 ```
 
 ### GET /ping
@@ -927,7 +1136,7 @@ Open Primitive runs as a Model Context Protocol server for direct tool use by LL
 node mcp.js
 ```
 
-The MCP server exposes 13 tools:
+The MCP server exposes 18 tools:
 
 | Tool Name | Description |
 |-----------|-------------|
@@ -944,6 +1153,11 @@ The MCP server exposes 13 tools:
 | get-product-recalls | CPSC recalls. Optional param: query |
 | get-sec-filings | SEC EDGAR. Optional params: query or cik |
 | get-safety-profile | Cross-domain safety. Param: zip (required) |
+| ask | Natural language query router. Param: q (required) |
+| get-alerts | Active federal alerts. No params. |
+| get-location | Location profile. Param: zip (required) |
+| compare-zips | ZIP comparison. Params: zip1, zip2 (required) |
+| get-weather | NOAA forecast. Params: lat, lng (required) |
 
 Each tool returns JSON wrapped in MCP text content format.
 
@@ -959,7 +1173,21 @@ The A2A (Agent-to-Agent) discovery card is at:
 https://api.openprimitive.com/.well-known/agent-card.json
 ```
 
-The card follows the A2A protocol spec and lists 13 skills corresponding to the 13 data domains. Agents can discover Open Primitive's capabilities by fetching this URL.
+The card follows the A2A protocol spec and lists all skills corresponding to the data domains and cross-domain endpoints. Agents can discover Open Primitive's capabilities by fetching this URL.
+
+
+---
+
+
+## OPP Protocol Summary
+
+The Open Primitive Protocol defines three requirements for any compliant data server:
+
+1. **Manifest** — Publish `/.well-known/opp.json` declaring your domains, endpoints, and signing key.
+2. **Envelope** — Every response carries domain, source, freshness, confidence, citations, and a cryptographic proof field.
+3. **Signing** — Response bodies are signed with Ed25519. Consumers verify the signature against the public key in the manifest.
+
+OPP is open. Any organization serving structured data can publish a manifest and start signing responses. The spec is at https://openprimitive.com/protocol.html.
 
 
 ---
@@ -984,6 +1212,10 @@ Domain-specific errors (returned as 400):
 - Nutrition: "query is required" or "fdcId is required"
 - Food: "query is required" (search only)
 - Demographics: throws on invalid ZIP
+- Weather: "lat and lng are required"
+- Ask: "q is required"
+- Compare: "zip1 and zip2 are required"
+- Location: "Valid 5-digit ZIP code required"
 
 
 ---
@@ -1013,4 +1245,9 @@ All endpoints return `Access-Control-Allow-Origin: *` and `Access-Control-Allow-
 | Demographics | Census Bureau | American Community Survey |
 | Products | CPSC | SaferProducts.gov |
 | SEC | SEC | EDGAR |
+| Weather | NOAA | National Weather Service |
 | Safety | EPA + CMS | Composite (Water + Hospitals) |
+| Location | Census + EPA + CMS | Composite (Demographics + Safety) |
+| Compare | Census + EPA + CMS | Composite (ZIP Comparison) |
+| Alerts | FDA + CPSC | Composite (Food + Product Recalls) |
+| Ask | All domains | Natural Language Router |

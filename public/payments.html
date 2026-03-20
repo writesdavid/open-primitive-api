@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPP Payments — Protocol-Level Monetization</title>
+  <meta name="description" content="How the Open Primitive Protocol handles payments. Three modes: free, x402 micropayments, and subscription. Payment is part of the spec, not bolted on.">
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #e0e0e0;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: #c04010; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: #888;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 64px;
+    }
+    .section h2 {
+      font-size: 1.5rem;
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+    }
+    .section h3 {
+      font-size: 1.1rem;
+      color: #c04010;
+      font-weight: 600;
+      margin-bottom: 8px;
+      margin-top: 28px;
+    }
+    .section p {
+      color: #aaa;
+      margin-bottom: 12px;
+    }
+    .section p strong {
+      color: #e0e0e0;
+    }
+
+    /* Mode cards */
+    .modes {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .mode {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 28px 24px;
+      transition: border-color 0.2s;
+    }
+    .mode:hover { border-color: #333; }
+    .mode-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c04010;
+      margin-bottom: 8px;
+    }
+    .mode h3 {
+      font-size: 1.2rem;
+      color: #fff;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+    }
+    .mode p {
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .mode code {
+      background: #1a1a1a;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+      margin: 16px 0;
+    }
+    pre .comment { color: #555; }
+    pre .key { color: #c04010; }
+    pre .string { color: #7ec; }
+    pre .number { color: #f9a; }
+
+    /* Flow steps */
+    .flow {
+      margin-top: 20px;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+      align-items: start;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #c04010;
+      flex-shrink: 0;
+    }
+    .step-content h4 {
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .step-content p {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    .step-content pre {
+      margin-top: 8px;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid #1a1a1a;
+      padding: 40px 0;
+      text-align: center;
+      color: #555;
+      font-size: 0.85rem;
+      margin-top: 40px;
+    }
+    .footer a { color: #888; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero { padding: 60px 0 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <div class="hero">
+      <h1>OPP Payments</h1>
+      <p>Protocol-level monetization. Payment is part of the spec, not bolted on.</p>
+    </div>
+
+    <!-- SECTION 1: THE MODEL -->
+    <div class="section">
+      <h2>The Model</h2>
+      <p>OPP supports three payment modes. Providers declare their mode in the manifest.</p>
+
+      <div class="modes">
+
+        <div class="mode">
+          <div class="mode-label">Mode 1</div>
+          <h3>Free</h3>
+          <p>Public domain data. No payment required.</p>
+          <p><code>manifest.authentication.type = "none"</code> or <code>"api-key"</code> with free registration.</p>
+          <p>Used for government data, open datasets, public records. The default for most OPP providers today.</p>
+        </div>
+
+        <div class="mode">
+          <div class="mode-label">Mode 2</div>
+          <h3>x402 Micropayments</h3>
+          <p>Per-request payment. The agent pays for each call.</p>
+          <p><code>manifest.authentication.type = "x402"</code></p>
+          <p><code>manifest.pricing = { currency: "USDC", perRequest: "0.005" }</code></p>
+          <p><strong>Flow:</strong> Agent sends GET. Server returns 402 with x402 headers. Agent signs payment. Server delivers data.</p>
+          <p><strong>Settlement:</strong> USDC on Base. About 200ms.</p>
+        </div>
+
+        <div class="mode">
+          <div class="mode-label">Mode 3</div>
+          <h3>Subscription</h3>
+          <p>Enterprise access. API key with paid tiers.</p>
+          <p><code>manifest.authentication.type = "api-key"</code> with paid tiers.</p>
+          <p><code>manifest.pricing = { tiers: [{ name: "free", limit: 500 }, { name: "pro", price: 99, limit: 100000 }] }</code></p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 2: MANIFEST PRICING FIELDS -->
+    <div class="section">
+      <h2>Manifest Pricing Fields</h2>
+      <p>Providers declare pricing in <code>opp.json</code>. Agents read this before making a single request.</p>
+
+<pre>{
+  <span class="key">"pricing"</span>: {
+    <span class="key">"model"</span>: <span class="string">"free"</span> | <span class="string">"x402"</span> | <span class="string">"subscription"</span> | <span class="string">"hybrid"</span>,
+    <span class="key">"currency"</span>: <span class="string">"USDC"</span>,
+    <span class="key">"perRequest"</span>: <span class="string">"0.005"</span>,
+    <span class="key">"freeLimit"</span>: <span class="number">500</span>,
+    <span class="key">"tiers"</span>: [
+      { <span class="key">"name"</span>: <span class="string">"free"</span>, <span class="key">"limit"</span>: <span class="number">500</span> },
+      { <span class="key">"name"</span>: <span class="string">"pro"</span>, <span class="key">"price"</span>: <span class="number">99</span>, <span class="key">"limit"</span>: <span class="number">100000</span> }
+    ]
+  }
+}</pre>
+
+      <p>The <code>model</code> field tells agents what to expect. <code>"hybrid"</code> means the provider offers a free tier and x402 for overages.</p>
+    </div>
+
+    <!-- SECTION 3: x402 FLOW -->
+    <div class="section">
+      <h2>x402 Flow</h2>
+      <p>Four HTTP exchanges. No redirects, no OAuth, no token refresh.</p>
+
+      <div class="flow">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Agent sends a standard request</h4>
+<pre>GET /v1/drugs?name=aspirin HTTP/1.1
+Host: api.openprimitive.com
+Accept: application/json</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Server returns 402 Payment Required</h4>
+<pre>HTTP/1.1 402 Payment Required
+X-Payment-Required: true
+X-Payment-Amount: 0.005
+X-Payment-Currency: USDC
+X-Payment-Network: base
+X-Payment-Address: 0x1a2b3c...provider-wallet
+X-Payment-Scheme: exact</pre>
+            <p>The agent now knows the price, currency, network, and destination. All machine-readable.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Agent signs and retries</h4>
+<pre>GET /v1/drugs?name=aspirin HTTP/1.1
+Host: api.openprimitive.com
+Accept: application/json
+X-PAYMENT: eyJwYXlsb2FkIjp7InR... <span class="comment">// signed USDC transfer</span></pre>
+            <p>The <code>X-PAYMENT</code> header contains a signed EIP-712 message authorizing the USDC transfer on Base.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Server verifies, settles, delivers</h4>
+<pre>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  <span class="key">"data"</span>: { ... },
+  <span class="key">"source"</span>: { <span class="key">"agency"</span>: <span class="string">"FDA"</span>, <span class="key">"url"</span>: <span class="string">"https://api.fda.gov/..."</span> },
+  <span class="key">"freshness"</span>: { <span class="key">"retrieved"</span>: <span class="string">"2026-03-19T14:00:00Z"</span> },
+  <span class="key">"payment"</span>: { <span class="key">"settled"</span>: <span class="number">true</span>, <span class="key">"txHash"</span>: <span class="string">"0xabc..."</span> }
+}</pre>
+            <p>Standard OPP envelope. The <code>payment</code> field confirms settlement.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 4: WHY PROTOCOL-LEVEL PAYMENTS -->
+    <div class="section">
+      <h2>Why Protocol-Level Payments</h2>
+      <p>When payment is part of the protocol, agents can programmatically discover price, evaluate cost vs value, and pay without human intervention.</p>
+      <p>An agent planning a research task reads 40 OPP manifests. 12 are free. 28 charge between $0.001 and $0.05 per request. The agent calculates total cost, compares it to its budget, and executes. No signup forms. No credit card entry. No approval workflow.</p>
+      <p>This is how the agent economy works. Price is metadata. Payment is a header. Data flows.</p>
+    </div>
+
+    <!-- SECTION 5: FOR PROVIDERS -->
+    <div class="section">
+      <h2>For Providers</h2>
+      <p>Add pricing to your manifest. If you use x402, install the <code>@x402/server</code> package. OPP handles discovery. x402 handles payment. You handle data.</p>
+
+<pre><span class="comment">// server.js — add x402 middleware</span>
+const { x402 } = require(<span class="string">'@x402/server'</span>);
+
+app.use(<span class="string">'/v1'</span>, x402({
+  payTo: <span class="string">'0x1a2b3c...your-wallet'</span>,
+  amount: <span class="string">'0.005'</span>,
+  currency: <span class="string">'USDC'</span>,
+  network: <span class="string">'base'</span>
+}));
+
+app.get(<span class="string">'/v1/your-data'</span>, (req, res) => {
+  <span class="comment">// Payment already verified by middleware</span>
+  res.json({ data: fetchYourData() });
+});</pre>
+
+      <p>Three steps. Declare pricing in <code>opp.json</code>. Add the middleware. Ship.</p>
+    </div>
+
+    <div class="footer">
+      <a href="/">Open Primitive API</a> &middot; <a href="https://openprimitive.com">openprimitive.com</a>
+    </div>
+
+  </div>
+</body>
+</html>

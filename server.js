@@ -23,6 +23,7 @@ const location = require('./sources/location');
 const compare = require('./sources/compare');
 const { getStatus } = require('./routes/status');
 const { handleRegister } = require('./routes/register');
+const { registerProvider, listProviders, searchProviders } = require('./routes/registry');
 const { addQualityGrade } = require('./middleware/quality');
 const { citationMiddleware } = require('./middleware/citations');
 const ask = require('./sources/ask');
@@ -158,6 +159,11 @@ app.get('/v1/alerts', (req, res) => wrap(res, alerts.getAlertFeed()));
 
 // ─── REGISTER (self-service API key) ───
 app.post('/v1/register', handleRegister);
+
+// ─── REGISTRY (provider discovery) ───
+app.post('/v1/registry/register', registerProvider);
+app.get('/v1/registry/search', searchProviders);
+app.get('/v1/registry', listProviders);
 
 // ─── META ───
 app.get('/v1', (req, res) => {

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPP Conformance — Live Validation</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'IBM Plex Mono', 'SF Mono', 'Menlo', monospace;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #c04010;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Overall result banner */
+    .result-banner {
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .result-banner.pass {
+      border-color: #2d6a2d;
+      background: rgba(45, 106, 45, 0.08);
+    }
+
+    .result-banner.fail {
+      border-color: #6a2d2d;
+      background: rgba(106, 45, 45, 0.08);
+    }
+
+    .result-banner.pending {
+      border-color: #444;
+      background: rgba(60, 60, 60, 0.08);
+    }
+
+    .result-text {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .result-banner.pass .result-text { color: #4caf50; }
+    .result-banner.fail .result-text { color: #e05050; }
+    .result-banner.pending .result-text { color: #888; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-level3 {
+      background: #2d6a2d;
+      color: #4caf50;
+    }
+
+    .badge-fail {
+      background: #6a2d2d;
+      color: #e05050;
+    }
+
+    .timestamp {
+      color: #666;
+      font-size: 0.75rem;
+      width: 100%;
+      text-align: right;
+    }
+
+    /* Cards */
+    .card {
+      border: 1px solid #222;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: #111;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #222;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #e0e0e0;
+    }
+
+    .card-endpoint {
+      font-size: 0.75rem;
+      color: #888;
+      font-family: inherit;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .card-status {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+    }
+
+    .card-status.pass { background: #2d6a2d; color: #4caf50; }
+    .card-status.fail { background: #6a2d2d; color: #e05050; }
+    .card-status.loading { background: #333; color: #888; }
+
+    /* Check rows */
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 0.85rem;
+    }
+
+    .check-row:last-child { border-bottom: none; }
+
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .check-icon.pass { color: #4caf50; }
+    .check-icon.fail { color: #e05050; }
+    .check-icon.pending { color: #555; }
+
+    .check-label { color: #bbb; }
+    .check-value {
+      margin-left: auto;
+      color: #888;
+      font-size: 0.75rem;
+      text-align: right;
+      max-width: 50%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Quoted text blocks */
+    .quote-block {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #111;
+      border-left: 3px solid #c04010;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.8rem;
+      color: #bbb;
+      line-height: 1.5;
+    }
+
+    .quote-block .label {
+      color: #666;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.4rem;
+    }
+
+    .quote-block + .quote-block { margin-top: 0.5rem; }
+
+    /* Response preview */
+    .response-preview {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #0d0d0d;
+      border: 1px solid #1a1a1a;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: #666;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .refresh-note {
+      text-align: center;
+      color: #444;
+      font-size: 0.7rem;
+      margin-top: 2rem;
+      padding-bottom: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      h1 { font-size: 1.3rem; }
+      .result-banner { padding: 1rem; }
+      .card-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .check-value { max-width: 40%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OPP Conformance — Live Validation</h1>
+    <p class="subtitle">Real API calls against a live OPP implementation. No mocks.</p>
+
+    <div id="result-banner" class="result-banner pending">
+      <span class="result-text" id="result-text">Running validation...</span>
+      <span class="badge" id="result-badge" style="display:none"></span>
+      <span class="timestamp" id="result-timestamp"></span>
+    </div>
+
+    <!-- Card 1: Manifest -->
+    <div class="card" id="card-manifest">
+      <div class="card-header">
+        <span class="card-title">Manifest Discovery</span>
+        <span class="card-endpoint">GET /.well-known/opp.json</span>
+        <span class="card-status loading" id="status-manifest">RUNNING</span>
+      </div>
+      <div class="card-body" id="body-manifest">
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-manifest-fetch">-</span>
+          <span class="check-label">Manifest fetched successfully</span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-manifest-name">-</span>
+          <span class="check-label">provider.name present</span>
+          <span class="check-value" id="val-manifest-name"></span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-manifest-proto">-</span>
+          <span class="check-label">protocol field present</span>
+          <span class="check-value" id="val-manifest-proto"></span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-manifest-endpoints">-</span>
+          <span class="check-label">endpoints array present</span>
+          <span class="check-value" id="val-manifest-endpoints"></span>
+        </div>
+        <div id="preview-manifest" class="response-preview" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Card 2: Structured Query -->
+    <div class="card" id="card-drugs">
+      <div class="card-header">
+        <span class="card-title">Structured Query + Provenance</span>
+        <span class="card-endpoint">GET /v1/drugs?name=aspirin</span>
+        <span class="card-status loading" id="status-drugs">RUNNING</span>
+      </div>
+      <div class="card-body" id="body-drugs">
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-drugs-domain">-</span>
+          <span class="check-label">domain field present</span>
+          <span class="check-value" id="val-drugs-domain"></span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-drugs-source">-</span>
+          <span class="check-label">source field present</span>
+          <span class="check-value" id="val-drugs-source"></span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-drugs-freshness">-</span>
+          <span class="check-label">freshness is valid ISO 8601</span>
+          <span class="check-value" id="val-drugs-freshness"></span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-drugs-confidence">-</span>
+          <span class="check-label">confidence object present</span>
+          <span class="check-value" id="val-drugs-confidence"></span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-drugs-citation">-</span>
+          <span class="check-label">citations.statement present</span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-drugs-proof">-</span>
+          <span class="check-label">proof.type = "DataIntegrityProof"</span>
+          <span class="check-value" id="val-drugs-proof"></span>
+        </div>
+        <div id="quote-citation" class="quote-block" style="display:none">
+          <div class="label">Citation Statement</div>
+          <div id="text-citation"></div>
+        </div>
+        <div id="quote-confidence" class="quote-block" style="display:none">
+          <div class="label">Confidence Note</div>
+          <div id="text-confidence"></div>
+        </div>
+        <div id="preview-drugs" class="response-preview" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Card 3: Natural Language Routing -->
+    <div class="card" id="card-ask">
+      <div class="card-header">
+        <span class="card-title">Natural Language Routing</span>
+        <span class="card-endpoint">GET /v1/ask?q=is+the+water+safe+in+10001</span>
+        <span class="card-status loading" id="status-ask">RUNNING</span>
+      </div>
+      <div class="card-body" id="body-ask">
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-ask-fetch">-</span>
+          <span class="check-label">Response returned successfully</span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-ask-routed">-</span>
+          <span class="check-label">Query routed to a domain</span>
+          <span class="check-value" id="val-ask-domain"></span>
+        </div>
+        <div class="check-row">
+          <span class="check-icon pending" id="icon-ask-answer">-</span>
+          <span class="check-label">Answer field present</span>
+        </div>
+        <div id="preview-ask" class="response-preview" style="display:none"></div>
+      </div>
+    </div>
+
+    <p class="refresh-note">Auto-refreshes every 60 seconds</p>
+  </div>
+
+  <script>
+    const BASE = '';
+
+    function setCheck(id, passed) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = 'check-icon ' + (passed ? 'pass' : 'fail');
+      el.textContent = passed ? '\u2713' : '\u2717';
+    }
+
+    function setStatus(id, passed) {
+      const el = document.getElementById(id);
+      el.className = 'card-status ' + (passed ? 'pass' : 'fail');
+      el.textContent = passed ? 'PASS' : 'FAIL';
+    }
+
+    function showPreview(id, data) {
+      const el = document.getElementById(id);
+      el.style.display = 'block';
+      el.textContent = JSON.stringify(data, null, 2);
+    }
+
+    function isISO8601(str) {
+      if (!str || typeof str !== 'string') return false;
+      const d = new Date(str);
+      return !isNaN(d.getTime()) && /\d{4}-\d{2}-\d{2}/.test(str);
+    }
+
+    function dig(obj, path) {
+      const keys = path.split('.');
+      let cur = obj;
+      for (const k of keys) {
+        if (cur == null || typeof cur !== 'object') return undefined;
+        cur = cur[k];
+      }
+      return cur;
+    }
+
+    async function runValidation() {
+      let totalChecks = 0;
+      let passedChecks = 0;
+
+      function track(id, passed) {
+        totalChecks++;
+        if (passed) passedChecks++;
+        setCheck(id, passed);
+      }
+
+      // 1. Manifest
+      try {
+        const res = await fetch(BASE + '/.well-known/opp.json');
+        const data = await res.json();
+        const ok = res.ok;
+
+        track('icon-manifest-fetch', ok);
+
+        const name = dig(data, 'provider.name');
+        track('icon-manifest-name', !!name);
+        document.getElementById('val-manifest-name').textContent = name || '-';
+
+        const proto = data.protocol;
+        track('icon-manifest-proto', !!proto);
+        document.getElementById('val-manifest-proto').textContent = proto || '-';
+
+        const endpoints = data.endpoints;
+        const hasEndpoints = Array.isArray(endpoints) && endpoints.length > 0;
+        track('icon-manifest-endpoints', hasEndpoints);
+        document.getElementById('val-manifest-endpoints').textContent = hasEndpoints ? endpoints.length + ' endpoints' : '-';
+
+        showPreview('preview-manifest', data);
+        setStatus('status-manifest', ok && !!name && !!proto && hasEndpoints);
+      } catch (e) {
+        track('icon-manifest-fetch', false);
+        track('icon-manifest-name', false);
+        track('icon-manifest-proto', false);
+        track('icon-manifest-endpoints', false);
+        setStatus('status-manifest', false);
+      }
+
+      // 2. Drugs
+      try {
+        const res = await fetch(BASE + '/v1/drugs?name=aspirin');
+        const data = await res.json();
+        let cardPass = true;
+
+        const domain = data.domain;
+        track('icon-drugs-domain', !!domain);
+        document.getElementById('val-drugs-domain').textContent = domain || '-';
+        if (!domain) cardPass = false;
+
+        const source = data.source;
+        track('icon-drugs-source', !!source);
+        document.getElementById('val-drugs-source').textContent = typeof source === 'string' ? source.substring(0, 40) : '-';
+        if (!source) cardPass = false;
+
+        const freshness = data.freshness;
+        const freshValid = isISO8601(freshness);
+        track('icon-drugs-freshness', freshValid);
+        document.getElementById('val-drugs-freshness').textContent = freshness || '-';
+        if (!freshValid) cardPass = false;
+
+        const confidence = data.confidence;
+        const hasConf = !!confidence && typeof confidence === 'object';
+        track('icon-drugs-confidence', hasConf);
+        document.getElementById('val-drugs-confidence').textContent = hasConf ? 'level: ' + (confidence.level || '-') : '-';
+        if (!hasConf) cardPass = false;
+
+        const citation = dig(data, 'citations.statement') || dig(data, 'citations.0.statement');
+        track('icon-drugs-citation', !!citation);
+        if (citation) {
+          document.getElementById('quote-citation').style.display = 'block';
+          document.getElementById('text-citation').textContent = citation;
+        }
+        if (!citation) cardPass = false;
+
+        const proofType = dig(data, 'proof.type');
+        const proofOk = proofType === 'DataIntegrityProof';
+        track('icon-drugs-proof', proofOk);
+        document.getElementById('val-drugs-proof').textContent = proofType || '-';
+        if (!proofOk) cardPass = false;
+
+        if (hasConf && confidence.note) {
+          document.getElementById('quote-confidence').style.display = 'block';
+          document.getElementById('text-confidence').textContent = confidence.note;
+        }
+
+        showPreview('preview-drugs', data);
+        setStatus('status-drugs', cardPass);
+      } catch (e) {
+        ['icon-drugs-domain','icon-drugs-source','icon-drugs-freshness','icon-drugs-confidence','icon-drugs-citation','icon-drugs-proof'].forEach(id => track(id, false));
+        setStatus('status-drugs', false);
+      }
+
+      // 3. Ask
+      try {
+        const res = await fetch(BASE + '/v1/ask?q=is+the+water+safe+in+10001');
+        const data = await res.json();
+        const ok = res.ok;
+
+        track('icon-ask-fetch', ok);
+
+        const domain = data.domain || data.routed_to;
+        track('icon-ask-routed', !!domain);
+        document.getElementById('val-ask-domain').textContent = domain || '-';
+
+        const answer = data.answer || data.summary || data.result;
+        track('icon-ask-answer', !!answer);
+
+        showPreview('preview-ask', data);
+        setStatus('status-ask', ok && !!domain && !!answer);
+      } catch (e) {
+        track('icon-ask-fetch', false);
+        track('icon-ask-routed', false);
+        track('icon-ask-answer', false);
+        setStatus('status-ask', false);
+      }
+
+      // Overall
+      const banner = document.getElementById('result-banner');
+      const text = document.getElementById('result-text');
+      const badge = document.getElementById('result-badge');
+      const allPassed = passedChecks === totalChecks;
+
+      banner.className = 'result-banner ' + (allPassed ? 'pass' : 'fail');
+      text.textContent = allPassed
+        ? 'This provider is OPP Level 3 compliant'
+        : passedChecks + ' of ' + totalChecks + ' checks passed';
+      badge.style.display = 'inline-block';
+      badge.className = 'badge ' + (allPassed ? 'badge-level3' : 'badge-fail');
+      badge.textContent = allPassed ? 'Level 3 (Verified)' : 'NOT CONFORMANT';
+
+      document.getElementById('result-timestamp').textContent = 'Validated ' + new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+    }
+
+    runValidation();
+    setInterval(runValidation, 60000);
+  </script>
+</body>
+</html>

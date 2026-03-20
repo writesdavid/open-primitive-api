@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPP Validator — Open Primitive</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'IBM Plex Mono', 'SF Mono', 'Menlo', monospace;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 2rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-row input {
+      flex: 1;
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 0.7rem 1rem;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      outline: none;
+    }
+
+    .input-row input:focus {
+      border-color: #555;
+    }
+
+    .input-row button {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 0.7rem 1.5rem;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .input-row button:hover {
+      background: #222;
+      border-color: #555;
+    }
+
+    .input-row button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Result banner */
+    .result-banner {
+      padding: 1rem;
+      border: 1px solid #222;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .result-banner.show { display: flex; }
+    .result-banner.level-0 { border-color: #5a2222; }
+    .result-banner.level-1 { border-color: #3a3a1a; }
+    .result-banner.level-2 { border-color: #1a3a2a; }
+    .result-banner.level-3 { border-color: #1a3a1a; }
+
+    .result-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .level-0 .result-dot { background: #cc4444; }
+    .level-1 .result-dot { background: #ccaa44; }
+    .level-2 .result-dot { background: #44aa88; }
+    .level-3 .result-dot { background: #44cc44; }
+
+    .result-text {
+      font-size: 0.95rem;
+    }
+
+    .result-meta {
+      font-size: 0.8rem;
+      color: #888;
+      margin-left: auto;
+    }
+
+    /* Checks */
+    .level-group {
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+
+    .level-group.show { display: block; }
+
+    .level-heading {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #aaa;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid #151515;
+      font-size: 0.85rem;
+    }
+
+    .check-icon {
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .check-icon.pass { color: #44cc44; }
+    .check-icon.fail { color: #cc4444; }
+
+    .check-name {
+      color: #ccc;
+    }
+
+    .check-detail {
+      margin-left: auto;
+      color: #666;
+      font-size: 0.75rem;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .spinner {
+      display: none;
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .spinner.show { display: block; }
+
+    a { color: #888; }
+    a:hover { color: #ccc; }
+
+    .footer {
+      margin-top: 3rem;
+      font-size: 0.75rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OPP Validator</h1>
+    <p class="subtitle">Check whether an endpoint conforms to the Open Primitive Protocol.</p>
+
+    <div class="input-row">
+      <input type="url" id="url-input" placeholder="https://api.openprimitive.com" spellcheck="false" />
+      <button id="run-btn" onclick="runValidation()">Validate</button>
+    </div>
+
+    <div class="spinner" id="spinner">Running checks...</div>
+
+    <div class="result-banner" id="result-banner">
+      <div class="result-dot"></div>
+      <span class="result-text" id="result-text"></span>
+      <span class="result-meta" id="result-meta"></span>
+    </div>
+
+    <div class="level-group" id="level1-group">
+      <div class="level-heading">Level 1 — Basic</div>
+      <div id="level1-checks"></div>
+    </div>
+
+    <div class="level-group" id="level2-group">
+      <div class="level-heading">Level 2 — Cited</div>
+      <div id="level2-checks"></div>
+    </div>
+
+    <div class="level-group" id="level3-group">
+      <div class="level-heading">Level 3 — Verified</div>
+      <div id="level3-checks"></div>
+    </div>
+
+    <div class="footer">
+      <a href="/">Open Primitive</a>
+    </div>
+  </div>
+
+  <script>
+    const LEVEL1_CHECKS = [
+      'manifest_exists', 'manifest_valid_json', 'manifest_has_context',
+      'manifest_has_name', 'manifest_has_provider', 'manifest_has_domains',
+      'manifest_has_endpoints', 'domains_have_required_fields',
+      'query_returns_json', 'response_has_domain', 'response_has_source',
+      'response_has_source_url', 'response_has_freshness',
+      'freshness_is_iso8601', 'source_url_is_valid'
+    ];
+
+    const LEVEL2_CHECKS = [
+      'response_has_confidence', 'confidence_has_completeness',
+      'response_has_citations', 'citations_has_statement'
+    ];
+
+    const LEVEL3_CHECKS = [
+      'manifest_has_public_key', 'response_has_proof', 'proof_has_type',
+      'proof_has_cryptosuite', 'proof_has_proof_value', 'signature_valid'
+    ];
+
+    // -----------------------------------------------------------------------
+    // Helpers
+    // -----------------------------------------------------------------------
+
+    function isValidURL(s) {
+      try { new URL(s); return true; } catch (_) { return false; }
+    }
+
+    function isISO8601(s) {
+      if (typeof s !== 'string') return false;
+      const d = new Date(s);
+      return !isNaN(d.getTime()) && /\d{4}-\d{2}-\d{2}/.test(s);
+    }
+
+    async function fetchJSON(url) {
+      const res = await fetch(url);
+      const text = await res.text();
+      return { status: res.status, body: text };
+    }
+
+    function ck(name, passed, detail) {
+      return { name, passed: !!passed, detail: detail || null };
+    }
+
+    // -----------------------------------------------------------------------
+    // Validation logic (mirrors server-side validator)
+    // -----------------------------------------------------------------------
+
+    async function validate(baseURL) {
+      const allChecks = [];
+      let manifest = null;
+      let queryResponse = null;
+
+      const base = baseURL.replace(/\/+$/, '');
+
+      // -- Level 1 --
+      let manifestRaw;
+      try {
+        manifestRaw = await fetchJSON(base + '/.well-known/opp.json');
+        allChecks.push(ck('manifest_exists', manifestRaw.status === 200,
+          manifestRaw.status === 200 ? null : 'HTTP ' + manifestRaw.status));
+      } catch (e) {
+        allChecks.push(ck('manifest_exists', false, e.message));
+        return finish(baseURL, allChecks);
+      }
+
+      try {
+        manifest = JSON.parse(manifestRaw.body);
+        allChecks.push(ck('manifest_valid_json', true));
+      } catch (e) {
+        allChecks.push(ck('manifest_valid_json', false, 'Parse error'));
+        return finish(baseURL, allChecks);
+      }
+
+      const requiredFields = ['@context', 'name', 'provider', 'domains', 'endpoints'];
+      for (const field of requiredFields) {
+        const key = field.replace('@', '');
+        allChecks.push(ck('manifest_has_' + key, manifest[field] !== undefined));
+      }
+
+      const domains = Array.isArray(manifest.domains) ? manifest.domains : [];
+      if (domains.length === 0) {
+        allChecks.push(ck('domains_have_required_fields', false, 'No domains'));
+      } else {
+        const ok = domains.every(d => d.id && d.name && d.source);
+        allChecks.push(ck('domains_have_required_fields', ok,
+          ok ? null : 'Missing id, name, or source'));
+      }
+
+      const endpoints = manifest.endpoints || {};
+      const queryPath = endpoints.query || '/query';
+      const firstDomain = domains[0];
+
+      if (firstDomain) {
+        const qURL = base + queryPath + '?domain=' + encodeURIComponent(firstDomain.id);
+        try {
+          const qRes = await fetchJSON(qURL);
+          try {
+            queryResponse = JSON.parse(qRes.body);
+            allChecks.push(ck('query_returns_json', true));
+          } catch (_) {
+            allChecks.push(ck('query_returns_json', false, 'Not valid JSON'));
+          }
+
+          if (queryResponse) {
+            allChecks.push(ck('response_has_domain', queryResponse.domain !== undefined));
+            allChecks.push(ck('response_has_source', queryResponse.source !== undefined));
+            allChecks.push(ck('response_has_source_url', queryResponse.source_url !== undefined));
+            allChecks.push(ck('response_has_freshness', queryResponse.freshness !== undefined));
+            allChecks.push(ck('freshness_is_iso8601', isISO8601(queryResponse.freshness),
+              queryResponse.freshness));
+            allChecks.push(ck('source_url_is_valid', isValidURL(queryResponse.source_url),
+              queryResponse.source_url));
+          }
+        } catch (e) {
+          allChecks.push(ck('query_returns_json', false, e.message));
+        }
+      } else {
+        allChecks.push(ck('query_returns_json', false, 'No domains to test'));
+      }
+
+      // -- Level 2 --
+      const l1Pass = allChecks.filter(c => LEVEL1_CHECKS.includes(c.name)).every(c => c.passed);
+      if (l1Pass && queryResponse) {
+        const conf = queryResponse.confidence;
+        allChecks.push(ck('response_has_confidence', conf && typeof conf === 'object'));
+        if (conf && typeof conf === 'object') {
+          const c = conf.completeness;
+          allChecks.push(ck('confidence_has_completeness',
+            typeof c === 'number' && c >= 0 && c <= 1, 'value: ' + c));
+        } else {
+          allChecks.push(ck('confidence_has_completeness', false));
+        }
+
+        const cit = queryResponse.citations;
+        allChecks.push(ck('response_has_citations', cit && typeof cit === 'object'));
+        if (cit && typeof cit === 'object') {
+          allChecks.push(ck('citations_has_statement', typeof cit.statement === 'string'));
+        } else {
+          allChecks.push(ck('citations_has_statement', false));
+        }
+      }
+
+      // -- Level 3 --
+      const l2Pass = allChecks.filter(c => LEVEL2_CHECKS.includes(c.name)).every(c => c.passed);
+      if (l1Pass && l2Pass && manifest && queryResponse) {
+        const pk = manifest.provider && manifest.provider.publicKey;
+        allChecks.push(ck('manifest_has_public_key', !!pk));
+
+        const proof = queryResponse.proof;
+        allChecks.push(ck('response_has_proof', proof && typeof proof === 'object'));
+        if (proof && typeof proof === 'object') {
+          allChecks.push(ck('proof_has_type', typeof proof.type === 'string'));
+          allChecks.push(ck('proof_has_cryptosuite', typeof proof.cryptosuite === 'string'));
+          allChecks.push(ck('proof_has_proof_value', typeof proof.proofValue === 'string'));
+
+          // Browser crypto verification (RSA-based only for now)
+          if (pk && proof.proofValue) {
+            try {
+              const payload = Object.assign({}, queryResponse);
+              delete payload.proof;
+              const canonical = JSON.stringify(payload);
+              const encoder = new TextEncoder();
+
+              // Try importing as RSA SPKI PEM
+              const pemBody = pk.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+              const keyBuf = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));
+              const cryptoKey = await window.crypto.subtle.importKey(
+                'spki', keyBuf,
+                { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+                false, ['verify']
+              );
+              const sigBuf = Uint8Array.from(atob(proof.proofValue), c => c.charCodeAt(0));
+              const valid = await window.crypto.subtle.verify(
+                'RSASSA-PKCS1-v1_5', cryptoKey, sigBuf, encoder.encode(canonical)
+              );
+              allChecks.push(ck('signature_valid', valid));
+            } catch (e) {
+              allChecks.push(ck('signature_valid', false, e.message));
+            }
+          } else {
+            allChecks.push(ck('signature_valid', false, 'Missing key or proof value'));
+          }
+        } else {
+          allChecks.push(ck('proof_has_type', false));
+          allChecks.push(ck('proof_has_cryptosuite', false));
+          allChecks.push(ck('proof_has_proof_value', false));
+          allChecks.push(ck('signature_valid', false));
+        }
+      }
+
+      return finish(baseURL, allChecks);
+    }
+
+    function finish(url, checks) {
+      const l1 = checks.filter(c => LEVEL1_CHECKS.includes(c.name));
+      const l2 = checks.filter(c => LEVEL2_CHECKS.includes(c.name));
+      const l3 = checks.filter(c => LEVEL3_CHECKS.includes(c.name));
+
+      const l1Pass = l1.length > 0 && l1.every(c => c.passed);
+      const l2Pass = l2.length > 0 && l2.every(c => c.passed);
+      const l3Pass = l3.length > 0 && l3.every(c => c.passed);
+
+      let level = 'No level achieved';
+      if (l1Pass) level = 'Level 1 (Basic)';
+      if (l1Pass && l2Pass) level = 'Level 2 (Cited)';
+      if (l1Pass && l2Pass && l3Pass) level = 'Level 3 (Verified)';
+
+      const passed = checks.filter(c => c.passed).length;
+      const failed = checks.filter(c => !c.passed).length;
+
+      return { url, level, checks, passed, failed, timestamp: new Date().toISOString() };
+    }
+
+    // -----------------------------------------------------------------------
+    // UI
+    // -----------------------------------------------------------------------
+
+    function renderChecks(checks, names, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      const subset = checks.filter(c => names.includes(c.name));
+      if (subset.length === 0) return false;
+
+      for (const c of subset) {
+        const row = document.createElement('div');
+        row.className = 'check-row';
+
+        const icon = document.createElement('span');
+        icon.className = 'check-icon ' + (c.passed ? 'pass' : 'fail');
+        icon.textContent = c.passed ? '\u2713' : '\u2717';
+
+        const name = document.createElement('span');
+        name.className = 'check-name';
+        name.textContent = c.name;
+
+        row.appendChild(icon);
+        row.appendChild(name);
+
+        if (c.detail) {
+          const detail = document.createElement('span');
+          detail.className = 'check-detail';
+          detail.textContent = c.detail;
+          detail.title = c.detail;
+          row.appendChild(detail);
+        }
+
+        container.appendChild(row);
+      }
+      return true;
+    }
+
+    async function runValidation() {
+      const input = document.getElementById('url-input');
+      const btn = document.getElementById('run-btn');
+      const spinner = document.getElementById('spinner');
+      const banner = document.getElementById('result-banner');
+
+      let url = input.value.trim();
+      if (!url) return;
+      if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+
+      btn.disabled = true;
+      spinner.classList.add('show');
+      banner.classList.remove('show');
+      ['level1-group', 'level2-group', 'level3-group'].forEach(id => {
+        document.getElementById(id).classList.remove('show');
+      });
+
+      let result;
+      try {
+        result = await validate(url);
+      } catch (e) {
+        spinner.classList.remove('show');
+        btn.disabled = false;
+        banner.className = 'result-banner show level-0';
+        document.getElementById('result-text').textContent = 'Validation failed: ' + e.message;
+        document.getElementById('result-meta').textContent = '';
+        return;
+      }
+
+      spinner.classList.remove('show');
+      btn.disabled = false;
+
+      // Determine level class
+      let levelClass = 'level-0';
+      if (result.level.startsWith('Level 1')) levelClass = 'level-1';
+      if (result.level.startsWith('Level 2')) levelClass = 'level-2';
+      if (result.level.startsWith('Level 3')) levelClass = 'level-3';
+
+      banner.className = 'result-banner show ' + levelClass;
+      document.getElementById('result-text').textContent = result.level;
+      document.getElementById('result-meta').textContent =
+        result.passed + ' passed, ' + result.failed + ' failed';
+
+      // Render check groups
+      if (renderChecks(result.checks, LEVEL1_CHECKS, 'level1-checks')) {
+        document.getElementById('level1-group').classList.add('show');
+      }
+      if (renderChecks(result.checks, LEVEL2_CHECKS, 'level2-checks')) {
+        document.getElementById('level2-group').classList.add('show');
+      }
+      if (renderChecks(result.checks, LEVEL3_CHECKS, 'level3-checks')) {
+        document.getElementById('level3-group').classList.add('show');
+      }
+    }
+
+    // Enter key triggers validation
+    document.getElementById('url-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') runValidation();
+    });
+  </script>
+</body>
+</html>

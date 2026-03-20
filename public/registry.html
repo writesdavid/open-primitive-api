@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provider Registry — Open Primitive Protocol</title>
+  <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'IBM Plex Mono', 'SF Mono', 'Menlo', monospace;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 0.6rem 0.8rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #1a1a1a;
+    }
+
+    .search-bar button {
+      padding: 0.6rem 1.2rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      border: 1px solid #1a1a1a;
+      background: #1a1a1a;
+      color: #f5f5f0;
+      cursor: pointer;
+    }
+
+    .search-bar button:hover {
+      background: #333;
+    }
+
+    .count {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .provider {
+      border: 1px solid #ddd;
+      background: #fff;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .provider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+    }
+
+    .provider-name {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .provider-status {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border: 1px solid;
+    }
+
+    .provider-status.active {
+      color: #2d7d2d;
+      border-color: #2d7d2d;
+    }
+
+    .provider-status.inactive {
+      color: #999;
+      border-color: #999;
+    }
+
+    .provider-url {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 0.75rem;
+    }
+
+    .provider-url a {
+      color: #666;
+      text-decoration: none;
+    }
+
+    .provider-url a:hover {
+      color: #1a1a1a;
+      text-decoration: underline;
+    }
+
+    .domains {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .domain-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      background: #f0f0ea;
+      border: 1px solid #ddd;
+      color: #444;
+    }
+
+    .provider-meta {
+      font-size: 0.7rem;
+      color: #999;
+      margin-top: 0.6rem;
+    }
+
+    .manifest-link {
+      font-size: 0.7rem;
+      color: #666;
+    }
+
+    .manifest-link a {
+      color: #666;
+    }
+
+    .manifest-link a:hover {
+      color: #1a1a1a;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 3rem;
+      color: #999;
+      font-size: 0.85rem;
+    }
+
+    .register-section {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #ddd;
+    }
+
+    .register-section h2 {
+      font-size: 1rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    .register-section p {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .register-form {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .register-form input {
+      flex: 1;
+      padding: 0.6rem 0.8rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #1a1a1a;
+    }
+
+    .register-form button {
+      padding: 0.6rem 1.2rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      border: 1px solid #1a1a1a;
+      background: #1a1a1a;
+      color: #f5f5f0;
+      cursor: pointer;
+    }
+
+    .register-result {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      padding: 0.6rem;
+      display: none;
+    }
+
+    .register-result.success {
+      background: #eaf5ea;
+      border: 1px solid #2d7d2d;
+      color: #2d7d2d;
+      display: block;
+    }
+
+    .register-result.error {
+      background: #fef0f0;
+      border: 1px solid #c44;
+      color: #c44;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Provider Registry</h1>
+    <p class="subtitle">Data providers registered with the Open Primitive Protocol. Agents query this to find data.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by domain, provider name, or capability">
+      <button onclick="searchProviders()">Search</button>
+    </div>
+
+    <div class="count" id="countLine"></div>
+    <div id="providerList"></div>
+
+    <div class="register-section">
+      <h2>Register a provider</h2>
+      <p>Host an OPP manifest at <code>/.well-known/opp.json</code> on your domain, then register it here. The registry fetches and validates your manifest, then lists your provider for agent discovery.</p>
+      <div class="register-form">
+        <input type="text" id="registerUrl" placeholder="https://your-api.com">
+        <button onclick="registerProvider()">Register</button>
+      </div>
+      <div class="register-result" id="registerResult"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+
+    async function loadProviders(search) {
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      const url = `${API_BASE}/v1/registry?${params}`;
+      try {
+        const resp = await fetch(url);
+        const data = await resp.json();
+        render(data.providers, data.count);
+      } catch (err) {
+        document.getElementById('providerList').innerHTML = '<div class="empty">Could not load registry.</div>';
+      }
+    }
+
+    function render(providers, count) {
+      const countLine = document.getElementById('countLine');
+      const list = document.getElementById('providerList');
+
+      countLine.textContent = `${count} provider${count === 1 ? '' : 's'} registered`;
+
+      if (!providers || providers.length === 0) {
+        list.innerHTML = '<div class="empty">No providers found.</div>';
+        return;
+      }
+
+      list.innerHTML = providers.map(p => `
+        <div class="provider">
+          <div class="provider-header">
+            <span class="provider-name">${esc(p.name)}</span>
+            <span class="provider-status ${p.status === 'active' ? 'active' : 'inactive'}">${esc(p.status)}</span>
+          </div>
+          <div class="provider-url">
+            <a href="${esc(p.url)}" target="_blank">${esc(p.url)}</a>
+          </div>
+          <div class="domains">
+            ${p.domains.map(d => `<span class="domain-tag">${esc(d)}</span>`).join('')}
+          </div>
+          <div class="provider-meta">
+            Verified: ${new Date(p.lastVerified).toLocaleDateString()}
+            <span class="manifest-link"> · <a href="${esc(p.url)}/.well-known/opp.json" target="_blank">manifest</a></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function searchProviders() {
+      const q = document.getElementById('searchInput').value.trim();
+      loadProviders(q);
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') searchProviders();
+    });
+
+    async function registerProvider() {
+      const url = document.getElementById('registerUrl').value.trim();
+      const result = document.getElementById('registerResult');
+      if (!url) {
+        result.className = 'register-result error';
+        result.textContent = 'Enter a URL.';
+        return;
+      }
+
+      result.className = 'register-result';
+      result.style.display = 'block';
+      result.style.background = '#f8f8f4';
+      result.style.border = '1px solid #ccc';
+      result.style.color = '#666';
+      result.textContent = 'Registering...';
+
+      try {
+        const resp = await fetch(`${API_BASE}/v1/registry/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url }),
+        });
+        const data = await resp.json();
+        if (data.registered) {
+          result.className = 'register-result success';
+          result.textContent = `Registered ${data.provider} with ${data.domains.length} domain${data.domains.length === 1 ? '' : 's'}: ${data.domains.join(', ')}`;
+          loadProviders();
+        } else {
+          result.className = 'register-result error';
+          result.textContent = data.error || 'Registration failed.';
+        }
+      } catch (err) {
+        result.className = 'register-result error';
+        result.textContent = err.message;
+      }
+    }
+
+    function esc(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    loadProviders();
+  </script>
+</body>
+</html>
