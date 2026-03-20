@@ -60,6 +60,9 @@ async function apiKeyAuth(req, res, next) {
 }
 
 async function rateLimitMiddleware(req, res, next) {
+  // Skip rate limiting for anonymous/free tier to avoid cold start timeouts
+  if (!req.apiKey || req.apiKey === 'anonymous' || req.apiKey === 'dev') return next();
+
   const { ratelimit } = getRedis();
   if (!ratelimit) return next();
 
@@ -79,6 +82,9 @@ async function rateLimitMiddleware(req, res, next) {
 }
 
 async function meterUsage(req, res, next) {
+  // Skip metering for anonymous users to avoid cold start timeouts
+  if (!req.apiKey || req.apiKey === 'anonymous' || req.apiKey === 'dev') return next();
+
   const { redis } = getRedis();
   if (!redis) return next();
 
