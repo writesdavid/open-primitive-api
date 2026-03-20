@@ -23,6 +23,7 @@ const compare = require('./sources/compare');
 const { getStatus } = require('./routes/status');
 const { handleRegister } = require('./routes/register');
 const { registerProvider, listProviders, searchProviders } = require('./routes/registry');
+const { handleCheckout, handleWebhook, handleUsage } = require('./routes/billing');
 const { addQualityGrade } = require('./middleware/quality');
 const { getFreshnessReport } = require('./middleware/freshness');
 const { rateLimitMiddleware } = require('./middleware/rate-limit-memory');
@@ -31,8 +32,11 @@ const alerts = require('./sources/alerts');
 
 const app = express();
 
-// JSON body parsing for POST routes
-app.use(express.json());
+// JSON body parsing for POST routes (skip webhook — Stripe needs raw body)
+app.use((req, res, next) => {
+  if (req.path === '/v1/billing/webhook') return next();
+  express.json()(req, res, next);
+});
 
 // Static docs page
 app.use(express.static(path.join(__dirname, 'public')));
@@ -159,6 +163,11 @@ app.post('/v1/register', handleRegister);
 app.post('/v1/registry/register', registerProvider);
 app.get('/v1/registry/search', searchProviders);
 app.get('/v1/registry', listProviders);
+
+// ─── BILLING ───
+app.post('/v1/billing/checkout', handleCheckout);
+app.post('/v1/billing/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+app.get('/v1/billing/usage', handleUsage);
 
 // ─── META ───
 app.get('/v1', (req, res) => {
