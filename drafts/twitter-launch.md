@@ -1,76 +1,86 @@
-# Open Primitive API — Launch Thread
+# Open Primitive Protocol -- Launch Thread
 
 **1/**
 
-I built the first website where AI agents are the primary audience.
+I built a protocol for the agent internet.
 
-Not a chatbot wrapper. Not an AI startup. A federal data API designed for machines to read, so they stop making things up.
+Not an API. A data envelope standard. Every piece of data an AI agent consumes should carry provenance, freshness, confidence, and a verification chain. Right now, none of it does.
 
-api.openprimitive.com
+Open Primitive Protocol fixes that.
+
+api.openprimitive.com/protocol
 
 
 **2/**
 
-Ask Claude "is my water safe?" and it will confidently give you an answer. That answer is fabricated. The EPA publishes real violation data for every water system in the country. But no agent can reach it. The data exists. The pipes don't.
+The problem: agents consume data naked.
+
+No source authority. No timestamp for when the data was actually observed. No confidence score. No way to verify the payload was not modified in transit.
+
+An agent that looks up your water quality and an agent that looks up drug interactions both face the same gap. Raw JSON. Zero metadata about trustworthiness.
 
 
 **3/**
 
-So I built the pipes. Open Primitive API pulls from 10 federal agencies across 13 data domains. Real numbers. Real enforcement records. Real inspection dates. One unified REST API.
+HTTP solved this for browsers 30 years ago. Content-Type. Cache-Control. TLS certificates. Browsers know what they are looking at, how old it is, and whether the server is legit.
+
+The agent internet has none of this. Agents trust everything by default. That trust is the vulnerability.
 
 
 **4/**
 
-The 13 domains:
+OPP defines 4 fields every agent-consumable response must carry:
 
-- Water safety — EPA SDWIS
-- Hospital quality — CMS Hospital Compare
-- Nursing homes — CMS Nursing Home Compare
-- Drug side effects — FDA FAERS
-- Food recalls — FDA Enforcement
-- Car defects — NHTSA Complaints
-- Airline delays — BTS On-Time
-- Clinical trials — ClinicalTrials.gov
-- Health supplements — NIH DSLD
-- Medical devices — FDA MAUDE
-- Air quality — EPA AQS
-- Workplace safety — OSHA Inspections
-- School safety — ED Civil Rights
+- Source authority (the specific database, not "the government")
+- Observation timestamp (when the data was captured, not when the cache was built)
+- Confidence score (live federal query > 72-hour-old cache)
+- Verification chain (signed hash, no silent mutation)
 
 
 **5/**
 
-The thing no federal agency does: cross-domain queries.
+The reference implementation: 16 federal data domains. 10 agencies. EPA water. FDA drugs. CMS hospitals. NHTSA vehicles. BTS airlines. And 11 more.
 
-GET /v1/safety?zip=90210 returns EPA water violations and CMS hospital ratings in one response. A single call combines data that lives in 2 different agencies, 2 different formats, 2 different update cycles. One score.
+Every domain returns the same envelope. An agent that reads one response can read all 16.
 
 
 **6/**
 
-Built for agents from the ground up. MCP server with 13 tools. A2A agent card at /.well-known/agent.json. Full llms.txt at the root. robots.txt that says: this data is meant for you.
+The cross-domain query that no federal agency supports:
 
-Every protocol an AI agent might speak, answered.
+GET /v1/safety?zip=48502
+
+Returns EPA water violations, CMS hospital ratings, and FDA food recall proximity in one signed envelope. Three agencies. Three databases. One protocol response.
 
 
 **7/**
 
-The stats page shows what percentage of traffic comes from machines vs. humans. Right now it is almost entirely machines. That was the point.
+Three agent protocols ship today:
 
-api.openprimitive.com/stats.html
+MCP server -- Claude and compatible clients call 16 tools natively.
+A2A agent card -- Google Agent-to-Agent discovery and negotiation.
+REST API -- standard HTTP for everything else.
+
+One protocol envelope across all three.
 
 
 **8/**
 
-I built this in one day with Claude Code. 13 source modules. 50+ AI agents deployed in parallel, each wiring up a different federal data source. One person, one terminal, one model.
+Solo build. Content engineering at Block during the day. Built with Claude Code. 16 source modules. The entire stack is Node.js, Express, Vercel serverless. No framework. No build step.
+
+The question that started this: does federal data get better when AI translates it? The answer became infrastructure. The infrastructure became a protocol.
 
 
 **9/**
 
-What ships next: 20+ domains by end of quarter. Historical data archives going back a decade. Webhook alerts when your zip code gets a new violation. Enterprise tier for production agent fleets.
+What ships next: protocol spec published as an open standard. 30+ domains by end of quarter. Historical data archives. Webhook alerts when your zip code gets a new violation. Partner integrations for agent frameworks that want to adopt the envelope format.
 
 
 **10/**
 
-api.openprimitive.com — free tier, no credit card, no waitlist. The API docs are the landing page because the landing page is for machines.
+The agent internet is missing its data layer. APIs exist. Tools exist. What does not exist is a standard that tells agents: here is where this data came from, how old it is, how much to trust it, and proof it was not tampered with.
 
-Code is on GitHub: github.com/writesdavid/open-primitive-api
+That standard is OPP.
+
+api.openprimitive.com/protocol
+github.com/writesdavid/open-primitive-api

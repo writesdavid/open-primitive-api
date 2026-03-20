@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Open Primitive API",
-    "version": "1.0.0",
-    "description": "Federal data for agents. 13 government data domains, one unified API.",
+    "title": "Open Primitive Protocol",
+    "version": "1.1.0",
+    "description": "Open Primitive Protocol reference implementation. 16 US federal data domains. Every response is signed, sourced, and scored.",
     "contact": {
       "email": "davehamiltonj@gmail.com"
     }
@@ -27,18 +27,356 @@
       }
     },
     "schemas": {
+      "Confidence": {
+        "type": "object",
+        "properties": {
+          "completeness": { "type": "number", "description": "Data completeness score 0-1" },
+          "methodology": { "type": "string", "description": "How the data was collected and scored" },
+          "note": { "type": "string", "description": "Caveats or limitations" }
+        }
+      },
+      "Citation": {
+        "type": "object",
+        "properties": {
+          "statement": { "type": "string", "description": "What the citation supports" },
+          "source_url": { "type": "string", "format": "uri", "description": "Direct URL to the source data" },
+          "license": { "type": "string", "description": "Data license (e.g. US Government Work, CC0)" }
+        }
+      },
+      "Proof": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "description": "Proof type (e.g. DataIntegrityProof)" },
+          "cryptosuite": { "type": "string", "description": "Cryptographic suite used (e.g. eddsa-jcs-2022)" },
+          "verificationMethod": { "type": "string", "description": "URI of the public key" },
+          "proofValue": { "type": "string", "description": "Base-encoded proof value" }
+        }
+      },
       "Envelope": {
         "type": "object",
         "properties": {
           "domain": { "type": "string" },
           "source": { "type": "string" },
           "source_url": { "type": "string", "format": "uri" },
-          "freshness": { "type": "string" }
+          "freshness": { "type": "string" },
+          "confidence": { "$ref": "#/components/schemas/Confidence" },
+          "citations": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Citation" }
+          },
+          "proof": { "$ref": "#/components/schemas/Proof" }
         }
       }
     }
   },
   "paths": {
+    "/v1/ask": {
+      "get": {
+        "summary": "Natural language query router",
+        "description": "Accepts a plain-English question and routes it to the correct domain endpoint. Returns structured data, not chat.",
+        "operationId": "ask",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Natural language question (e.g. 'Is my water safe in 78701?' or 'Toyota Camry recalls')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Routed response from the matched domain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "routed_to": { "type": "string", "description": "The domain endpoint that handled the query" },
+                        "answer": { "type": "object", "description": "Structured response from the matched domain" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/weather": {
+      "get": {
+        "summary": "NOAA weather forecasts and alerts",
+        "description": "Returns current weather forecasts and active alerts from NOAA. Query by ZIP code or state abbreviation.",
+        "operationId": "getWeather",
+        "parameters": [
+          {
+            "name": "zip",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "5-digit ZIP code for local forecast"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "2-letter state abbreviation for statewide alerts (e.g. TX, CA)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Weather forecast and alerts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "location": { "type": "string" },
+                        "forecast": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "period": { "type": "string" },
+                              "temperature": { "type": "number" },
+                              "unit": { "type": "string" },
+                              "wind_speed": { "type": "string" },
+                              "short_forecast": { "type": "string" },
+                              "detailed_forecast": { "type": "string" }
+                            }
+                          }
+                        },
+                        "alerts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "event": { "type": "string" },
+                              "severity": { "type": "string" },
+                              "headline": { "type": "string" },
+                              "description": { "type": "string" },
+                              "onset": { "type": "string" },
+                              "expires": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/location": {
+      "get": {
+        "summary": "Cross-domain location profile",
+        "description": "Returns a unified profile for a ZIP code pulling from water, demographics, safety, weather, and hospitals.",
+        "operationId": "getLocation",
+        "parameters": [
+          {
+            "name": "zip",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "5-digit ZIP code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cross-domain location profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "zip": { "type": "string" },
+                        "domains": {
+                          "type": "object",
+                          "properties": {
+                            "water": { "type": "object", "description": "Water system summary" },
+                            "demographics": { "type": "object", "description": "Census data summary" },
+                            "safety": { "type": "object", "description": "Environmental and healthcare safety" },
+                            "weather": { "type": "object", "description": "Current forecast and alerts" },
+                            "hospitals": { "type": "object", "description": "Nearby hospital quality" }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/compare": {
+      "get": {
+        "summary": "Side-by-side comparison",
+        "description": "Compares two items within the same domain. Supports drugs, hospitals, cars, water systems, and ZIP codes.",
+        "operationId": "compare",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "enum": ["drugs", "hospitals", "cars", "water", "location"] },
+            "description": "Domain to compare within"
+          },
+          {
+            "name": "a",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "First item (drug name, hospital ID, vehicle, PWSID, or ZIP)"
+          },
+          {
+            "name": "b",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Second item to compare against"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comparison results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": { "type": "string" },
+                        "a": { "type": "object", "description": "Data for first item" },
+                        "b": { "type": "object", "description": "Data for second item" },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": { "type": "string" },
+                              "a_value": {},
+                              "b_value": {},
+                              "delta": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/alerts": {
+      "get": {
+        "summary": "Proactive alert feed",
+        "description": "Returns active alerts across all domains: food recalls, product recalls, weather warnings, water violations, FAA delays. Optionally filter by ZIP or domain.",
+        "operationId": "getAlerts",
+        "parameters": [
+          {
+            "name": "zip",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "5-digit ZIP code to localize alerts"
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["food", "products", "weather", "water", "flights"] },
+            "description": "Filter to a single domain"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active alerts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/Envelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "alerts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "domain": { "type": "string" },
+                              "severity": { "type": "string", "enum": ["critical", "warning", "info"] },
+                              "title": { "type": "string" },
+                              "summary": { "type": "string" },
+                              "issued": { "type": "string", "format": "date-time" },
+                              "expires": { "type": "string", "format": "date-time" },
+                              "source_url": { "type": "string", "format": "uri" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/status": {
+      "get": {
+        "summary": "System health",
+        "description": "Returns operational status of each domain endpoint, cache freshness, and uptime.",
+        "operationId": "getStatus",
+        "responses": {
+          "200": {
+            "description": "System health report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "enum": ["healthy", "degraded", "down"] },
+                    "version": { "type": "string" },
+                    "uptime_seconds": { "type": "integer" },
+                    "domains": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "status": { "type": "string", "enum": ["up", "degraded", "down"] },
+                          "last_fetch": { "type": "string", "format": "date-time" },
+                          "cache_age_seconds": { "type": "integer" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/flights": {
       "get": {
         "summary": "All airline flight data",

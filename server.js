@@ -3,6 +3,7 @@ const path = require('path');
 const { apiKeyAuth, rateLimitMiddleware, meterUsage } = require('./middleware/auth');
 const { agentDetect, getStats } = require('./middleware/agent-detect');
 const { archiveMiddleware, historyRoute } = require('./middleware/archive');
+const { signingMiddleware } = require('./middleware/signing');
 
 const flights = require('./sources/flights');
 const cars = require('./sources/cars');
@@ -51,6 +52,9 @@ app.use('/v1', apiKeyAuth, rateLimitMiddleware, meterUsage);
 
 // Archive every /v1/* response to Upstash Redis (fire-and-forget)
 app.use(archiveMiddleware);
+
+// Ed25519 response signing (runs before citations so citations get signed too)
+app.use(signingMiddleware);
 
 // Citation injection on all /v1/* responses
 app.use(citationMiddleware);

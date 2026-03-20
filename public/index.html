@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open Primitive API — Federal Data for Agents</title>
-  <meta name="description" content="7 federal data domains. One unified API. Structured for AI agents, MCP servers, and human developers.">
+  <title>Open Primitive API — Reference Implementation of OPP</title>
+  <meta name="description" content="16 federal data domains. 11 agencies. Every response signed, sourced, and scored. The reference implementation of the Open Primitive Protocol.">
   <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
   <script type="application/ld+json">
   [
@@ -12,7 +12,7 @@
       "@context": "https://schema.org",
       "@type": "WebAPI",
       "name": "Open Primitive API",
-      "description": "13 US federal data domains — flights, cars, food, water, drugs, hospitals, health, nutrition, jobs, demographics, products, SEC filings, and cross-domain safety scores",
+      "description": "16 US federal data domains across 11 agencies. Reference implementation of the Open Primitive Protocol (OPP).",
       "url": "https://api.openprimitive.com",
       "documentation": "https://api.openprimitive.com/openapi.json",
       "provider": {
@@ -20,27 +20,6 @@
         "name": "Open Primitive",
         "url": "https://openprimitive.com"
       }
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "DataCatalog",
-      "name": "Open Primitive Federal Data Catalog",
-      "url": "https://api.openprimitive.com",
-      "dataset": [
-        {"@type": "Dataset", "name": "Flight Delays", "description": "Live FAA airline delays", "url": "https://api.openprimitive.com/v1/flights"},
-        {"@type": "Dataset", "name": "Car Safety", "description": "NHTSA crash ratings and recalls", "url": "https://api.openprimitive.com/v1/cars"},
-        {"@type": "Dataset", "name": "Food Recalls", "description": "FDA food enforcement actions", "url": "https://api.openprimitive.com/v1/food"},
-        {"@type": "Dataset", "name": "Water Safety", "description": "EPA drinking water violations", "url": "https://api.openprimitive.com/v1/water"},
-        {"@type": "Dataset", "name": "Drug Safety", "description": "FDA adverse event reports", "url": "https://api.openprimitive.com/v1/drugs"},
-        {"@type": "Dataset", "name": "Hospital Quality", "description": "CMS hospital ratings and outcomes", "url": "https://api.openprimitive.com/v1/hospitals"},
-        {"@type": "Dataset", "name": "Health Evidence", "description": "PubMed research evidence for health claims", "url": "https://api.openprimitive.com/v1/health"},
-        {"@type": "Dataset", "name": "Nutrition", "description": "USDA food composition and nutrient data", "url": "https://api.openprimitive.com/v1/nutrition"},
-        {"@type": "Dataset", "name": "Jobs", "description": "BLS employment and labor statistics", "url": "https://api.openprimitive.com/v1/jobs"},
-        {"@type": "Dataset", "name": "Demographics", "description": "Census population and demographic data", "url": "https://api.openprimitive.com/v1/demographics"},
-        {"@type": "Dataset", "name": "Products", "description": "CPSC consumer product safety data", "url": "https://api.openprimitive.com/v1/products"},
-        {"@type": "Dataset", "name": "SEC Filings", "description": "SEC EDGAR company filings", "url": "https://api.openprimitive.com/v1/sec"},
-        {"@type": "Dataset", "name": "Safety Scores", "description": "Cross-domain safety composite scores", "url": "https://api.openprimitive.com/v1/safety"}
-      ]
     }
   ]
   </script>
@@ -53,8 +32,8 @@
     /* Hero */
     .hero {
       text-align: center;
-      padding: var(--space-12) var(--space-4) var(--space-6);
-      max-width: 680px;
+      padding: var(--space-12) var(--space-4) var(--space-8);
+      max-width: 720px;
       margin: 0 auto;
     }
     .hero-eyebrow {
@@ -77,30 +56,6 @@
       color: var(--body);
       font-size: 1.15rem;
       line-height: 1.5;
-    }
-
-    /* Live proof */
-    .live-proof {
-      text-align: center;
-      padding: var(--space-4) var(--space-4) var(--space-8);
-    }
-    .proof-stat {
-      display: inline-block;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: var(--space-3) var(--space-6);
-    }
-    .proof-stat .number {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      color: var(--accent);
-      font-weight: 700;
-    }
-    .proof-stat .label {
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin-top: var(--space-1);
     }
 
     /* Section layout */
@@ -129,48 +84,6 @@
       max-width: 600px;
     }
 
-    /* Domain cards */
-    .domain-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-4);
-    }
-    .domain-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: var(--space-5);
-    }
-    .domain-card.full-width {
-      grid-column: 1 / -1;
-    }
-    .domain-card h3 {
-      margin: 0 0 var(--space-1);
-      color: var(--text);
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-    }
-    .domain-card .source {
-      color: var(--muted);
-      font-size: 0.8rem;
-      margin-bottom: var(--space-2);
-    }
-    .domain-card .desc {
-      color: var(--body);
-      font-size: 0.95rem;
-      margin-bottom: var(--space-3);
-    }
-    .domain-card .curl {
-      background: var(--code-bg);
-      border-radius: 4px;
-      padding: var(--space-2) var(--space-3);
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--code-text);
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-
     /* Code blocks */
     .code-block {
       background: var(--code-bg);
@@ -186,6 +99,7 @@
     .code-block .comment { color: #6a9955; }
     .code-block .str { color: #ce9178; }
     .code-block .key { color: #9cdcfe; }
+    .code-block .num { color: #b5cea8; }
 
     /* Envelope */
     .envelope-grid {
@@ -213,7 +127,79 @@
       font-size: 0.85rem;
     }
 
-    /* Pricing summary */
+    /* Territory headings */
+    .territory-label {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: var(--space-5);
+      margin-bottom: var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .territory-label:first-of-type {
+      margin-top: 0;
+    }
+
+    /* Domain grid */
+    .domain-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-3);
+    }
+    .domain-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: var(--space-4);
+    }
+    .domain-card h3 {
+      margin: 0 0 var(--space-1);
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 1rem;
+    }
+    .domain-card .source {
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-bottom: var(--space-1);
+    }
+    .domain-card .desc {
+      color: var(--body);
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    /* Agent features */
+    .agent-features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .agent-features li {
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--body);
+      font-size: 0.95rem;
+    }
+    .agent-features li:last-child { border-bottom: none; }
+    .agent-features code {
+      font-family: var(--font-mono);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .agent-features .detail {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: var(--space-1);
+    }
+
+    /* Pricing */
     .pricing-tiers {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -229,6 +215,7 @@
     }
     .tier.highlight {
       border-color: var(--accent);
+      border-width: 2px;
     }
     .tier-name {
       font-family: var(--font-display);
@@ -246,29 +233,37 @@
       color: var(--muted);
       font-size: 0.8rem;
     }
+    .tier-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-bottom: var(--space-2);
+    }
 
     /* Get started */
-    .get-started-steps {
-      counter-reset: step;
-      list-style: none;
-      padding: 0;
-      margin-bottom: var(--space-5);
+    .get-started-actions {
+      display: flex;
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+      flex-wrap: wrap;
     }
-    .get-started-steps li {
-      counter-increment: step;
-      padding: var(--space-2) 0 var(--space-2) var(--space-6);
-      position: relative;
-      color: var(--body);
-      font-size: 0.95rem;
-    }
-    .get-started-steps li::before {
-      content: counter(step);
-      position: absolute;
-      left: 0;
-      font-family: var(--font-display);
-      font-weight: 700;
+    .get-started-actions a {
       color: var(--accent);
-      font-size: 1.1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 2px;
+    }
+    .get-started-actions a:hover {
+      color: var(--text);
+      border-color: var(--text);
     }
 
     /* Footer */
@@ -296,7 +291,6 @@
     @media (max-width: 768px) {
       .hero h1 { font-size: 2rem; }
       .domain-grid { grid-template-columns: 1fr; }
-      .domain-card.full-width { grid-column: auto; }
       .envelope-grid { grid-template-columns: 1fr; }
       .pricing-tiers { grid-template-columns: 1fr 1fr; }
       .api-footer { flex-direction: column; text-align: center; }
@@ -311,142 +305,184 @@
 
   <!-- Hero -->
   <div class="hero">
-    <p class="hero-eyebrow">Federal data for agents</p>
+    <p class="hero-eyebrow">Reference Implementation</p>
     <h1>Open Primitive API</h1>
-    <p>7 government data domains. One unified REST API. Structured for LLMs, agent frameworks, and the humans who build them.</p>
+    <p>16 federal data domains. 11 agencies. Every response signed, sourced, and scored.</p>
   </div>
 
-  <!-- Live proof -->
-  <div class="live-proof">
-    <div class="proof-stat">
-      <div class="number" id="machine-pct">&mdash;</div>
-      <div class="label">of our traffic is machines</div>
+  <!-- Section 1: The Envelope -->
+  <div class="section">
+    <p class="section-label">The Envelope</p>
+    <h2>Every response carries proof</h2>
+    <p class="intro">OPP defines a standard envelope. Every domain, every endpoint, every response ships the same metadata. Agents parse it once and trust it everywhere.</p>
+
+    <div class="envelope-grid">
+      <ul class="envelope-list">
+        <li><code>domain</code> &mdash; Which dataset answered the query</li>
+        <li><code>source</code> &mdash; The federal agency that produced the data</li>
+        <li><code>source_url</code> &mdash; Direct link to the upstream record</li>
+        <li><code>freshness</code> &mdash; ISO 8601 timestamp of last data pull</li>
+        <li><code>confidence</code> &mdash; 0&ndash;1 score of data completeness</li>
+        <li><code>citations</code> &mdash; Array of source references agents can paste directly</li>
+        <li><code>proof</code> &mdash; Hash of the upstream data at query time</li>
+      </ul>
+      <div class="code-block" style="margin-bottom: 0;">
+{
+  <span class="key">"domain"</span>: <span class="str">"cars"</span>,
+  <span class="key">"source"</span>: <span class="str">"NHTSA"</span>,
+  <span class="key">"source_url"</span>: <span class="str">"https://api.nhtsa.gov/..."</span>,
+  <span class="key">"freshness"</span>: <span class="str">"2026-03-19T14:30:00Z"</span>,
+  <span class="key">"confidence"</span>: <span class="num">0.94</span>,
+  <span class="key">"citations"</span>: [
+    <span class="str">"NHTSA NCAP 5-Star Safety Rating, 2024 Toyota Camry"</span>
+  ],
+  <span class="key">"proof"</span>: <span class="str">"sha256:a3f8c1..."</span>,
+  <span class="key">"data"</span>: { <span class="comment">...</span> }
+}
+      </div>
     </div>
   </div>
-  <script>
-    fetch('/v1/stats')
-      .then(r => r.json())
-      .then(d => {
-        if (d && typeof d.machine_pct === 'number') {
-          document.getElementById('machine-pct').textContent = d.machine_pct + '%';
-        }
-      })
-      .catch(() => {});
-  </script>
 
-  <!-- Domains -->
+  <!-- Section 2: 16 Domains -->
   <div class="section">
-    <p class="section-label">7 Domains</p>
-    <div class="domain-grid">
+    <p class="section-label">16 Domains</p>
+    <h2>Federal data, structured for machines</h2>
+    <p class="intro">16 domains across 5 territories. Each backed by a primary federal source.</p>
 
+    <div class="territory-label">Move</div>
+    <div class="domain-grid">
       <div class="domain-card">
         <h3>Flights</h3>
         <p class="source">FAA NAS + Open-Meteo</p>
         <p class="desc">Live delays and hub weather for 8 US carriers.</p>
-        <div class="curl">curl -H "X-API-Key: KEY" https://api.openprimitive.com/v1/flights/DL</div>
       </div>
-
       <div class="domain-card">
         <h3>Cars</h3>
         <p class="source">NHTSA</p>
-        <p class="desc">Crash safety ratings and recalls for any US vehicle.</p>
-        <div class="curl">curl "https://api.openprimitive.com/v1/cars?year=2024&amp;make=Toyota&amp;model=Camry&amp;api_key=KEY"</div>
+        <p class="desc">Crash safety ratings and active recalls for any US vehicle.</p>
       </div>
+      <div class="domain-card">
+        <h3>Weather</h3>
+        <p class="source">NWS / Open-Meteo</p>
+        <p class="desc">Current conditions, forecasts, and severe alerts by location.</p>
+      </div>
+    </div>
 
+    <div class="territory-label">Sustain</div>
+    <div class="domain-grid">
       <div class="domain-card">
         <h3>Food</h3>
         <p class="source">FDA Enforcement</p>
         <p class="desc">Active food recalls from the last 90 days.</p>
-        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/food?q=peanut+butter"</div>
       </div>
-
       <div class="domain-card">
         <h3>Water</h3>
         <p class="source">EPA SDWIS</p>
         <p class="desc">Drinking water systems and violations by ZIP code.</p>
-        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/water?zip=10001"</div>
       </div>
-
       <div class="domain-card">
-        <h3>Drugs</h3>
-        <p class="source">FDA FAERS</p>
-        <p class="desc">Adverse events, top reactions, and label warnings.</p>
-        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/drugs?name=ibuprofen"</div>
+        <h3>Nutrition</h3>
+        <p class="source">USDA FoodData Central</p>
+        <p class="desc">Macros, micros, and composition for any food item.</p>
       </div>
+    </div>
 
+    <div class="territory-label">Heal</div>
+    <div class="domain-grid">
+      <div class="domain-card">
+        <h3>Health</h3>
+        <p class="source">PubMed / MEDLINE</p>
+        <p class="desc">Research evidence for supplements and health claims.</p>
+      </div>
       <div class="domain-card">
         <h3>Hospitals</h3>
         <p class="source">CMS Care Compare</p>
         <p class="desc">Quality ratings, mortality, readmissions, patient experience.</p>
-        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/hospitals?q=mayo+clinic"</div>
       </div>
-
-      <div class="domain-card full-width">
-        <h3>Health</h3>
-        <p class="source">PubMed / MEDLINE</p>
-        <p class="desc">Research evidence for supplements and health claims.</p>
-        <div class="curl">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/health?q=vitamin+d"</div>
+      <div class="domain-card">
+        <h3>Drugs</h3>
+        <p class="source">FDA FAERS</p>
+        <p class="desc">Adverse events, top reactions, and label warnings.</p>
       </div>
+    </div>
 
+    <div class="territory-label">Know</div>
+    <div class="domain-grid">
+      <div class="domain-card">
+        <h3>Jobs</h3>
+        <p class="source">BLS</p>
+        <p class="desc">Employment stats, wages, and labor market trends.</p>
+      </div>
+      <div class="domain-card">
+        <h3>Demographics</h3>
+        <p class="source">Census Bureau</p>
+        <p class="desc">Population, income, housing by geography.</p>
+      </div>
+      <div class="domain-card">
+        <h3>SEC</h3>
+        <p class="source">SEC EDGAR</p>
+        <p class="desc">Company filings, 10-Ks, and ownership disclosures.</p>
+      </div>
+      <div class="domain-card">
+        <h3>Products</h3>
+        <p class="source">CPSC</p>
+        <p class="desc">Consumer product recalls and hazard reports.</p>
+      </div>
+    </div>
+
+    <div class="territory-label">Intelligence</div>
+    <div class="domain-grid">
+      <div class="domain-card">
+        <h3>Safety</h3>
+        <p class="source">Cross-domain composite</p>
+        <p class="desc">Aggregate safety scores across food, water, drugs, products.</p>
+      </div>
+      <div class="domain-card">
+        <h3>Location</h3>
+        <p class="source">Census + EPA + CMS</p>
+        <p class="desc">Local data profile for any US ZIP or city.</p>
+      </div>
+      <div class="domain-card">
+        <h3>Compare</h3>
+        <p class="source">Multi-domain</p>
+        <p class="desc">Side-by-side comparison across any two entities in any domain.</p>
+      </div>
     </div>
   </div>
 
-  <!-- For AI Agents -->
+  <!-- Section 3: Agent-Native -->
   <div class="section">
-    <p class="section-label">For AI Agents</p>
-    <h2>Built for the machine layer</h2>
-    <p class="intro">Open Primitive ships as an MCP server, exposes an A2A-compatible agent card, and publishes <a href="/llms.txt" style="color: var(--accent);">llms.txt</a> for LLM discovery. Point any agent framework at it and go.</p>
+    <p class="section-label">Agent-Native</p>
+    <h2>Five ways in. Zero friction.</h2>
 
-    <h3 style="color: var(--text); font-family: var(--font-display); margin-bottom: var(--space-2);">MCP Server Config</h3>
-    <div class="code-block">
-<span class="comment">// claude_desktop_config.json</span>
-{
-  <span class="key">"mcpServers"</span>: {
-    <span class="key">"open-primitive"</span>: {
-      <span class="key">"command"</span>: <span class="str">"node"</span>,
-      <span class="key">"args"</span>: [<span class="str">"/path/to/open-primitive-api/mcp.js"</span>]
-    }
-  }
-}
-    </div>
-
-    <p style="color: var(--body); margin-bottom: var(--space-3); font-size: 0.95rem;">
-      7 tools registered: <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-flights</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-car-safety</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-food-recalls</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-water-safety</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-drug-safety</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-hospital-quality</code>, <code style="font-family: var(--font-mono); color: var(--text); font-size: 0.85rem;">get-health-evidence</code>.
-    </p>
-    <p style="color: var(--body); font-size: 0.95rem;">
-      A2A agent card at <a href="/.well-known/agent.json" style="color: var(--accent);">/.well-known/agent.json</a>. OpenAPI spec at <a href="/openapi.json" style="color: var(--accent);">/openapi.json</a>.
-    </p>
+    <ul class="agent-features">
+      <li>
+        <code>/v1/ask?q=</code> &mdash; Natural language. You ask, we route to the right domain.
+        <span class="detail">curl -H "X-API-Key: KEY" "https://api.openprimitive.com/v1/ask?q=is+austin+tap+water+safe"</span>
+      </li>
+      <li>
+        <code>MCP Server</code> &mdash; 13 tools. One command.
+        <span class="detail">npx @openprimitive/mcp-server --api-key YOUR_KEY</span>
+      </li>
+      <li>
+        <code>A2A Agent Card</code> &mdash; 13 skills at <a href="/.well-known/agent.json" style="color: var(--accent);">/.well-known/agent.json</a>
+        <span class="detail">Google A2A compatible. Point any orchestrator at the card and go.</span>
+      </li>
+      <li>
+        <code>Alert Feed</code> &mdash; Subscribe to new data across any domain.
+        <span class="detail">Webhook or SSE. Get notified when upstream agencies publish new records.</span>
+      </li>
+      <li>
+        <code>Citation-Ready</code> &mdash; Every response includes formatted citations agents paste directly.
+        <span class="detail">No post-processing. No hallucinated sources. The citation array is copy-paste ready.</span>
+      </li>
+    </ul>
   </div>
 
-  <!-- Every Response -->
-  <div class="section">
-    <p class="section-label">Every Response</p>
-    <h2>One envelope, every domain</h2>
-    <p class="intro">Agents parse it once. Every endpoint returns the same four metadata fields alongside domain-specific data.</p>
-
-    <div class="envelope-grid">
-      <ul class="envelope-list">
-        <li><code>domain</code> &mdash; Which dataset ("flights", "cars", "water"...)</li>
-        <li><code>source</code> &mdash; The federal agency or data provider</li>
-        <li><code>source_url</code> &mdash; Direct link to the upstream source</li>
-        <li><code>freshness</code> &mdash; ISO 8601 timestamp of last data pull</li>
-      </ul>
-      <div class="code-block" style="margin-bottom: 0;">
-{
-  <span class="key">"domain"</span>: <span class="str">"flights"</span>,
-  <span class="key">"source"</span>: <span class="str">"FAA NAS + Open-Meteo"</span>,
-  <span class="key">"source_url"</span>: <span class="str">"https://nasstatus.faa.gov"</span>,
-  <span class="key">"freshness"</span>: <span class="str">"2026-03-19T14:30:00Z"</span>,
-  <span class="comment">// ... domain data</span>
-}
-      </div>
-    </div>
-  </div>
-
-  <!-- Pricing -->
+  <!-- Section 4: Pricing -->
   <div class="section">
     <p class="section-label">Pricing</p>
-    <h2>Five tiers. All 7 domains on every one.</h2>
+    <h2>All 16 domains on every tier</h2>
     <div class="pricing-tiers">
       <div class="tier">
         <div class="tier-name">Free</div>
@@ -458,12 +494,13 @@
         <div class="tier-price">$19/mo</div>
         <div class="tier-limit">5,000 req/day</div>
       </div>
-      <div class="tier highlight">
+      <div class="tier">
         <div class="tier-name">Pro</div>
         <div class="tier-price">$49/mo</div>
         <div class="tier-limit">25,000 req/day</div>
       </div>
-      <div class="tier">
+      <div class="tier highlight">
+        <span class="tier-badge">Most Popular</span>
         <div class="tier-name">Agent</div>
         <div class="tier-price">$149/mo</div>
         <div class="tier-limit">100,000 req/day</div>
@@ -479,26 +516,25 @@
     </p>
   </div>
 
-  <!-- Get Started -->
+  <!-- Section 5: Get Started -->
   <div class="section">
     <p class="section-label">Get Started</p>
-    <h2>Three steps. Under a minute.</h2>
-
-    <ol class="get-started-steps">
-      <li>Sign up at <a href="/pricing.html" style="color: var(--accent);">openprimitive.com/pricing</a> and grab your API key.</li>
-      <li>Pass the key as an <code style="font-family: var(--font-mono); color: var(--text);">X-API-Key</code> header or <code style="font-family: var(--font-mono); color: var(--text);">api_key</code> query parameter.</li>
-      <li>Hit any of the 7 endpoints. That's it.</li>
-    </ol>
+    <h2>One curl. Real data.</h2>
 
     <div class="code-block">
-<span class="comment"># Check flight delays for Delta</span>
-curl -H <span class="str">"X-API-Key: YOUR_KEY"</span> https://api.openprimitive.com/v1/flights/DL
+<span class="comment"># Ask a question in plain English</span>
+curl -H <span class="str">"X-API-Key: YOUR_KEY"</span> \
+  <span class="str">"https://api.openprimitive.com/v1/ask?q=is+tylenol+safe+with+ibuprofen"</span>
 
-<span class="comment"># Search hospital quality</span>
-curl -H <span class="str">"X-API-Key: YOUR_KEY"</span> <span class="str">"https://api.openprimitive.com/v1/hospitals?q=mayo+clinic"</span>
+<span class="comment"># Or hit a domain directly</span>
+curl -H <span class="str">"X-API-Key: YOUR_KEY"</span> \
+  <span class="str">"https://api.openprimitive.com/v1/hospitals?q=mayo+clinic"</span>
+    </div>
 
-<span class="comment"># Or use a query parameter</span>
-curl <span class="str">"https://api.openprimitive.com/v1/drugs?name=metformin&amp;api_key=YOUR_KEY"</span>
+    <div class="get-started-actions">
+      <a href="/pricing.html">Register for an API key</a>
+      <a href="https://github.com/writesdavid/open-primitive-api">GitHub</a>
+      <a href="/openapi.json">OpenAPI Spec</a>
     </div>
   </div>
 
@@ -507,8 +543,10 @@ curl <span class="str">"https://api.openprimitive.com/v1/drugs?name=metformin&am
     <span style="color: var(--muted); font-size: 0.85rem;">Open Primitive API</span>
     <nav class="footer-links">
       <a href="https://openprimitive.com">openprimitive.com</a>
+      <a href="/protocol.html">Protocol</a>
       <a href="/stats.html">Stats</a>
-      <a href="/openapi.json">OpenAPI Spec</a>
+      <a href="/status.html">Status</a>
+      <a href="/openapi.json">OpenAPI</a>
       <a href="/llms.txt">llms.txt</a>
       <a href="https://github.com/writesdavid/open-primitive-api">GitHub</a>
     </nav>

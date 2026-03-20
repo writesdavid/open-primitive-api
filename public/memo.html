@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open Primitive — Investor Memo</title>
+  <title>Open Primitive Protocol — Investor Memo</title>
   <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
   <style>
     :root {
@@ -101,6 +101,29 @@
       color: var(--muted);
     }
 
+    .component-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.95rem;
+    }
+
+    .component-table th,
+    .component-table td {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .component-table th {
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+    }
+
     footer {
       margin-top: 4rem;
       padding-top: 1.5rem;
@@ -114,50 +137,78 @@
       header h1 { font-size: 1.6rem; }
       h2 { font-size: 1.15rem; }
       p { font-size: 1rem; }
-      .tier-table { font-size: 0.85rem; }
-      .tier-table th, .tier-table td { padding: 0.5rem; }
+      .tier-table, .component-table { font-size: 0.85rem; }
+      .tier-table th, .tier-table td,
+      .component-table th, .component-table td { padding: 0.5rem; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Open Primitive</h1>
-  <p>The federal data layer for AI agents and human decisions</p>
+  <h1>Open Primitive Protocol</h1>
+  <p>The data layer of the agent internet</p>
 </header>
 
 <section>
   <h2>The Market</h2>
-  <p>Ten federal agencies produce the data behind $2T+ in annual US consumer decisions. Transportation, food safety, healthcare quality, pharmaceutical risk, financial regulation. Every American touches this data whether they know it or not.</p>
-  <p>53% of Americans now use AI assistants for health and safety decisions. That number climbs every quarter. These assistants need ground truth. Without primary federal sources, they guess. They hallucinate. They get people hurt.</p>
-  <p>AI agents need structured, verified data to function. This is infrastructure, not a feature request.</p>
-  <p>The RegTech and compliance market sits at $23B in 2026 and projects to $77B by 2034. Thomson Reuters and Wolters Kluwer charge six figures annually for structured access to public data. They built those businesses before agents existed. The agent economy needs a native data layer, and nobody has built it.</p>
+  <p>Bot traffic will exceed human traffic by 2027. Cloudflare's CEO said it plainly on March 19, 2026: the internet is becoming a machine-to-machine network. The browsing era is ending. The agent era has started.</p>
+  <p>The Big Four will spend $700B on AI infrastructure in 2026. Salesforce Agentforce, ServiceNow agent workflows, Microsoft Copilot Studio. Every major platform now sells agent orchestration. Every agent needs data to act on. Trusted data. Verifiable data. Data with provenance.</p>
+  <p>RegTech and compliance spending sits at $23B in 2026 and projects to $77B by 2034. Thomson Reuters and Wolters Kluwer charge six figures annually for structured access to public data. They built those businesses before agents existed.</p>
+  <p>AI-native data companies trade at 25-30x revenue. Traditional SaaS trades at 6x. The market pays a premium for companies that make data agent-consumable. That premium exists because almost nobody does it well.</p>
 </section>
 
 <section>
   <h2>The Problem</h2>
-  <p>Federal data is scattered across dozens of agencies. Each publishes in different formats, different schemas, different update frequencies. The FDA uses one API pattern. The EPA uses another. The FAA publishes XML. The BTS ships CSV dumps quarterly. CMS changes its endpoints without notice.</p>
-  <p>No unified query layer exists. Enigma raised $130M to try. They pivoted away from government data entirely. The problem beat them.</p>
-  <p>AI models train on summaries of summaries. Fidelity degrades at every layer. When Claude answers "is my water safe?" it has no primary source to reference. It synthesizes fragments from blog posts and news articles. The answer sounds confident. The answer is often wrong.</p>
-  <p>Every developer who wants federal data rebuilds the same parsing, the same error handling, the same caching. Thousands of engineers solving the same problem independently, each with partial coverage.</p>
+  <p>Agents consume data with no provenance, no freshness guarantees, no confidence scores. An agent pulls a food recall from a cached search result. The recall was updated six hours ago. The agent doesn't know. The user doesn't know. Decisions get made on stale data dressed up as fact.</p>
+  <p>The agent internet has no data envelope standard. MCP defines how agents call tools. A2A defines how agents talk to each other. Nobody defines how data providers make data trustworthy for agent consumption. The plumbing exists. The water quality doesn't.</p>
+  <p>Federal data is the sharpest version of this problem. The FDA suspended OpenFDA dataset updates in March 2025. The government deleted 3,000+ datasets from federal repositories. Data.gov went offline during the October 2025 shutdown. Agencies publish in incompatible formats, change endpoints without notice, and overwrite historical records. No cross-agency integration exists.</p>
+  <p>Every developer who touches federal data rebuilds the same parsing, the same error handling, the same caching. Every agent that needs government records improvises. The absence of a standard guarantees fragility.</p>
 </section>
 
 <section>
-  <h2>The Product</h2>
-  <p>Open Primitive connects 13 federal data domains through one unified REST API. Water quality. Food recalls. Drug adverse events. Hospital safety scores. Vehicle complaints. Airline reliability. Nursing home inspections. Each domain normalized to a consistent schema.</p>
-  <p>The MCP server exposes 13 tools. AI agents call them directly. No prompt engineering required. No retrieval-augmented generation workarounds. The agent asks for water violation data in a ZIP code and gets structured federal records with source URLs.</p>
-  <p>The A2A agent card makes Open Primitive discoverable by agent orchestrators. Agents find us without human configuration.</p>
+  <h2>The Protocol</h2>
+  <p>The Open Primitive Protocol (OPP) defines how data providers make data agent-consumable, verifiable, and discoverable. Three components.</p>
+  <table class="component-table">
+    <thead>
+      <tr><th>Component</th><th>Function</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="stat">Manifest</span></td><td>Machine-readable declaration of available domains, update frequencies, schema versions, and data quality grades. Agents read the manifest to know what a provider offers and how fresh it is.</td></tr>
+      <tr><td><span class="stat">Signed Envelope</span></td><td>Every response wrapped in a cryptographic envelope: source agency, retrieval timestamp, confidence score, citation URL, and Ed25519 signature. Agents verify provenance without trusting the provider on faith.</td></tr>
+      <tr><td><span class="stat">Standardized Endpoint</span></td><td>Consistent query patterns across all data domains. Natural language routing, structured filters, pagination, and cross-domain joins. One interface regardless of source agency.</td></tr>
+    </tbody>
+  </table>
+  <p>OPP is compatible with MCP, A2A, OpenAPI, JSON-LD, and W3C Data Integrity. It does not replace agent communication protocols. It fills the gap they left: data trust.</p>
   <div class="highlight">
-    <p>Cross-domain queries set this apart. A composite safety score for any US ZIP code, joining water quality, hospital ratings, food inspection history, and drug event frequency. Nobody else joins federal datasets across agencies.</p>
+    <p>Block is a founding member of AAIF. OPP has a direct path to standards body proposal. First to define the data envelope standard holds the TCP/IP position of the agent internet.</p>
   </div>
-  <p>Every API response includes the domain, source agency, source URL, and freshness timestamp. Provenance is not optional. Historical archiving captures time-series data that federal agencies themselves delete or overwrite. Within 12 months of operation, this archive becomes irreplaceable.</p>
 </section>
 
 <section>
-  <h2>The Traction</h2>
-  <p>The API is live at api.openprimitive.com. Ten federal agencies connected and returning data. Agent traffic detection distinguishes machine callers from human browsers. Webhook alerting pushes new recalls and violations to subscribers the moment federal agencies publish them.</p>
-  <p>Seven consumer-facing tools run at openprimitive.com. Each one demonstrates a data domain: flight reliability, vehicle defects, water violations, food recalls, drug side effects, hospital quality, supplement efficacy. These tools validate the API, generate organic traffic, and prove the data works at the point of decision.</p>
-  <p>The entire platform was built and shipped by one engineer. Every scraper, every parser, every API endpoint, every consumer tool. The technical foundation exists. What comes next is scale.</p>
+  <h2>The Implementation</h2>
+  <p>The reference implementation is live at api.openprimitive.com. 16 federal data domains. 11 agencies. Running in production.</p>
+  <p>The MCP server exposes 13 tools. AI agents call them directly. No prompt engineering. No RAG workarounds. The agent asks for water violations in a ZIP code and gets structured federal records with source URLs, retrieval timestamps, and data quality grades.</p>
+  <p>Natural language query routing maps plain questions to the right domain, the right agency, the right endpoint. Cross-domain intelligence joins datasets that were never designed to talk to each other: composite safety scores by ZIP code, location profiles that combine water quality with hospital ratings with food inspection history.</p>
+  <p>Every response is citation-ready. Source agency, source URL, freshness timestamp, reasoning hints. Agents pass these citations through to users. Trust propagates from the primary source to the final answer.</p>
+</section>
+
+<section>
+  <h2>The Moat</h2>
+  <p><span class="stat">Protocol definition.</span> First to define the data envelope standard sets the terms for every provider that follows. OPP becomes the specification other providers adopt. This is the TCP/IP position, not the application layer.</p>
+  <p><span class="stat">Historical archive.</span> Federal agencies overwrite current data. They do not maintain accessible time-series. Every day Open Primitive runs, the archive grows. After 12 months, this longitudinal data exists nowhere else. After 24 months, the switching cost is permanent. Historical data compounds daily and cannot be replicated retroactively.</p>
+  <p><span class="stat">Cryptographic provenance.</span> Ed25519 signed responses create a verifiable chain from federal source to agent consumer. Competing services can serve data. They cannot prove it unchanged from the source without rebuilding the signing infrastructure.</p>
+  <p><span class="stat">Cross-domain joins.</span> No single agency joins its data with other agencies. Water quality plus hospital ratings plus drug events plus food inspections for a single location requires normalization work across incompatible schemas. Tedious. Essential. Expensive to replicate.</p>
+  <p><span class="stat">Editorial judgment.</span> Which data benefits from AI translation and which benefits from reading raw? This question has no algorithmic answer. The learning layer at openprimitive.com captures this judgment. It compounds into a taxonomy of data legibility that no pure-API competitor will build.</p>
+</section>
+
+<section>
+  <h2>The Competition</h2>
+  <p><span class="stat">us-gov-open-data-mcp.</span> 300+ tools. Raw wrapper around federal APIs. No protocol layer, no provenance, no confidence scores, no human-facing layer. A firehose with no filter.</p>
+  <p><span class="stat">GovInfo MCP.</span> Official but single-agency. Congressional and regulatory documents only. No cross-domain intelligence.</p>
+  <p><span class="stat">Google Data Commons MCP.</span> Statistical aggregates from Census and World Bank. No editorial judgment. No real-time federal data. No signed provenance.</p>
+  <p><span class="stat">Thomson Reuters / Wolters Kluwer.</span> Six-figure annual contracts for structured public data. Cannot go free. Cannot serve agents at $0.005/call. Business model prevents them from competing on price or protocol openness.</p>
+  <p>Nobody defines the data envelope standard. Nobody combines protocol specification with reference implementation with human editorial layer. The market is open.</p>
 </section>
 
 <section>
@@ -167,52 +218,33 @@
       <tr><th>Tier</th><th>Price</th><th>Target</th></tr>
     </thead>
     <tbody>
-      <tr><td>Free</td><td>$0</td><td>Developers, exploration</td></tr>
-      <tr><td>Builder</td><td>$29/mo</td><td>Indie developers, small apps</td></tr>
-      <tr><td>Pro</td><td>$99/mo</td><td>Startups, production apps</td></tr>
-      <tr><td>Agent</td><td>$0.005/call</td><td>AI agents, orchestrators</td></tr>
-      <tr><td>Enterprise</td><td>Custom</td><td>Compliance teams, large orgs</td></tr>
+      <tr><td>Free</td><td>$0</td><td>Developers, public domain data, adoption engine</td></tr>
+      <tr><td>Agent</td><td>$0.005/call</td><td>AI agents, orchestrators, agent platforms</td></tr>
+      <tr><td>Enterprise</td><td>Custom</td><td>SLA, custom endpoints, historical archive access</td></tr>
+      <tr><td>Protocol License</td><td>Revenue share</td><td>Other providers adopt OPP, join the network</td></tr>
     </tbody>
   </table>
-  <p>The Agent tier is novel. Nobody prices federal data for AI consumption. Pay-per-call aligns with how agents work: high volume, low friction, no subscriptions to manage.</p>
+  <p>Free tier drives adoption. Public domain data at zero marginal cost. The data is free. The trust layer is the product.</p>
+  <p>Agent tier pricing aligns with how agents work: high volume, low friction, no subscriptions. At $0.005 per call, 277K calls per day produces $500K ARR. Agent call volume scales with agent deployment, not with a sales team.</p>
+  <p>Protocol licensing creates a network. Other data providers adopt OPP to make their data agent-consumable. Each new provider increases the value of the standard. Each new agent that trusts OPP-signed envelopes increases demand for every provider in the network.</p>
   <div class="highlight">
-    <p>At $0.005 per call, 277K calls per day produces $500K ARR. AI-native data companies trade at 25-30x revenue. $500K ARR implies a $12-15M valuation.</p>
+    <p>$500K ARR at 25-30x AI-native revenue multiples implies $12-15M valuation. The protocol licensing layer has no revenue ceiling.</p>
   </div>
-  <p>Agent call volume scales with agent adoption. As companies deploy more AI agents, each agent needs verified data for every decision. Open Primitive sits in the critical path. Usage grows with the agent economy, not with our sales team.</p>
-</section>
-
-<section>
-  <h2>The Moat</h2>
-  <p>Four layers protect this business, and each one compounds over time.</p>
-  <p><span class="stat">Cross-domain composites.</span> Joining water quality, hospital scores, drug events, and food inspections per ZIP code requires normalizing data from agencies that were never designed to talk to each other. This integration work is tedious, unglamorous, and essential. Competitors would need to rebuild it from scratch.</p>
-  <p><span class="stat">Historical archive.</span> Federal agencies overwrite current data. They do not maintain accessible time-series. Every day Open Primitive runs, the archive grows. After 12 months, we hold longitudinal federal data that exists nowhere else. After 24 months, the switching cost is permanent.</p>
-  <p><span class="stat">Agent network effects.</span> MCP and A2A registration puts Open Primitive in agent tool registries. Once agents discover and rely on these tools, they route queries here by default. Each new agent integration increases the value for every other agent in the network.</p>
-  <p><span class="stat">Query intelligence.</span> Logs reveal what agents actually ask for. Which domains, which geographies, which cross-references. This data shapes product decisions, surfaces unmet demand, and creates a flywheel that no competitor can replicate without equivalent traffic.</p>
-</section>
-
-<section>
-  <h2>The Competition</h2>
-  <p><span class="stat">Enigma</span> raised $130M to structure government data. They abandoned the mission and pivoted to KYB (know-your-business) verification. The government data problem remains unsolved.</p>
-  <p><span class="stat">Socrata (Tyler Technologies)</span> sells data portals to governments. Their customer is the agency, not the developer. Not the agent.</p>
-  <p><span class="stat">data.gov</span> is a metadata catalog. It points to datasets. It does not serve queryable data.</p>
-  <p><span class="stat">OpenFDA</span> covers a single agency. Dataset updates were suspended in March 2025. Single-agency solutions cannot provide cross-domain intelligence.</p>
-  <p>Nobody builds unified cross-agency APIs designed for agent consumption. The market is open.</p>
 </section>
 
 <section>
   <h2>The Team</h2>
-  <p>David Hamilton leads content engineering and AI infrastructure at Block. He built all 7 consumer tools and the unified API as a solo engineer. The scrapers, the parsers, the normalization layers, the REST endpoints, the MCP server, the consumer interfaces. Shipped and live.</p>
-  <p>This is a builder who ships. The technical foundation proves the concept works. What comes next requires capital and a team.</p>
+  <p>David Hamilton. Content engineering and AI infrastructure at Block. Block is a founding member of AAIF. Built the entire protocol specification, reference implementation, 16-domain API, MCP server, and 7 consumer tools as a solo engineer. Shipped and live.</p>
 </section>
 
 <section>
   <h2>The Ask</h2>
-  <p>Seed funding to execute three priorities. First, expand from 13 to 20+ federal data domains, covering financial regulation, environmental compliance, and housing safety. Second, build enterprise features: SSO, audit logs, SLA guarantees, and dedicated support. Third, hire the first engineer and begin go-to-market.</p>
-  <p>The infrastructure exists. The data flows. The agents are calling. This is the moment to scale.</p>
+  <p>Seed funding to execute five priorities. Expand to 30+ federal data domains. Implement Ed25519 response signing across all endpoints. Build the provider registry so other data sources can adopt OPP. Hire the first engineer. Propose OPP as an AAIF standard.</p>
+  <p>The protocol is defined. The reference implementation runs in production. The agent internet needs a data trust layer. This is the moment to own it.</p>
 </section>
 
 <footer>
-  <p>Open Primitive &mdash; openprimitive.com &mdash; March 2026</p>
+  <p>Open Primitive Protocol &mdash; openprimitive.com &mdash; March 2026</p>
 </footer>
 
 </body>

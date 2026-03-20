@@ -1,6 +1,6 @@
 {
   "name": "Open Primitive",
-  "description": "Federal public safety and consumer data across 13 US government domains. Real agencies, real numbers, structured for agents.",
+  "description": "Open Primitive Protocol reference implementation. 16 US federal data domains with signed, sourced, scored responses.",
   "url": "https://api.openprimitive.com",
   "version": "1.0.0",
   "provider": {
@@ -20,7 +20,7 @@
     {
       "id": "flight_status",
       "name": "Flight Status",
-      "description": "FAA ground delays, weather disruptions, and historical on-time performance for 7 major US airlines across 30 hub airports. Sources: FAA NAS, BTS on-time data, Open-Meteo forecasts.",
+      "description": "FAA ground delays, weather disruptions, and historical on-time performance for 7 major US airlines across 30 hub airports. Sources: FAA NAS, BTS on-time data, Open-Meteo forecasts. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "Are there FAA delays at JFK right now?",
         "How reliable is Delta out of Atlanta in January?",
@@ -31,7 +31,7 @@
     {
       "id": "car_safety",
       "name": "Car Safety",
-      "description": "NHTSA 5-star crash test ratings and active recall notices for vehicles sold in the US. Covers frontal, side, and rollover ratings plus open recall campaigns with remedy status.",
+      "description": "NHTSA 5-star crash test ratings and active recall notices for vehicles sold in the US. Covers frontal, side, and rollover ratings plus open recall campaigns with remedy status. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "What are the crash ratings for a 2024 Toyota Camry?",
         "Are there open recalls on my 2021 Ford F-150?",
@@ -42,7 +42,7 @@
     {
       "id": "food_recalls",
       "name": "Food Recalls",
-      "description": "Active FDA food recall alerts including reason, severity classification, and distribution scope. Covers Class I (serious health risk) through Class III recalls for products on US shelves.",
+      "description": "Active FDA food recall alerts including reason, severity classification, and distribution scope. Covers Class I (serious health risk) through Class III recalls for products on US shelves. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "Any recent Class I food recalls?",
         "Has peanut butter been recalled this month?",
@@ -53,7 +53,7 @@
     {
       "id": "water_safety",
       "name": "Water Safety",
-      "description": "EPA Safe Drinking Water Act violations by water system, county, or ZIP code. Covers contaminant levels, treatment failures, and monitoring gaps reported to the EPA SDWIS database.",
+      "description": "EPA Safe Drinking Water Act violations by water system, county, or ZIP code. Covers contaminant levels, treatment failures, and monitoring gaps reported to the EPA SDWIS database. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "Does my ZIP code 48201 have clean drinking water?",
         "What EPA violations has Detroit's water system had?",
@@ -64,7 +64,7 @@
     {
       "id": "drug_safety",
       "name": "Drug Safety",
-      "description": "FDA adverse event reports (FAERS) and structured product labeling for prescription and OTC drugs. Surfaces reported side effects, black box warnings, and drug interaction signals.",
+      "description": "FDA adverse event reports (FAERS) and structured product labeling for prescription and OTC drugs. Surfaces reported side effects, black box warnings, and drug interaction signals. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "What adverse events are reported for metformin?",
         "Does lisinopril have a black box warning?",
@@ -75,7 +75,7 @@
     {
       "id": "hospital_quality",
       "name": "Hospital Quality",
-      "description": "CMS star ratings, mortality rates, readmission rates, and patient experience scores for every Medicare-certified hospital in the US. Direct from Hospital Compare.",
+      "description": "CMS star ratings, mortality rates, readmission rates, and patient experience scores for every Medicare-certified hospital in the US. Direct from Hospital Compare. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "What's the CMS star rating for Mayo Clinic?",
         "Which hospitals near ZIP 10001 have the lowest readmission rates?",
@@ -86,7 +86,7 @@
     {
       "id": "health_evidence",
       "name": "Health Evidence",
-      "description": "PubMed research summaries for health claims and supplement questions. Returns study counts, evidence quality tiers, and plain-language summaries so agents can ground health answers in published research.",
+      "description": "PubMed research summaries for health claims and supplement questions. Returns study counts, evidence quality tiers, and plain-language summaries so agents can ground health answers in published research. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "Is there evidence that turmeric reduces inflammation?",
         "What does the research say about melatonin for sleep?",
@@ -97,7 +97,7 @@
     {
       "id": "location_safety",
       "name": "Location Safety",
-      "description": "Cross-domain safety profile for any US ZIP code. Pulls water violations, hospital quality, food recall exposure, and air travel reliability into a single composite view. Built for relocation decisions and local risk assessment.",
+      "description": "Cross-domain safety profile for any US ZIP code. Pulls water violations, hospital quality, food recall exposure, and air travel reliability into a single composite view. Built for relocation decisions and local risk assessment. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "Give me a safety profile for ZIP code 90210.",
         "How does 60614 compare to 30301 on public safety data?",
@@ -108,7 +108,7 @@
     {
       "id": "nutrition_lookup",
       "name": "Nutrition Facts",
-      "description": "USDA food nutrition data including calories, macronutrients, vitamins, and minerals for thousands of common foods. Direct from the USDA FoodData Central database.",
+      "description": "USDA food nutrition data including calories, macronutrients, vitamins, and minerals for thousands of common foods. Direct from the USDA FoodData Central database. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "How many calories in a banana?",
         "Nutrition facts for Greek yogurt",
@@ -119,7 +119,7 @@
     {
       "id": "employment_data",
       "name": "Employment & Economic Data",
-      "description": "Bureau of Labor Statistics data covering unemployment rates, consumer price index, average wages, and labor force participation. Monthly and annual series direct from BLS public APIs.",
+      "description": "Bureau of Labor Statistics data covering unemployment rates, consumer price index, average wages, and labor force participation. Monthly and annual series direct from BLS public APIs. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "What is the current unemployment rate?",
         "Show me CPI data for the last year",
@@ -130,7 +130,7 @@
     {
       "id": "demographics",
       "name": "Demographics by ZIP Code",
-      "description": "Census American Community Survey data by ZIP code including median household income, population counts, poverty rates, housing occupancy, and educational attainment. Direct from Census ACS 5-year estimates.",
+      "description": "Census American Community Survey data by ZIP code including median household income, population counts, poverty rates, housing occupancy, and educational attainment. Direct from Census ACS 5-year estimates. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "What is the median income in 90210?",
         "Population of ZIP 10001",
@@ -141,7 +141,7 @@
     {
       "id": "product_safety",
       "name": "Consumer Product Recalls",
-      "description": "Consumer Product Safety Commission recall notices for household goods, children's products, and electronics sold in the US. Covers hazard descriptions, remedy actions, and incident counts.",
+      "description": "Consumer Product Safety Commission recall notices for household goods, children's products, and electronics sold in the US. Covers hazard descriptions, remedy actions, and incident counts. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "Recent product recalls",
         "Are there recalls on cribs?",
@@ -152,13 +152,46 @@
     {
       "id": "corporate_filings",
       "name": "SEC Corporate Filings",
-      "description": "SEC EDGAR filings including 10-K annual reports, 10-Q quarterly reports, and 8-K current reports for publicly traded US companies. Structured access to financial disclosures and corporate events.",
+      "description": "SEC EDGAR filings including 10-K annual reports, 10-Q quarterly reports, and 8-K current reports for publicly traded US companies. Structured access to financial disclosures and corporate events. Returns OPP envelope with provenance, confidence score, and citation.",
       "examples": [
         "Apple's latest 10-K filing",
         "Tesla revenue history",
         "Recent 8-K filings for Microsoft"
       ],
       "tags": ["sec", "edgar", "filings", "financial", "corporate"]
+    },
+    {
+      "id": "natural_language_query",
+      "name": "Natural Language Query",
+      "description": "Ask any question in plain language — Open Primitive routes to the right domain(s) and returns structured data. Returns OPP envelope with provenance, confidence score, and citation.",
+      "examples": [
+        "Is the water safe to drink in Newark?",
+        "What's the safest SUV for 2024?",
+        "Compare hospitals near me to the national average"
+      ],
+      "tags": ["natural-language", "routing", "multi-domain", "query"]
+    },
+    {
+      "id": "weather_forecast",
+      "name": "Weather Forecast",
+      "description": "NOAA weather forecasts and active alerts by ZIP code or state. Returns OPP envelope with provenance, confidence score, and citation.",
+      "examples": [
+        "Weather forecast for ZIP 10001",
+        "Any active weather alerts in Florida?",
+        "Will it rain in Chicago this week?"
+      ],
+      "tags": ["noaa", "weather", "forecast", "alerts", "climate"]
+    },
+    {
+      "id": "alert_feed",
+      "name": "Alert Feed",
+      "description": "Proactive feed of new federal safety alerts — food recalls, product recalls, water violations. Returns OPP envelope with provenance, confidence score, and citation.",
+      "examples": [
+        "What new safety alerts came out today?",
+        "Recent federal recalls across all categories",
+        "Any new water violations this week?"
+      ],
+      "tags": ["alerts", "feed", "recalls", "safety", "proactive"]
     }
   ]
 }

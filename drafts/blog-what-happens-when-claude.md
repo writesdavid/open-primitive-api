@@ -1,34 +1,40 @@
-# What happens when Claude tries to look up your water quality
+# The agent internet is missing its data layer
 
 Ask Claude if the tap water is safe in Flint, Michigan.
 
-Go ahead. Type it in right now. "Is the water safe to drink in Flint?"
+You will get one of two answers. A confident summary from training data, maybe 2023, maybe older. Lead pipes replaced, situation improving, consult local authorities. Or a hedge. "I don't have access to real-time data, but..." followed by five paragraphs of nothing.
 
-You will get one of two answers. The first: a confident summary cobbled from training data, circa 2023, maybe older. Lead pipes replaced, situation improving, consult local authorities. The second: a careful hedge. "I don't have access to real-time data, but..." followed by five paragraphs of nothing.
-
-Neither answer tells you that the Flint 48502 zip code had 4 EPA Safe Drinking Water Act violations in the last 3 years. Neither gives you the violation codes. Neither links to the federal compliance record. Neither tells you when the data was last updated.
+Neither answer tells you that ZIP 48502 had 4 EPA Safe Drinking Water Act violations in the last 3 years. Neither gives you the violation codes. Neither tells you when the data was last updated.
 
 The agent sounds like it knows. It does not know.
 
-## The gap
+But this is not a story about water.
 
-This is the core problem with AI and public data. Federal agencies collect extraordinary information about the safety of your water, your food, your hospitals, your drugs. Ten agencies. Exposed through dozens of APIs, XML feeds, CSV dumps, and legacy SOAP endpoints built in 2004.
+## Every piece of data has the same problem
 
-AI agents cannot reach any of it.
+An agent looks up drug interactions. It gets JSON from an API. The JSON has no timestamp. No source authority. No confidence score. The agent treats it as fact and passes it downstream.
 
-Claude has no tool to call the EPA's SDWIS database. ChatGPT cannot query the FDA's adverse event reports. No agent framework ships with a connector to CMS hospital ratings or NHTSA recall data. The agents are flying blind, and they fill the void with confidence.
+An agent checks hospital ratings. The response arrives with no signature, no cache age, no provenance chain. The agent cannot distinguish a live federal record from a stale cache served by a third-party aggregator three hops removed from CMS.
 
-This is not a hallucination problem. Hallucination implies the model made something up. This is an access problem. The data exists. The model cannot get to it.
+An agent queries food recall status. The data says "no active recalls." But the data is 6 days old, and 2 new recalls posted yesterday. The agent has no way to know. Nothing in the response tells it.
 
-The distance between what an agent confidently says about your drinking water and what the EPA compliance record actually shows — that distance is dangerous. People make decisions in that gap. They move into apartments. They fill bottles for their kids.
+This is the state of agent data consumption in 2026. Raw JSON. No envelope. No metadata about the metadata. The agent trusts everything it receives because the responses give it nothing to evaluate.
 
-## One API for 13 federal data domains
+The HTTP internet solved this for browsers decades ago. Content-Type headers. Cache-Control. TLS certificates. Browsers know what they are looking at, how old it is, and whether the server is who it claims to be.
 
-We built Open Primitive to close the gap.
+The agent internet has none of this. Agents consume data naked.
 
-Open Primitive pulls primary-source data from 10 federal agencies across 13 domains: water quality, food recalls, drug adverse events, hospital ratings, vehicle safety, airline performance, clinical trials, nursing home inspections, health supplement reports, and more.
+## The protocol
 
-Every domain follows the same pattern. Structured JSON. Source citations. Timestamps. Federal identifiers.
+I built the Open Primitive Protocol to close this gap. OPP defines a standard envelope for agent-consumable data. Four fields that every response must carry:
+
+**Source authority.** The specific federal database that produced this record. Not "government data." The EPA SDWIS system, query ID 48502, enforcement records table.
+
+**Observation timestamp.** When this data was captured from the source. Not when the cache was built. Not when the server processed the request. When the underlying observation happened.
+
+**Confidence score.** How much the agent should trust this response. A live federal API query scores higher than a cached result from 72 hours ago. A cross-referenced result confirmed by 3 agencies scores higher than a single-source lookup.
+
+**Verification chain.** A signed hash so downstream agents can confirm the payload was not modified in transit.
 
 When an agent calls:
 
@@ -36,66 +42,30 @@ When an agent calls:
 GET https://api.openprimitive.com/v1/water?zip=48502
 ```
 
-It gets back EPA violation records for Flint. Real violations. With compliance period dates, contaminant codes, and a direct link to the SDWIS source. No summary. No interpretation. The federal record.
+It gets back EPA violation records for Flint. Real violations. Compliance period dates. Contaminant codes. Direct link to the SDWIS source. And an envelope that tells the agent exactly what it is holding, how fresh it is, and how much to trust it.
 
-When an agent calls:
+The agent stops guessing. It starts evaluating.
 
-```
-GET https://api.openprimitive.com/v1/drugs?name=aspirin
-```
+## 16 domains prove it works
 
-It gets back 601,247 adverse event reports from the FDA's FAERS database. Reported outcomes. Demographic breakdowns. The actual pharmacovigilance data that the FDA uses to issue safety signals.
+The reference implementation covers 16 federal data domains across 10 agencies. Water quality. Drug adverse events. Hospital ratings. Food recalls. Vehicle defects. Airline performance. Clinical trials. Nursing home inspections. Workplace safety. Air quality. Medical devices. Health supplements. School safety.
 
-The agent stops guessing. It starts citing.
+Every domain follows the same envelope. Same provenance format. Same freshness indicators. Same confidence scoring. An agent that learns to read one Open Primitive response can read all 16.
 
-## The cross-domain moment
+Cross-domain queries work because the envelope is consistent. A single call against a zip code returns EPA water data, CMS hospital scores, and FDA food recall proximity. Three agencies, three databases, one protocol envelope. No federal agency crosses those boundaries. The protocol does.
 
-Individual data feeds exist. Scattered, inconsistent, hard to parse — but they exist. What does not exist is the cross-domain query.
+## The agent internet needs infrastructure
 
-No federal agency answers this question: "How safe is this zip code?"
+MCP gave agents the ability to call tools. A2A gave agents the ability to find each other. Neither protocol defines what the data itself should look like when it arrives.
 
-We do.
+That is the missing layer. Not more endpoints. Not more tools. A standard for what a trustworthy data response contains.
 
-```
-GET https://api.openprimitive.com/v1/safety?zip=48502
-```
+The HTTP internet runs on standards that most people never think about. Content negotiation. Cache headers. Certificate chains. These standards let browsers make decisions about data without asking humans. The agent internet needs the same thing.
 
-That call combines EPA water violations, CMS hospital quality ratings, and FDA food recall proximity into a composite safety score for a single zip code. Three agencies. Three databases. One response.
+Open Primitive Protocol is a draft of what that looks like. 16 federal domains as proof. Signed envelopes as the mechanism. Provenance, freshness, confidence, and verification as the minimum bar.
 
-No federal website does this. No AI agent can do this without structured access to the underlying data. The agencies were never designed to talk to each other. We built the bridge.
+The data was always public. The agents could always reach APIs. What was missing was the envelope that lets an agent evaluate what it received before it passes that data to a human making a decision about water, or drugs, or hospitals, or whether to move their family to a new city.
 
-A family evaluating a move to a new city gets a single score backed by 3 federal data sources. An insurance company modeling neighborhood risk gets structured JSON instead of a human Googling three websites. A local journalist investigating health disparities gets cross-referenced federal data in one API call.
+That envelope is the data layer of the agent internet. I think it matters more than the data itself.
 
-## Built for machines
-
-Here is the part that makes Open Primitive different from every other government data project.
-
-We built the first website where AI agents are the primary audience.
-
-Our traffic dashboard tracks what percentage of requests come from machines versus browsers. Our `robots.txt` does not say "go away." It says: this data is meant for you.
-
-Every response includes machine-readable metadata: data freshness timestamps, source agency identifiers, confidence indicators, and suggested related queries. We designed the payload format for token efficiency — because when Claude reads our API response, every token counts against the context window.
-
-The human-readable tools still exist. You can visit water.openprimitive.com and type in your zip code. But the human site and the API share the same data layer. Same freshness. Same sources. The human site is a reference implementation. The API is the product.
-
-## Three protocols
-
-We ship three ways for agents to connect:
-
-**MCP Server.** Claude and any MCP-compatible client can discover and call Open Primitive tools natively. Ask Claude "check the water quality in my zip code" and it calls our MCP server, gets the EPA data, and responds with cited facts instead of trained guesses.
-
-**A2A Agent Card.** Google's Agent-to-Agent protocol. Any agent framework that speaks A2A can discover Open Primitive's capabilities, negotiate the interaction, and call our endpoints without human configuration.
-
-**REST API.** For everything else. Standard HTTP. JSON responses. API key auth. Works with curl, works with Python, works with whatever agent framework ships next month.
-
-One data platform. Three protocols. Thirteen federal domains.
-
-## Live now
-
-The API is live at `api.openprimitive.com`.
-
-Thirteen domains. Ten federal agencies. Primary-source data with citations and timestamps.
-
-The next time you ask Claude about your water quality, it should not have to guess. The federal government already measured it. We made the measurement readable — for humans and machines both.
-
-The data was always public. We made it usable.
+api.openprimitive.com/protocol

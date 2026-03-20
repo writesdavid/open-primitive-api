@@ -1,18 +1,20 @@
-# Press Pitches — Open Primitive
+# Press Pitches -- Open Primitive Protocol
 
 ---
 
 ## 1. 404 Media
 
-**Subject: A federal data site built for AI agents, not browsers**
+**Subject: I built the HTTP of agent data -- a protocol that makes data trustworthy for machines**
 
-I built a website where the primary users are AI agents, not people.
+AI agents consume data with no provenance, no freshness guarantee, and no verification. Every API returns raw JSON. The agent trusts it blindly. That blind trust is how an agent confidently tells you Flint's water is fine when the EPA shows 4 violations in 3 years.
 
-Open Primitive serves raw federal data — car safety recalls, hospital quality scores, drug side effects, food contamination alerts, water violations, flight delay probabilities — across 13 domains. Each endpoint returns structured JSON designed for LLM consumption. No scraping. No API keys. No login walls. Right now, 7 tools are live with real federal source data. The MCP server lets any AI agent query all of them in one connection. Traffic stats are public at api.openprimitive.com/stats.
+I built the Open Primitive Protocol to fix this. OPP is a data envelope standard for AI agents. Every response carries source authority, observation timestamp, confidence score, and a signed verification chain. The agent does not have to trust the data. It can check.
 
-Federal agencies publish critical data in formats that punish the people who need it most. PDFs, nested portals, inconsistent schemas. AI agents can translate that mess — but only if someone builds the clean layer between government servers and the models. That's what this is. One person, no funding, no startup. Just the data, structured and free.
+The reference implementation covers 16 federal data domains across 10 agencies. Water violations from EPA. Drug adverse events from FDA. Hospital ratings from CMS. Vehicle defects from NHTSA. Every domain returns the same envelope format. Cross-domain queries combine data from 3 agencies in one signed response. No federal agency crosses those boundaries. The protocol does.
 
-Live: api.openprimitive.com
+HTTP gave browsers Content-Type, Cache-Control, and TLS. The agent internet has no equivalent. OPP is a draft of what that equivalent looks like. 16 domains as proof. One person, no funding, no startup.
+
+Live: api.openprimitive.com/protocol
 
 David Hamilton
 writesdavid.substack.com
@@ -21,15 +23,21 @@ writesdavid.substack.com
 
 ## 2. TechCrunch
 
-**Subject: Solo builder ships 13-domain federal data API in a weekend**
+**Subject: Solo builder ships data envelope protocol for the agent internet -- 16 federal domains as proof**
 
-One person built a federal data API across 13 domains and shipped it with an MCP server — in a single build sprint.
+Open Primitive is not an API. It is a protocol.
 
-Open Primitive pulls live data from federal sources: NHTSA recall feeds, CMS hospital ratings, FDA food recall enforcement, EPA water violations, NLM drug interactions, BTS flight statistics, and more. Seven tools are live today. Each returns structured JSON. No API key required. The MCP server exposes all tools to any AI agent through one connection. Usage stats are public at api.openprimitive.com/stats.
+AI agents query APIs and get raw JSON with no metadata about trustworthiness. No source authority. No observation timestamp. No confidence score. No way to verify the payload was not modified between the server and the agent. The agent trusts everything by default.
 
-The pitch from every AI company is "agents will do your research." But agents need clean data to query, and federal data is a disaster of PDFs and buried portals. Open Primitive is the infrastructure layer — built for agents first, humans second. No funding. No team. The entire stack is Node.js, Express, and Vercel serverless. The thesis: if you build data endpoints that agents actually want to use, the human interface becomes optional.
+The Open Primitive Protocol defines a standard envelope that every agent-consumable data response should carry. Four fields: source authority, observation timestamp, confidence score, verification chain. The reference implementation proves the format works across 16 federal data domains and 10 agencies.
 
-Live: api.openprimitive.com
+The cross-domain capability demonstrates why the protocol matters. A single query against a zip code returns EPA water data, CMS hospital scores, and FDA food recall proximity in one signed envelope. Three agencies that were never designed to talk to each other. One protocol that makes their data composable.
+
+Ships with MCP server for Claude, A2A agent card for Google's framework, and standard REST. One envelope format across all three protocols. Solo build. Node.js and Vercel serverless. No framework, no funding, no team.
+
+The pitch from every AI company is "agents will do your research." But agents need a trust layer for the data they consume. OPP is that layer.
+
+Live: api.openprimitive.com/protocol
 
 David Hamilton
 writesdavid.substack.com
@@ -38,15 +46,21 @@ writesdavid.substack.com
 
 ## 3. Ben's Bites
 
-**Subject: MCP server with 13 federal data tools — free, no auth**
+**Subject: The agent internet is missing its data layer -- here is a protocol draft**
 
-I built an MCP server that gives your agent access to 13 federal data tools in one connection.
+HTTP gave browsers Content-Type, Cache-Control, and TLS certificates. Browsers know what they are looking at, how old it is, and whether the server is real.
 
-Car recalls from NHTSA. Hospital quality scores from CMS. Drug side effects from NLM. Food recall alerts from FDA. Water violations from EPA. Flight delay probabilities from BTS and FAA. Seven tools are live, six more in progress. Every endpoint returns structured JSON. No API key. No rate limiting yet because nobody knows about it. Public stats dashboard at api.openprimitive.com/stats.
+AI agents have none of this. Every API response arrives as raw JSON. No provenance. No freshness. No confidence score. No verification. The agent trusts everything.
 
-If you're building agents that answer real questions — "is my tap water safe," "which airline is least likely to strand me in Denver" — you need structured federal data. The government publishes it, but in formats that make agents choke. This is the clean middle layer. MCP-native, JSON-native, free. Connect your agent to api.openprimitive.com/mcp and start querying.
+I built the Open Primitive Protocol to define what a trustworthy data response looks like for machines. Four fields in every envelope: source authority, observation timestamp, confidence score, signed verification chain.
 
-Live: api.openprimitive.com
+16 federal data domains ship as the reference implementation. EPA water. FDA drugs. CMS hospitals. NHTSA vehicles. 10 agencies total. MCP server with 16 tools. A2A agent card. REST API. Same envelope format everywhere.
+
+The cross-domain query is the proof of concept. GET /v1/safety?zip=48502 returns EPA water violations, CMS hospital ratings, and FDA food recall data in one signed envelope. Three agencies. One protocol response.
+
+If you are building agents that answer real questions about safety, health, or infrastructure, the data layer matters more than the model. OPP is a draft of what that layer looks like. Free. Open. No auth required on the reference implementation.
+
+Live: api.openprimitive.com/protocol
 
 David Hamilton
 writesdavid.substack.com

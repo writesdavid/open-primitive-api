@@ -1,8 +1,15 @@
-# Open Primitive API
+# Open Primitive Protocol — Reference Implementation
 
-> Federal data for agents. 13 government data domains, one unified API.
+> The data layer of the agent internet. 16 US federal data domains, signed responses, cross-domain intelligence. Every response carries provenance, confidence, and citation metadata.
 
-## Endpoints
+Base URL: https://api.openprimitive.com
+
+## Protocol
+- Manifest: /.well-known/opp.json
+- Response envelope: domain, source, freshness, confidence, citations, proof (Ed25519)
+- Any data provider can implement OPP: https://openprimitive.com/protocol.html
+
+## Domain Endpoints
 
 - GET /v1/flights — Live airline delays and hub weather for 8 US carriers. Source: FAA NAS + Open-Meteo.
 - GET /v1/flights/:iata — Single airline by IATA code (DL, UA, AA, WN, AS, B6, G4, F9).
@@ -16,7 +23,7 @@
 - GET /v1/hospitals?id= — Hospital quality detail by provider ID.
 - GET /v1/health?q= — Research evidence for health claims. Source: PubMed/MEDLINE.
 - GET /v1/nutrition?q= — Search foods by name. Source: USDA FoodData Central.
-- GET /v1/nutrition?id= — Get detailed nutrition by FDC ID.
+- GET /v1/nutrition?id= — Detailed nutrition by FDC ID.
 - GET /v1/jobs — Latest unemployment rate. Source: Bureau of Labor Statistics.
 - GET /v1/jobs?series= — Any BLS data series by ID.
 - GET /v1/demographics?zip= — Population, income, poverty, education, housing by ZIP. Source: US Census ACS.
@@ -24,17 +31,29 @@
 - GET /v1/products?q= — Search product recalls.
 - GET /v1/sec?q= — Search SEC corporate filings. Source: SEC EDGAR.
 - GET /v1/sec?cik= — Company financial facts by CIK.
+- GET /v1/weather?lat=&lng= — 7-day forecast by coordinates. Source: NOAA National Weather Service.
 - GET /v1/safety?zip= — Cross-domain safety profile (water + hospitals composite). Source: EPA + CMS.
 
+## Cross-Domain Intelligence Endpoints
+
+- POST /v1/ask — Natural language query routed to the right domain. Send { "q": "Is my tap water safe in 48201?" } and the API identifies the domain, fetches data, returns a structured answer.
+- GET /v1/alerts — Active federal alerts across food recalls (Class I) and consumer product recalls. Pulls from FDA + CPSC.
+- GET /v1/location?zip= — Full location profile: demographics, safety score, water systems, hospitals. Combines Census + EPA + CMS.
+- GET /v1/compare?zip1=&zip2= — Side-by-side comparison of two ZIP codes: income, population, safety scores, hospital ratings.
+- GET /v1/weather?lat=&lng= — NOAA 7-day forecast with temperature, wind, precipitation detail.
+
 ## Authentication
-Pass API key via X-API-Key header or ?api_key= query parameter.
+Pass API key via X-API-Key header or ?api_key= query parameter. Register at https://api.openprimitive.com/register.html.
 
 ## Response Format
-Every response includes: domain, source, source_url, freshness (ISO 8601 timestamp).
+Every response includes: domain, source, source_url, freshness (ISO 8601 timestamp), confidence, citations, proof.
 
 ## MCP Server
 Available as Model Context Protocol server. Install: node mcp.js (stdio transport).
-Tools: get-flights, get-car-safety, get-food-recalls, get-water-safety, get-drug-safety, get-hospital-quality, get-health-evidence, get-nutrition, get-jobs, get-demographics, get-product-recalls, get-sec-filings, get-safety-profile.
+Tools: get-flights, get-car-safety, get-food-recalls, get-water-safety, get-drug-safety, get-hospital-quality, get-health-evidence, get-nutrition, get-jobs, get-demographics, get-product-recalls, get-sec-filings, get-safety-profile, ask, get-alerts, get-location, compare-zips, get-weather.
+
+## A2A Agent Card
+Discovery: https://api.openprimitive.com/.well-known/agent-card.json
 
 ## About
-Open Primitive translates federal government data into structured, agent-consumable endpoints. Primary sources: FAA, NHTSA, FDA, EPA, CMS, NIH/PubMed, USDA, BLS, Census Bureau, CPSC, SEC.
+Open Primitive is the reference implementation of the Open Primitive Protocol. Federal government data translated into signed, structured, agent-consumable endpoints. 11 federal agencies. 16 data domains. Cross-domain intelligence. Primary sources: FAA, NHTSA, FDA, EPA, CMS, NIH/NLM, USDA, BLS, Census Bureau, CPSC, SEC, NOAA.

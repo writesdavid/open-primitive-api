@@ -1,0 +1,48 @@
+{
+  "@context": "https://openprimitive.com/protocol/v1",
+  "name": "Open Primitive",
+  "description": "Reference implementation of the Open Primitive Protocol. 16 US federal data domains across 11 government agencies.",
+  "version": "1.0.0",
+  "protocolVersion": "0.1.0",
+  "provider": {
+    "name": "Open Primitive",
+    "url": "https://openprimitive.com",
+    "contact": "davehamiltonj@gmail.com"
+  },
+  "domains": [
+    { "id": "flights", "name": "Flight Delays", "source": "FAA NAS + Open-Meteo", "entityTypes": ["airline", "airport"], "freshness": "real-time", "license": "public-domain" },
+    { "id": "cars", "name": "Vehicle Safety", "source": "NHTSA", "entityTypes": ["vehicle", "recall"], "freshness": "continuous", "license": "public-domain" },
+    { "id": "food", "name": "Food Recalls", "source": "FDA Enforcement", "entityTypes": ["recall", "product"], "freshness": "continuous", "license": "public-domain" },
+    { "id": "water", "name": "Water Safety", "source": "EPA SDWIS", "entityTypes": ["water-system", "violation"], "freshness": "quarterly", "license": "public-domain" },
+    { "id": "drugs", "name": "Drug Safety", "source": "FDA FAERS", "entityTypes": ["drug", "adverse-event"], "freshness": "quarterly", "license": "public-domain" },
+    { "id": "hospitals", "name": "Hospital Quality", "source": "CMS Care Compare", "entityTypes": ["hospital", "measure"], "freshness": "monthly", "license": "public-domain" },
+    { "id": "health", "name": "Health Evidence", "source": "PubMed/MEDLINE", "entityTypes": ["study", "supplement"], "freshness": "daily", "license": "public-domain" },
+    { "id": "nutrition", "name": "Nutrition Facts", "source": "USDA FoodData Central", "entityTypes": ["food", "nutrient"], "freshness": "periodic", "license": "public-domain" },
+    { "id": "jobs", "name": "Employment Data", "source": "Bureau of Labor Statistics", "entityTypes": ["series", "indicator"], "freshness": "monthly", "license": "public-domain" },
+    { "id": "demographics", "name": "Demographics", "source": "US Census ACS", "entityTypes": ["zip-code", "indicator"], "freshness": "annual", "license": "public-domain" },
+    { "id": "products", "name": "Product Recalls", "source": "CPSC", "entityTypes": ["recall", "product"], "freshness": "continuous", "license": "public-domain" },
+    { "id": "sec", "name": "SEC Filings", "source": "SEC EDGAR", "entityTypes": ["company", "filing", "financial-fact"], "freshness": "real-time", "license": "public-domain" },
+    { "id": "weather", "name": "Weather", "source": "NOAA NWS", "entityTypes": ["forecast", "alert"], "freshness": "real-time", "license": "public-domain" },
+    { "id": "safety", "name": "Safety Score", "source": "EPA + CMS", "entityTypes": ["zip-code", "composite-score"], "freshness": "composite", "license": "public-domain" },
+    { "id": "location", "name": "Location Profile", "source": "Census + EPA + CMS", "entityTypes": ["zip-code", "profile"], "freshness": "composite", "license": "public-domain" },
+    { "id": "compare", "name": "Comparison", "source": "Multiple", "entityTypes": ["comparison"], "freshness": "composite", "license": "public-domain" }
+  ],
+  "endpoints": {
+    "base": "https://api.openprimitive.com",
+    "query": "/v1/{domain}",
+    "ask": "/v1/ask",
+    "alerts": "/v1/alerts",
+    "status": "/v1/status",
+    "stats": "/v1/stats"
+  },
+  "discovery": {
+    "openapi": "/openapi.json",
+    "llms": "/llms.txt",
+    "llmsFull": "/llms-full.txt",
+    "mcpServer": "npx open-primitive-mcp",
+    "agentCard": "/.well-known/agent-card.json"
+  },
+  "geographic": { "scope": "US", "granularity": "zip-code" },
+  "authentication": { "type": "api-key", "header": "X-API-Key", "registration": "https://api.openprimitive.com/register.html" },
+  "lastUpdated": "2026-03-19T00:00:00Z"
+}
