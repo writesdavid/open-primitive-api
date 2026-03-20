@@ -52,17 +52,9 @@ app.use(agentDetect);
 // Auth + rate limit + meter on all /v1 routes
 app.use('/v1', apiKeyAuth, rateLimitMiddleware, meterUsage);
 
-// Archive every /v1/* response to Upstash Redis (fire-and-forget)
-app.use(archiveMiddleware);
-
-// Ed25519 response signing (runs before citations so citations get signed too)
-app.use(signingMiddleware);
-
-// Data freshness tracking on all /v1/* responses
-app.use(freshnessMiddleware);
-
-// Citation injection on all /v1/* responses
-app.use(citationMiddleware);
+// NOTE: archiveMiddleware, signingMiddleware, freshnessMiddleware, citationMiddleware
+// are disabled temporarily — multiple res.json wrappers cause hangs on Vercel serverless.
+// TODO: refactor into a single post-response hook instead of 4 separate middleware wraps.
 
 // Response wrapper
 function wrap(res, promise) {
