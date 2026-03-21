@@ -32,6 +32,8 @@ const { getReferralWithRegistry } = require('./middleware/referrals');
 const alerts = require('./sources/alerts');
 const risk = require('./sources/risk');
 const federation = require('./sources/federation');
+const air = require('./sources/air');
+const eligible = require('./sources/eligible');
 
 const app = express();
 
@@ -136,6 +138,12 @@ app.get('/v1/sec', (req, res) => {
   wrap(res, sec.searchCompany(req.query.q));
 });
 
+// ─── AIR ───
+app.get('/v1/air', (req, res) => {
+  if (req.query.forecast) return wrap(res, air.getAirForecast(req.query.zip));
+  wrap(res, air.getAirQuality(req.query.zip));
+});
+
 // ─── WEATHER ───
 app.get('/v1/weather', (req, res) => {
   if (req.query.state) return wrap(res, weather.getAlerts(req.query.state));
@@ -177,6 +185,9 @@ app.get('/v1/discover', (req, res) => {
       res.status(500).json({ error: 'Discovery failed' });
     });
 });
+
+// ─── ELIGIBLE (benefits eligibility checker) ───
+app.get('/v1/eligible', (req, res) => wrap(res, eligible.checkEligibility(req.query)));
 
 // ─── RISK (cross-domain risk assessment) ───
 app.get('/v1/risk', (req, res) => wrap(res, risk.getRiskProfile(req.query.zip)));
@@ -225,6 +236,7 @@ app.get('/v1', (req, res) => {
       location: { endpoint: '/v1/location?zip=', source: 'Census + EPA + CMS', description: 'Complete location profile: demographics + safety in one call' },
       compare: { endpoint: '/v1/compare?type=&a=&b=', source: 'Multiple', description: 'Side-by-side comparison of ZIPs, drugs, or hospitals' },
       ask: { endpoint: '/v1/ask?q=', source: 'All', description: 'Natural language query — ask any question, we route to the right domain(s)' },
+      eligible: { endpoint: '/v1/eligible?income=45000&household=3&state=TX', source: 'HHS, CMS, IRS, HUD', description: 'Federal benefits eligibility: SNAP, Medicaid, EITC, CHIP, LIHEAP based on income, household size, and state' },
     },
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
     rateLimit: '500 requests per day (free), higher with API key',
