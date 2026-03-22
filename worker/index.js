@@ -1,6 +1,46 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
+// x402 micropayments (activate by setting X402_PAY_TO env var)
+let x402Middleware = null;
+try {
+  const { paymentMiddleware, x402ResourceServer } = require('@x402/hono');
+  const { ExactEvmScheme } = require('@x402/evm/exact/server');
+  const { HTTPFacilitatorClient } = require('@x402/core/server');
+
+  x402Middleware = (payTo) => {
+    const facilitatorClient = new HTTPFacilitatorClient({
+      url: 'https://facilitator.x402.org',
+    });
+    const resourceServer = new x402ResourceServer(facilitatorClient)
+      .register('eip155:8453', new ExactEvmScheme());
+
+    return paymentMiddleware(
+      {
+        'GET /v1/eligible': {
+          accepts: { scheme: 'exact', price: '$0.005', network: 'eip155:8453', payTo },
+          description: 'Federal benefits eligibility check',
+        },
+        'GET /v1/compare': {
+          accepts: { scheme: 'exact', price: '$0.003', network: 'eip155:8453', payTo },
+          description: 'Cross-domain federal data comparison',
+        },
+        'GET /v1/risk': {
+          accepts: { scheme: 'exact', price: '$0.003', network: 'eip155:8453', payTo },
+          description: 'Cross-domain risk assessment by ZIP',
+        },
+        'GET /v1/location': {
+          accepts: { scheme: 'exact', price: '$0.003', network: 'eip155:8453', payTo },
+          description: 'Complete location profile by ZIP',
+        },
+      },
+      resourceServer,
+    );
+  };
+} catch (e) {
+  // x402 packages not available — all endpoints free
+}
+
 // Source modules (CommonJS — nodejs_compat handles require)
 const flights = require('../sources/flights');
 const cars = require('../sources/cars');
@@ -159,6 +199,13 @@ async function wrap(c, promise) {
     console.error(err);
     return c.json({ error: 'Internal server error' }, 500);
   }
+}
+
+// ─── x402 MICROPAYMENTS (optional — activate with X402_PAY_TO secret) ───
+// When active, /v1/eligible, /v1/compare, /v1/risk, /v1/location require payment
+// All other endpoints remain free
+if (x402Middleware && typeof process !== 'undefined' && process.env && process.env.X402_PAY_TO) {
+  app.use(x402Middleware(process.env.X402_PAY_TO));
 }
 
 // ─── PING ───
