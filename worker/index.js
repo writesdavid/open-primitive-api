@@ -106,6 +106,7 @@ const drugInteractions = require('../sources/drug-interactions');
 const clinicalTrials = require('../sources/clinical-trials');
 const earthquakes = require('../sources/earthquakes');
 const spending = require('../sources/spending');
+const dailymed = require('../sources/dailymed');
 
 // ─── Agent detection (in-memory stats) ───
 
@@ -323,6 +324,7 @@ app.get('/v1', (c) => {
       food: { endpoint: '/v1/food', source: 'FDA Enforcement', description: 'Active food recalls and search by product or brand' },
       water: { endpoint: '/v1/water?zip=', source: 'EPA SDWIS', description: 'Drinking water systems and violations by ZIP code' },
       drugs: { endpoint: '/v1/drugs?name=', source: 'FDA FAERS', description: 'Drug adverse events, reactions, and label warnings' },
+      'drug-labels': { endpoint: '/v1/drug-labels?name=metformin', source: 'NLM DailyMed', description: 'FDA-approved drug labeling: warnings, interactions, contraindications, adverse reactions' },
       'drug-interactions': { endpoint: '/v1/drug-interactions?drug1=aspirin&drug2=warfarin', source: 'NIH RxNav', description: 'Drug interaction check between any two medications' },
       hospitals: { endpoint: '/v1/hospitals?q=', source: 'CMS Care Compare', description: 'Hospital quality ratings, mortality, readmissions' },
       health: { endpoint: '/v1/health?q=', source: 'PubMed/MEDLINE', description: 'Research evidence for supplements and health claims' },
@@ -369,6 +371,13 @@ app.get('/v1/water/:pwsid', (c) => wrap(c, water.getSystem(c.req.param('pwsid'))
 
 // ─── DRUGS ───
 app.get('/v1/drugs', (c) => wrap(c, drugs.getDrug(c.req.query('name'))));
+
+// ─── DRUG LABELS (DailyMed) ───
+app.get('/v1/drug-labels', (c) => {
+  const id = c.req.query('id');
+  if (id) return wrap(c, dailymed.getLabelSections(id));
+  return wrap(c, dailymed.searchLabels(c.req.query('name')));
+});
 
 // ─── DRUG INTERACTIONS ───
 app.get('/v1/drug-interactions', (c) => wrap(c, drugInteractions.checkInteractions(c.req.query('drug1'), c.req.query('drug2'))));
@@ -497,7 +506,7 @@ app.post('/v1/register', async (c) => {
 const HARDCODED_PROVIDERS = [{
   url: 'https://api.openprimitive.com',
   name: 'Open Primitive',
-  domains: ['flights','cars','food','water','drugs','drug-interactions','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending'],
+  domains: ['flights','cars','food','water','drugs','drug-labels','drug-interactions','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending'],
   lastVerified: '2026-03-21T00:00:00Z',
   status: 'active',
 }];
