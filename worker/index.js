@@ -231,7 +231,7 @@ app.use('*', async (c, next) => {
 
 // ─── Archive helper ───
 
-const SKIP_ARCHIVE = new Set(['/v1/stats', '/v1/status', '/ping', '/v1', '/v1/history', '/v1/changes']);
+const SKIP_ARCHIVE = new Set(['/v1/stats', '/v1/status', '/ping', '/v1', '/v1/history', '/v1/changes', '/v1/snapshot-status']);
 
 async function simpleHash(str) {
   try {
@@ -1157,6 +1157,81 @@ app.get('/v1/changes', async (c) => {
   }
 });
 
+// ─── PROTOCOL STATUS ───
+
+const OPP_IMPLEMENTATIONS = [
+  { url: 'api.openprimitive.com', label: 'API hub', internal: true },
+  { url: 'cars.openprimitive.com', label: 'Cars', internal: true },
+  { url: 'water.openprimitive.com', label: 'Water', internal: true },
+  { url: 'drugs.openprimitive.com', label: 'Drugs', internal: true },
+  { url: 'food.openprimitive.com', label: 'Food', internal: true },
+  { url: 'hospitals.openprimitive.com', label: 'Hospitals', internal: true },
+  { url: 'health.openprimitive.com', label: 'Health', internal: true },
+];
+
+const OPP_REQUIRED_FIELDS = ['name', 'version', 'domains'];
+
+async function checkOppManifest(url) {
+  const manifestUrl = `https://${url}/.well-known/opp.json`;
+  try {
+    const resp = await fetch(manifestUrl, { signal: AbortSignal.timeout(3000) });
+    if (!resp.ok) return { url, status: 'unreachable', level: 0, domains: 0 };
+    const manifest = await resp.json();
+    const hasRequired = OPP_REQUIRED_FIELDS.every(f => !!manifest[f]);
+    if (!hasRequired) return { url, status: 'invalid', level: 0, domains: 0 };
+    const domainCount = Array.isArray(manifest.domains) ? manifest.domains.length : 0;
+    // Level: 1 = manifest exists, 2 = valid manifest, 3 = has signing/federation
+    let level = 2;
+    if (manifest.publicKey || manifest.federation || manifest.signing) level = 3;
+    return { url, status: 'live', level, domains: domainCount };
+  } catch {
+    return { url, status: 'unreachable', level: 0, domains: 0 };
+  }
+}
+
+app.get('/v1/protocol-status', async (c) => {
+  try {
+    const checks = OPP_IMPLEMENTATIONS.map(impl => checkOppManifest(impl.url));
+
+    let registryProviders = [];
+    try {
+      const allProviders = await getAllProviders(c.env);
+      for (const p of allProviders) {
+        const host = p.url.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+        const alreadyKnown = OPP_IMPLEMENTATIONS.some(i => i.url === host);
+        if (!alreadyKnown) {
+          registryProviders.push({ url: host, label: p.name, internal: false });
+          checks.push(checkOppManifest(host));
+        }
+      }
+    } catch { /* registry unavailable */ }
+
+    const results = await Promise.all(checks);
+    const total = results.filter(r => r.status === 'live').length;
+    const external = results.filter((r, i) => {
+      const impl = i < OPP_IMPLEMENTATIONS.length
+        ? OPP_IMPLEMENTATIONS[i]
+        : registryProviders[i - OPP_IMPLEMENTATIONS.length];
+      return r.status === 'live' && impl && !impl.internal;
+    }).length;
+
+    let adoption = 'pre-launch';
+    if (external >= 10) adoption = 'growing';
+    if (external >= 50) adoption = 'established';
+
+    return c.json({
+      domain: 'protocol-status',
+      implementations: results,
+      total,
+      external,
+      summary: `${total} OPP implementation${total === 1 ? '' : 's'} live. ${external} external (${external === 0 ? 'all Open Primitive' : external + ' third-party'}). Protocol adoption: ${adoption}.`,
+    });
+  } catch (err) {
+    console.error('[protocol-status]', err);
+    return c.json({ error: 'Protocol status check failed' }, 500);
+  }
+});
+
 // ─── STATS ───
 app.get('/v1/stats', (c) => {
   const pct = stats.total > 0 ? Math.round((stats.agent / stats.total) * 100) : 0;
@@ -1192,28 +1267,98 @@ app.get('/v1/status', async (c) => {
   });
 });
 
+// ─── SNAPSHOT DOMAINS (comprehensive daily archive) ───
+
+const SNAPSHOT_DOMAINS = [
+  // Parameterless endpoints
+  { name: 'food', url: '/v1/food' },
+  { name: 'products', url: '/v1/products' },
+  { name: 'jobs', url: '/v1/jobs' },
+  { name: 'flights', url: '/v1/flights' },
+  { name: 'earthquakes', url: '/v1/earthquakes' },
+  // ZIP-based domains for major metro areas
+  { name: 'water-10001', url: '/v1/water?zip=10001' },
+  { name: 'water-90210', url: '/v1/water?zip=90210' },
+  { name: 'water-60601', url: '/v1/water?zip=60601' },
+  { name: 'water-77001', url: '/v1/water?zip=77001' },
+  { name: 'water-48201', url: '/v1/water?zip=48201' },
+  { name: 'demographics-10001', url: '/v1/demographics?zip=10001' },
+  { name: 'demographics-90210', url: '/v1/demographics?zip=90210' },
+  { name: 'safety-10001', url: '/v1/safety?zip=10001' },
+  { name: 'safety-90210', url: '/v1/safety?zip=90210' },
+  { name: 'eligible-30000-4-CA', url: '/v1/eligible?income=30000&household=4&state=CA' },
+  { name: 'eligible-45000-3-TX', url: '/v1/eligible?income=45000&household=3&state=TX' },
+  { name: 'drugs-aspirin', url: '/v1/drugs?name=aspirin' },
+  { name: 'drugs-metformin', url: '/v1/drugs?name=metformin' },
+  { name: 'drugs-ibuprofen', url: '/v1/drugs?name=ibuprofen' },
+];
+
+// In-memory snapshot status (resets on deploy, but Redis persists the real data)
+let lastSnapshotRun = null;
+let lastSnapshotResults = [];
+
+// ─── SNAPSHOT STATUS ───
+app.get('/v1/snapshot-status', async (c) => {
+  // Try Redis first (survives deploys), fall back to in-memory
+  let persisted = null;
+  try {
+    const r = getHistoryRedis(c.env);
+    if (r) {
+      const raw = await r.get('snapshot:last-run');
+      if (raw) persisted = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    }
+  } catch (err) {
+    // Redis unavailable — use in-memory
+  }
+
+  return c.json({
+    domain: 'snapshot-status',
+    lastRun: persisted ? persisted.timestamp : lastSnapshotRun,
+    snapshotCount: SNAPSHOT_DOMAINS.length,
+    domains: SNAPSHOT_DOMAINS.map(d => d.name),
+    results: persisted ? persisted.results : lastSnapshotResults,
+    archived: persisted ? persisted.archived : lastSnapshotResults.filter(r => r.status === 'archived').length,
+    failed: persisted ? persisted.failed : lastSnapshotResults.filter(r => r.status === 'failed').length,
+  });
+});
+
 // Cron trigger for daily archive ingestion
 // Hits our own endpoints, which triggers the archive middleware to write to Redis.
 export default {
   fetch: app.fetch,
   async scheduled(event, env, ctx) {
-    const domains = [
-      { name: 'food', url: 'https://api.openprimitive.com/v1/food' },
-      { name: 'products', url: 'https://api.openprimitive.com/v1/products' },
-      { name: 'jobs', url: 'https://api.openprimitive.com/v1/jobs' },
-      { name: 'flights', url: 'https://api.openprimitive.com/v1/flights' },
-    ];
-
+    const BASE = 'https://api.openprimitive.com';
     const results = [];
-    for (const d of domains) {
+
+    for (const d of SNAPSHOT_DOMAINS) {
       try {
-        const res = await fetch(d.url);
+        const res = await fetch(BASE + d.url);
         if (res.ok) results.push({ domain: d.name, status: 'archived' });
         else results.push({ domain: d.name, status: 'failed', error: `HTTP ${res.status}` });
       } catch (e) {
         results.push({ domain: d.name, status: 'failed', error: e.message });
       }
     }
-    console.log('Cron ingestion:', JSON.stringify(results));
+
+    lastSnapshotRun = new Date().toISOString();
+    lastSnapshotResults = results;
+
+    // Also persist last-run timestamp to Redis so it survives deploys
+    try {
+      const r = getHistoryRedis(env);
+      if (r) {
+        await r.set('snapshot:last-run', JSON.stringify({
+          timestamp: lastSnapshotRun,
+          results,
+          count: results.length,
+          archived: results.filter(r => r.status === 'archived').length,
+          failed: results.filter(r => r.status === 'failed').length,
+        }), { ex: 604800 }); // keep 7 days
+      }
+    } catch (err) {
+      console.error('[snapshot] Redis persist failed:', err.message);
+    }
+
+    console.log(`[snapshot] ${results.filter(r => r.status === 'archived').length}/${results.length} archived at ${lastSnapshotRun}`);
   },
 };
