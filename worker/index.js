@@ -231,20 +231,34 @@ app.use('*', async (c, next) => {
 const SKIP_ARCHIVE = new Set(['/v1/stats', '/v1/status', '/ping', '/v1', '/v1/history']);
 
 async function simpleHash(str) {
-  const encoded = new TextEncoder().encode(str);
-  const buf = await crypto.subtle.digest('SHA-256', encoded);
-  const arr = new Uint8Array(buf);
-  let hex = '';
-  for (let i = 0; i < 8; i++) hex += arr[i].toString(16).padStart(2, '0');
-  return hex;
+  try {
+    const encoded = new TextEncoder().encode(str);
+    // Use globalThis.crypto for Web Crypto API — require('crypto') is Node's module
+    const buf = await globalThis.crypto.subtle.digest('SHA-256', encoded);
+    const arr = new Uint8Array(buf);
+    let hex = '';
+    for (let i = 0; i < 8; i++) hex += arr[i].toString(16).padStart(2, '0');
+    return hex;
+  } catch (err) {
+    console.error('[archive] simpleHash failed:', err.message || err);
+    // Fallback: timestamp-based hex
+    return Date.now().toString(16);
+  }
 }
 
 async function archiveToRedis(env, domain, url, data) {
+  console.log('[archive] START — domain:', domain, 'url:', url);
   try {
+    console.log('[archive] env keys available:', env ? Object.keys(env).filter(k => k.includes('UPSTASH') || k.includes('REDIS')).join(', ') || 'none matching UPSTASH/REDIS' : 'env is falsy');
     const r = getHistoryRedis(env);
-    if (!r) return;
+    if (!r) {
+      console.error('[archive] getHistoryRedis returned null — Redis not configured');
+      return;
+    }
+    console.log('[archive] Redis client obtained');
     const date = new Date().toISOString().slice(0, 10);
     const hash = await simpleHash(url + Date.now());
+    console.log('[archive] hash computed:', hash);
     const key = `archive:${domain}:${date}:${hash}`;
     const value = JSON.stringify({
       query: url,
@@ -252,9 +266,12 @@ async function archiveToRedis(env, domain, url, data) {
       timestamp: new Date().toISOString(),
       domain,
     });
-    await r.set(key, value, { ex: 31536000 });
+    console.log('[archive] writing key:', key, 'value length:', value.length);
+    const result = await r.set(key, value, { ex: 31536000 });
+    console.log('[archive] SUCCESS — set result:', result);
   } catch (err) {
-    console.error('Archive write failed:', err.message || err);
+    console.error('[archive] FAILED:', err.message || err);
+    console.error('[archive] stack:', err.stack || 'no stack');
   }
 }
 
@@ -453,15 +470,158 @@ app.post('/v1/register', async (c) => {
   return c.json({ error: 'Registration not yet available on Workers — use the primary API' }, 501);
 });
 
-// ─── REGISTRY (stub — needs Redis/KV) ───
-app.post('/v1/registry/register', async (c) => {
-  return c.json({ error: 'Registry not yet available on Workers' }, 501);
-});
-app.get('/v1/registry/search', async (c) => {
-  return c.json({ error: 'Registry not yet available on Workers' }, 501);
-});
+// ─── REGISTRY ───
+
+const HARDCODED_PROVIDERS = [{
+  url: 'https://api.openprimitive.com',
+  name: 'Open Primitive',
+  domains: ['flights','cars','food','water','drugs','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air'],
+  lastVerified: '2026-03-21T00:00:00Z',
+  status: 'active',
+}];
+
+let _registryRedis = null;
+function getRegistryRedis(env) {
+  if (_registryRedis) return _registryRedis;
+  const url = env.UPSTASH_REDIS_REST_URL;
+  const token = env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  const { Redis } = require('@upstash/redis');
+  _registryRedis = new Redis({ url, token });
+  return _registryRedis;
+}
+
+async function registryHashUrl(url) {
+  const encoded = new TextEncoder().encode(url);
+  const buf = await crypto.subtle.digest('SHA-256', encoded);
+  const arr = new Uint8Array(buf);
+  let hex = '';
+  for (let i = 0; i < 8; i++) hex += arr[i].toString(16).padStart(2, '0');
+  return hex;
+}
+
+async function getAllProviders(env) {
+  const r = getRegistryRedis(env);
+  if (r) {
+    try {
+      const keys = await r.keys('registry:*');
+      if (keys.length > 0) {
+        const values = await Promise.all(keys.map(k => r.get(k)));
+        const providers = values.map(v => (typeof v === 'string' ? JSON.parse(v) : v)).filter(Boolean);
+        if (providers.length > 0) return providers;
+      }
+    } catch (err) {
+      console.error('Registry Redis error:', err.message);
+    }
+  }
+  return HARDCODED_PROVIDERS;
+}
+
 app.get('/v1/registry', async (c) => {
-  return c.json({ error: 'Registry not yet available on Workers' }, 501);
+  try {
+    let providers = await getAllProviders(c.env);
+    const domain = c.req.query('domain');
+    const search = c.req.query('search');
+
+    if (domain) {
+      providers = providers.filter(p => p.domains.some(d => d.toLowerCase() === domain.toLowerCase()));
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      providers = providers.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.domains.some(d => d.toLowerCase().includes(q))
+      );
+    }
+
+    return c.json({ providers, count: providers.length });
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Registry lookup failed' }, 500);
+  }
+});
+
+app.post('/v1/registry/register', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { url } = body || {};
+    if (!url) return c.json({ error: 'url is required' }, 400);
+
+    const baseUrl = url.replace(/\/+$/, '');
+    const manifestUrl = `${baseUrl}/.well-known/opp.json`;
+
+    let manifest;
+    try {
+      const resp = await fetch(manifestUrl, { signal: AbortSignal.timeout(10000) });
+      if (!resp.ok) {
+        return c.json({ error: `Failed to fetch manifest: HTTP ${resp.status}` }, 400);
+      }
+      manifest = await resp.json();
+    } catch (err) {
+      return c.json({ error: `Could not reach ${manifestUrl}: ${err.message}` }, 400);
+    }
+
+    const requiredFields = ['name', 'version', 'domains'];
+    for (const field of requiredFields) {
+      if (!manifest[field]) {
+        return c.json({ error: `Invalid OPP manifest: Missing required field: ${field}` }, 400);
+      }
+    }
+    if (!Array.isArray(manifest.domains) || manifest.domains.length === 0) {
+      return c.json({ error: 'Invalid OPP manifest: domains must be a non-empty array' }, 400);
+    }
+
+    const domainNames = manifest.domains.map(d => (typeof d === 'string' ? d : d.name || d.id));
+    const entry = {
+      url: baseUrl,
+      name: manifest.name,
+      domains: domainNames,
+      lastVerified: new Date().toISOString(),
+      status: 'active',
+    };
+
+    const r = getRegistryRedis(c.env);
+    if (r) {
+      const hash = await registryHashUrl(baseUrl);
+      const key = `registry:${hash}`;
+      await r.set(key, JSON.stringify(entry));
+    }
+
+    return c.json({ registered: true, provider: entry.name, domains: entry.domains });
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Registration failed' }, 500);
+  }
+});
+
+app.get('/v1/registry/search', async (c) => {
+  try {
+    const q = c.req.query('q');
+    if (!q) return c.json({ error: 'q parameter is required' }, 400);
+
+    const terms = q.toLowerCase().split(/\s+/);
+    const providers = await getAllProviders(c.env);
+
+    const scored = providers.map(p => {
+      const haystack = [p.name, p.url, ...p.domains].join(' ').toLowerCase();
+      let score = 0;
+      for (const term of terms) {
+        if (haystack.includes(term)) score++;
+        if (p.domains.some(d => d.toLowerCase() === term)) score += 2;
+      }
+      return { ...p, score };
+    });
+
+    const results = scored
+      .filter(p => p.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ score, ...rest }) => rest);
+
+    return c.json({ results, count: results.length, query: q });
+  } catch (err) {
+    console.error(err);
+    return c.json({ error: 'Search failed' }, 500);
+  }
 });
 
 // ─── BILLING (stub — needs Stripe + Redis) ───
@@ -478,16 +638,75 @@ app.get('/v1/billing/usage', async (c) => {
   return c.json({ error: 'Billing not yet available on Workers' }, 501);
 });
 
+// ─── ARCHIVE TEST ───
+app.get('/v1/archive-test', async (c) => {
+  const steps = [];
+  try {
+    steps.push('1. checking env vars');
+    const url = c.env.UPSTASH_REDIS_REST_URL;
+    const token = c.env.UPSTASH_REDIS_REST_TOKEN;
+    steps.push(`2. URL: ${url ? url.substring(0, 30) + '...' : 'MISSING'}`);
+    steps.push(`3. TOKEN: ${token ? token.substring(0, 8) + '...' : 'MISSING'}`);
+    if (!url || !token) return c.json({ ok: false, steps, error: 'Redis env vars missing' }, 503);
+
+    steps.push('4. importing @upstash/redis');
+    const { Redis } = require('@upstash/redis');
+    steps.push('5. import succeeded');
+
+    steps.push('6. creating client');
+    const r = new Redis({ url, token });
+    steps.push('7. client created');
+
+    steps.push('8. writing test key');
+    const testKey = `archive-test:${Date.now()}`;
+    await r.set(testKey, JSON.stringify({ test: true, ts: new Date().toISOString() }), { ex: 60 });
+    steps.push('9. write succeeded');
+
+    steps.push('10. reading test key back');
+    const val = await r.get(testKey);
+    steps.push(`11. read result: ${JSON.stringify(val)}`);
+
+    steps.push('12. testing simpleHash');
+    const hash = await simpleHash('test' + Date.now());
+    steps.push(`13. hash: ${hash}`);
+
+    steps.push('14. cleaning up test key');
+    await r.del(testKey);
+
+    return c.json({ ok: true, steps });
+  } catch (err) {
+    steps.push(`ERROR: ${err.message}`);
+    steps.push(`STACK: ${err.stack}`);
+    return c.json({ ok: false, steps, error: err.message }, 500);
+  }
+});
+
 // ─── HISTORY ───
 let _historyRedis = null;
 function getHistoryRedis(env) {
-  if (_historyRedis) return _historyRedis;
+  if (_historyRedis) {
+    console.log('[archive] returning cached Redis client');
+    return _historyRedis;
+  }
+  console.log('[archive] getHistoryRedis — building new client');
   const url = env.UPSTASH_REDIS_REST_URL;
   const token = env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-  const { Redis } = require('@upstash/redis');
-  _historyRedis = new Redis({ url, token });
-  return _historyRedis;
+  console.log('[archive] UPSTASH_REDIS_REST_URL:', url ? url.substring(0, 30) + '...' : 'MISSING');
+  console.log('[archive] UPSTASH_REDIS_REST_TOKEN:', token ? token.substring(0, 8) + '...' : 'MISSING');
+  if (!url || !token) {
+    console.error('[archive] Redis env vars missing — cannot create client');
+    return null;
+  }
+  try {
+    const { Redis } = require('@upstash/redis');
+    console.log('[archive] @upstash/redis imported successfully');
+    _historyRedis = new Redis({ url, token });
+    console.log('[archive] Redis client created');
+    return _historyRedis;
+  } catch (err) {
+    console.error('[archive] Failed to import/create @upstash/redis:', err.message || err);
+    return null;
+  }
 }
 
 app.get('/v1/history', async (c) => {

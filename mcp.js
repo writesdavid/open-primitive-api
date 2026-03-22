@@ -20,10 +20,15 @@ const weather = require('./sources/weather');
 const location = require('./sources/location');
 const compare = require('./sources/compare');
 const ask = require('./sources/ask');
+const risk = require('./sources/risk');
+const eligible = require('./sources/eligible');
+const air = require('./sources/air');
+const alerts = require('./sources/alerts');
+const federation = require('./sources/federation');
 
 const server = new McpServer({
   name: 'open-primitive',
-  version: '1.0.0',
+  version: '1.1.0',
 });
 
 // ─── FLIGHTS ───
@@ -239,6 +244,69 @@ server.registerTool('ask-question', {
   }),
 }, async ({ q }) => {
   const data = await ask.askQuestion(q);
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── RISK ───
+server.registerTool('get-risk', {
+  title: 'Get Risk Profile',
+  description: 'Get a composite risk score for a ZIP code across water, hospitals, weather, and demographics. Source: EPA + CMS + NOAA + Census.',
+  inputSchema: z.object({
+    zip: z.string().describe('5-digit ZIP code'),
+  }),
+}, async ({ zip }) => {
+  const data = await risk.getRiskProfile(zip);
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── ELIGIBILITY ───
+server.registerTool('get-eligible', {
+  title: 'Check Benefits Eligibility',
+  description: 'Check eligibility for federal benefit programs (Medicaid, SNAP, EITC, CHIP, Pell Grant, etc.) based on income, household size, and state. Source: HHS + CMS + IRS + HUD.',
+  inputSchema: z.object({
+    income: z.string().describe('Annual household income in dollars (e.g. "35000")'),
+    household: z.string().describe('Number of people in household (e.g. "4")'),
+    state: z.string().describe('2-letter state code (e.g. "CA")'),
+  }),
+}, async ({ income, household, state }) => {
+  const data = await eligible.checkEligibility({ income, household, state });
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── AIR QUALITY ───
+server.registerTool('get-air-quality', {
+  title: 'Get Air Quality',
+  description: 'Get current AQI and air quality forecast for a ZIP code. Source: AirNow (EPA).',
+  inputSchema: z.object({
+    zip: z.string().describe('5-digit ZIP code'),
+    forecast: z.boolean().optional().describe('Set true for forecast instead of current conditions'),
+  }),
+}, async ({ zip, forecast }) => {
+  const data = forecast ? await air.getAirForecast(zip) : await air.getAirQuality(zip);
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── ALERTS ───
+server.registerTool('get-alerts', {
+  title: 'Get Recall Alerts',
+  description: 'Get a feed of recent food and product recall alerts. Source: FDA + CPSC.',
+  inputSchema: z.object({}),
+}, async () => {
+  const data = await alerts.getAlertFeed();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── FEDERATED QUERY ───
+server.registerTool('federated-query', {
+  title: 'Federated Query',
+  description: 'Query multiple data domains at once across the Open Primitive network. Source: All federated providers.',
+  inputSchema: z.object({
+    domains: z.string().describe('Comma-separated domain list (e.g. "water,hospitals,demographics")'),
+    zip: z.string().optional().describe('5-digit ZIP code (if applicable)'),
+    q: z.string().optional().describe('Search query (if applicable)'),
+  }),
+}, async ({ domains, zip, q }) => {
+  const data = await federation.federatedQuery({ domains, zip, q });
   return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
 });
 
