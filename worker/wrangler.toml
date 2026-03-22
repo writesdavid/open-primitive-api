@@ -1,0 +1,23 @@
+name = "open-primitive-api"
+main = "index.js"
+compatibility_date = "2026-03-20"
+compatibility_flags = ["nodejs_compat"]
+
+# Static files (llms.txt, robots.txt, .well-known, HTML pages)
+assets = { directory = "../public" }
+
+# Custom domain (activate after testing on workers.dev)
+# [[routes]]
+# pattern = "api.openprimitive.com"
+# custom_domain = true
+
+[vars]
+ENVIRONMENT = "production"
+
+# Secrets (set via: npx wrangler secret put SECRET_NAME)
+# UPSTASH_REDIS_REST_URL
+# UPSTASH_REDIS_REST_TOKEN
+# STRIPE_SECRET_KEY
+# STRIPE_WEBHOOK_SECRET
+# STRIPE_PRICE_BUILDER
+# STRIPE_PRICE_PRO
