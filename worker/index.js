@@ -1,6 +1,44 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
+const crypto = require('crypto');
+
+// ─── Ed25519 Response Signing ───
+
+let cachedPrivateKey = null;
+
+function getPrivateKey(env) {
+  if (cachedPrivateKey) return cachedPrivateKey;
+  const pem = env.OPP_PRIVATE_KEY;
+  if (!pem) return null;
+  try {
+    cachedPrivateKey = crypto.createPrivateKey(pem);
+    return cachedPrivateKey;
+  } catch (err) {
+    console.error('Failed to load signing key:', err.message);
+    return null;
+  }
+}
+
+function signResponse(data, env) {
+  const key = getPrivateKey(env);
+  if (!key) return null;
+  try {
+    const canonical = JSON.stringify(data, Object.keys(data).sort());
+    const signature = crypto.sign(null, Buffer.from(canonical), key);
+    return {
+      type: 'DataIntegrityProof',
+      cryptosuite: 'eddsa-jcs-2022',
+      verificationMethod: 'https://api.openprimitive.com/.well-known/opp.json#publicKey',
+      created: new Date().toISOString(),
+      proofValue: signature.toString('base64url'),
+    };
+  } catch (err) {
+    console.error('Signing error:', err.message);
+    return null;
+  }
+}
+
 // x402 micropayments (activate by setting X402_PAY_TO env var)
 let x402Middleware = null;
 try {
@@ -188,12 +226,53 @@ app.use('*', async (c, next) => {
   await next();
 });
 
+// ─── Archive helper ───
+
+const SKIP_ARCHIVE = new Set(['/v1/stats', '/v1/status', '/ping', '/v1', '/v1/history']);
+
+async function simpleHash(str) {
+  const encoded = new TextEncoder().encode(str);
+  const buf = await crypto.subtle.digest('SHA-256', encoded);
+  const arr = new Uint8Array(buf);
+  let hex = '';
+  for (let i = 0; i < 8; i++) hex += arr[i].toString(16).padStart(2, '0');
+  return hex;
+}
+
+async function archiveToRedis(env, domain, url, data) {
+  try {
+    const r = getHistoryRedis(env);
+    if (!r) return;
+    const date = new Date().toISOString().slice(0, 10);
+    const hash = await simpleHash(url + Date.now());
+    const key = `archive:${domain}:${date}:${hash}`;
+    const value = JSON.stringify({
+      query: url,
+      data,
+      timestamp: new Date().toISOString(),
+      domain,
+    });
+    await r.set(key, value, { ex: 31536000 });
+  } catch (err) {
+    console.error('Archive write failed:', err.message || err);
+  }
+}
+
 // ─── Wrap helper ───
 
 async function wrap(c, promise) {
   try {
     const data = await promise;
     if (data && data.error) return c.json(data, 400);
+    const proof = signResponse(data, c.env);
+    if (proof) data.proof = proof;
+    const pathname = new URL(c.req.url).pathname;
+    if (!SKIP_ARCHIVE.has(pathname)) {
+      const match = pathname.match(/^\/v1\/(\w+)/);
+      if (match) {
+        c.executionCtx.waitUntil(archiveToRedis(c.env, match[1], c.req.url, data));
+      }
+    }
     return c.json(data);
   } catch (err) {
     console.error(err);
@@ -399,9 +478,76 @@ app.get('/v1/billing/usage', async (c) => {
   return c.json({ error: 'Billing not yet available on Workers' }, 501);
 });
 
-// ─── HISTORY (stub — needs Redis) ───
+// ─── HISTORY ───
+let _historyRedis = null;
+function getHistoryRedis(env) {
+  if (_historyRedis) return _historyRedis;
+  const url = env.UPSTASH_REDIS_REST_URL;
+  const token = env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  const { Redis } = require('@upstash/redis');
+  _historyRedis = new Redis({ url, token });
+  return _historyRedis;
+}
+
 app.get('/v1/history', async (c) => {
-  return c.json({ error: 'History not yet available on Workers' }, 501);
+  const domain = c.req.query('domain');
+  const date = c.req.query('date');
+  if (!domain || !date) {
+    return c.json({ error: 'Provide ?domain= and ?date= (YYYY-MM-DD)' }, 400);
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return c.json({ error: 'date must be YYYY-MM-DD' }, 400);
+  }
+
+  const r = getHistoryRedis(c.env);
+  if (!r) {
+    return c.json({ error: 'Archive storage unavailable. Redis not configured.' }, 503);
+  }
+
+  const MAX_RESULTS = 50;
+  const TIMEOUT_MS = 5000;
+  const pattern = `archive:${domain}:${date}:*`;
+
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Redis scan timed out')), TIMEOUT_MS)
+  );
+
+  const scan = (async () => {
+    const keys = [];
+    let cursor = 0;
+    do {
+      const result = await r.scan(cursor, { match: pattern, count: 100 });
+      cursor = result[0];
+      keys.push(...result[1]);
+      if (keys.length >= MAX_RESULTS) break;
+    } while (cursor !== 0 && cursor !== '0');
+    return keys.slice(0, MAX_RESULTS);
+  })();
+
+  try {
+    const keys = await Promise.race([scan, timeout]);
+    if (!keys.length) {
+      return c.json({ domain, date, records: [], count: 0 });
+    }
+
+    const raw = await Promise.all(keys.map((k) => r.get(k)));
+    const records = raw
+      .map((val) => {
+        if (!val) return null;
+        try {
+          const rec = typeof val === 'string' ? JSON.parse(val) : val;
+          return { query: rec.query, data: rec.data, timestamp: rec.timestamp };
+        } catch (e) {
+          return null;
+        }
+      })
+      .filter(Boolean);
+
+    return c.json({ domain, date, records, count: records.length });
+  } catch (err) {
+    return c.json({ error: err.message || 'Archive retrieval failed' }, 504);
+  }
 });
 
 // ─── STATS ───
