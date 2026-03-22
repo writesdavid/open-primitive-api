@@ -7,229 +7,359 @@
   <meta name="description" content="Reference implementation of the Open Primitive Protocol. 16 federal data domains. 11 US agencies.">
   <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
   <style>
-    body {
-      background: var(--bg, #fff);
-      color: var(--body, #333);
-      font-family: var(--font-body, system-ui, sans-serif);
-      margin: 0;
-      padding: 0;
-    }
-    .page {
-      max-width: 900px;
+    /* Page-level overrides for API docs */
+    .api-page {
+      max-width: 680px;
       margin: 0 auto;
-      padding: var(--space-8, 2rem) var(--space-4, 1rem) var(--space-12, 3rem);
+      padding: 0 48px 96px;
+      position: relative;
+      z-index: 1;
     }
-    h1 {
-      font-family: var(--font-display, system-ui, sans-serif);
-      color: var(--text, #111);
-      font-size: 2rem;
-      margin-bottom: var(--space-2, 0.5rem);
+
+    .api-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-8) 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-12);
     }
-    h1 + p {
-      color: var(--body);
-      font-size: 1.05rem;
-      margin-bottom: var(--space-8, 2rem);
-    }
-    h2 {
-      font-family: var(--font-display, system-ui, sans-serif);
-      color: var(--text, #111);
-      font-size: 1.3rem;
-      margin-top: var(--space-8, 2rem);
-      margin-bottom: var(--space-3, 0.75rem);
-      padding-bottom: var(--space-2, 0.5rem);
-      border-bottom: 1px solid var(--border, #ddd);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-      margin-bottom: var(--space-4, 1rem);
-    }
-    th {
-      text-align: left;
+
+    .api-wordmark {
+      font-family: var(--font-mono);
+      font-size: 13px;
       font-weight: 600;
-      color: var(--text, #111);
-      padding: var(--space-2, 0.5rem) var(--space-2, 0.5rem);
-      border-bottom: 2px solid var(--border, #ddd);
-      font-size: 0.78rem;
-      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .api-wordmark:hover { color: var(--accent-warm); }
+
+    .api-nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
       letter-spacing: 0.04em;
     }
-    td {
-      padding: var(--space-2, 0.5rem);
-      border-bottom: 1px solid var(--border, #eee);
-      color: var(--body, #333);
-      vertical-align: top;
-    }
-    code {
-      font-family: var(--font-mono, monospace);
-      font-size: 0.84rem;
-      color: var(--text, #111);
-    }
-    p {
-      line-height: 1.6;
-      margin-bottom: var(--space-3, 0.75rem);
-    }
-    .code-block {
-      background: #1a1a1a;
-      color: #e0e0e0;
-      border-radius: 6px;
-      padding: var(--space-4, 1rem);
-      font-family: var(--font-mono, monospace);
-      font-size: 0.84rem;
-      overflow-x: auto;
-      margin-bottom: var(--space-4, 1rem);
-      line-height: 1.7;
-    }
-    .footer {
-      margin-top: var(--space-8, 2rem);
-      padding-top: var(--space-4, 1rem);
-      border-top: 1px solid var(--border, #ddd);
-      font-size: 0.8rem;
-      color: var(--muted, #999);
-    }
-    .footer a {
-      color: var(--muted, #999);
+
+    .api-nav a {
+      color: var(--muted);
       text-decoration: none;
-      margin-right: var(--space-4, 1rem);
+      transition: color 0.15s;
     }
-    .footer a:hover { color: var(--text, #111); }
+    .api-nav a:hover { color: var(--accent); }
+    .api-nav-sep { color: var(--border-strong); user-select: none; }
+
+    /* Title */
+    .api-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.025em;
+      margin-bottom: var(--space-2);
+    }
+
+    .api-subtitle {
+      font-size: 17px;
+      color: var(--body);
+      line-height: 1.6;
+      margin-bottom: var(--space-12);
+    }
+
+    /* Section headers */
+    .api-section {
+      margin-bottom: var(--space-12);
+    }
+
+    .api-section-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: var(--space-2);
+    }
+
+    .api-section h2 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .api-section > p {
+      font-size: 15px;
+      color: var(--body);
+      line-height: 1.7;
+      margin-bottom: var(--space-5);
+    }
+
+    /* Base URL callout */
+    .base-url {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: var(--space-4) var(--space-5);
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: var(--space-8);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .base-url-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      flex-shrink: 0;
+    }
+
+    .base-url-value {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* Confidence column styling */
+    .conf-high { color: var(--ok); font-weight: 600; }
+    .conf-mid  { color: var(--warn); font-weight: 600; }
+    .conf-low  { color: var(--danger); font-weight: 600; }
+
     @media (max-width: 640px) {
-      table { font-size: 0.8rem; }
-      .page { padding: var(--space-4, 1rem); }
+      .api-page { padding: 0 var(--space-6) 72px; }
+      .api-title { font-size: 26px; }
+      .api-section h2 { font-size: 19px; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
+  <div class="api-page">
 
-    <h1>Open Primitive API</h1>
-    <p>Reference implementation of the Open Primitive Protocol. 16 federal data domains. 11 US agencies.</p>
+    <header class="api-header">
+      <a class="api-wordmark" href="https://openprimitive.com">Open Primitive</a>
+      <nav class="api-nav">
+        <span class="op-pulse"></span>
+        <a href="https://openprimitive.com">Protocol</a>
+        <span class="api-nav-sep">&middot;</span>
+        <a href="/stats.html">Traffic</a>
+        <span class="api-nav-sep">&middot;</span>
+        <a href="/pricing.html">Pricing</a>
+        <span class="api-nav-sep">&middot;</span>
+        <a href="https://github.com/writesdavid/open-primitive-api">GitHub</a>
+      </nav>
+    </header>
+
+    <!-- Title -->
+    <h1 class="api-title">API Reference</h1>
+    <p class="api-subtitle">Reference implementation of the Open Primitive Protocol. 16 federal data domains across 11 US agencies.</p>
+
+    <div class="base-url">
+      <span class="base-url-label">Base</span>
+      <span class="base-url-value">https://api.openprimitive.com</span>
+    </div>
 
     <!-- Endpoints -->
-    <h2>Endpoints</h2>
-    <table>
-      <thead>
-        <tr><th>Domain</th><th>Endpoint</th><th>Source</th><th>Parameters</th><th>Freshness</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>alerts</td><td><code>/v1/alerts</code></td><td>Cross-domain</td><td>none</td><td>real-time</td></tr>
-        <tr><td>ask</td><td><code>/v1/ask</code></td><td>All domains</td><td><code>q</code> (string)</td><td>real-time</td></tr>
-        <tr><td>cars</td><td><code>/v1/cars</code></td><td>NHTSA</td><td><code>year</code>, <code>make</code>, <code>model</code></td><td>continuous</td></tr>
-        <tr><td>compare</td><td><code>/v1/compare</code></td><td>Multi-domain</td><td><code>type</code> (drugs|hospitals|zip), <code>a</code>, <code>b</code></td><td>real-time</td></tr>
-        <tr><td>demographics</td><td><code>/v1/demographics</code></td><td>Census Bureau</td><td><code>zip</code></td><td>annual</td></tr>
-        <tr><td>drugs</td><td><code>/v1/drugs</code></td><td>FDA FAERS</td><td><code>name</code></td><td>quarterly</td></tr>
-        <tr><td>flights</td><td><code>/v1/flights</code></td><td>FAA NAS + Open-Meteo</td><td>none; <code>/v1/flights/:iata</code> for single carrier</td><td>real-time</td></tr>
-        <tr><td>food</td><td><code>/v1/food</code></td><td>FDA Enforcement</td><td><code>q</code> (optional, omit for recent)</td><td>daily</td></tr>
-        <tr><td>health</td><td><code>/v1/health</code></td><td>PubMed / MEDLINE</td><td><code>q</code> (string)</td><td>continuous</td></tr>
-        <tr><td>hospitals</td><td><code>/v1/hospitals</code></td><td>CMS Care Compare</td><td><code>q</code> or <code>id</code></td><td>quarterly</td></tr>
-        <tr><td>jobs</td><td><code>/v1/jobs</code></td><td>BLS</td><td><code>series</code> (optional, omit for unemployment)</td><td>monthly</td></tr>
-        <tr><td>location</td><td><code>/v1/location</code></td><td>Census + EPA + CMS</td><td><code>zip</code></td><td>real-time composite</td></tr>
-        <tr><td>nutrition</td><td><code>/v1/nutrition</code></td><td>USDA FoodData Central</td><td><code>q</code> or <code>id</code></td><td>continuous</td></tr>
-        <tr><td>products</td><td><code>/v1/products</code></td><td>CPSC</td><td><code>q</code> (optional, omit for recent)</td><td>daily</td></tr>
-        <tr><td>safety</td><td><code>/v1/safety</code></td><td>Cross-domain composite</td><td><code>zip</code></td><td>real-time composite</td></tr>
-        <tr><td>sec</td><td><code>/v1/sec</code></td><td>SEC EDGAR</td><td><code>q</code> or <code>cik</code></td><td>daily</td></tr>
-        <tr><td>water</td><td><code>/v1/water</code></td><td>EPA SDWIS</td><td><code>zip</code>; <code>/v1/water/:pwsid</code> for single system</td><td>quarterly</td></tr>
-        <tr><td>weather</td><td><code>/v1/weather</code></td><td>NWS / Open-Meteo</td><td><code>zip</code> or <code>state</code> (for alerts)</td><td>real-time</td></tr>
-      </tbody>
-    </table>
-    <p>Base URL: <code>https://api.openprimitive.com</code></p>
+    <section class="api-section">
+      <p class="api-section-label">Domains</p>
+      <h2>Endpoints</h2>
+
+      <div class="op-table-wrap">
+        <table>
+          <thead>
+            <tr><th>Domain</th><th>Endpoint</th><th>Source</th><th>Parameters</th><th>Freshness</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">alerts</td><td><code>/v1/alerts</code></td><td>Cross-domain</td><td>none</td><td>real-time</td></tr>
+            <tr><td class="mono">ask</td><td><code>/v1/ask</code></td><td>All domains</td><td><code>q</code></td><td>real-time</td></tr>
+            <tr><td class="mono">cars</td><td><code>/v1/cars</code></td><td>NHTSA</td><td><code>year</code>, <code>make</code>, <code>model</code></td><td>continuous</td></tr>
+            <tr><td class="mono">compare</td><td><code>/v1/compare</code></td><td>Multi-domain</td><td><code>type</code>, <code>a</code>, <code>b</code></td><td>real-time</td></tr>
+            <tr><td class="mono">demographics</td><td><code>/v1/demographics</code></td><td>Census Bureau</td><td><code>zip</code></td><td>annual</td></tr>
+            <tr><td class="mono">drugs</td><td><code>/v1/drugs</code></td><td>FDA FAERS</td><td><code>name</code></td><td>quarterly</td></tr>
+            <tr><td class="mono">flights</td><td><code>/v1/flights</code></td><td>FAA NAS</td><td>none; <code>/v1/flights/:iata</code></td><td>real-time</td></tr>
+            <tr><td class="mono">food</td><td><code>/v1/food</code></td><td>FDA</td><td><code>q</code> (optional)</td><td>daily</td></tr>
+            <tr><td class="mono">health</td><td><code>/v1/health</code></td><td>PubMed</td><td><code>q</code></td><td>continuous</td></tr>
+            <tr><td class="mono">hospitals</td><td><code>/v1/hospitals</code></td><td>CMS</td><td><code>q</code> or <code>id</code></td><td>quarterly</td></tr>
+            <tr><td class="mono">jobs</td><td><code>/v1/jobs</code></td><td>BLS</td><td><code>series</code> (optional)</td><td>monthly</td></tr>
+            <tr><td class="mono">location</td><td><code>/v1/location</code></td><td>Census + EPA + CMS</td><td><code>zip</code></td><td>composite</td></tr>
+            <tr><td class="mono">nutrition</td><td><code>/v1/nutrition</code></td><td>USDA FoodData</td><td><code>q</code> or <code>id</code></td><td>continuous</td></tr>
+            <tr><td class="mono">products</td><td><code>/v1/products</code></td><td>CPSC</td><td><code>q</code> (optional)</td><td>daily</td></tr>
+            <tr><td class="mono">safety</td><td><code>/v1/safety</code></td><td>Cross-domain</td><td><code>zip</code></td><td>composite</td></tr>
+            <tr><td class="mono">sec</td><td><code>/v1/sec</code></td><td>SEC EDGAR</td><td><code>q</code> or <code>cik</code></td><td>daily</td></tr>
+            <tr><td class="mono">water</td><td><code>/v1/water</code></td><td>EPA SDWIS</td><td><code>zip</code>; <code>/v1/water/:pwsid</code></td><td>quarterly</td></tr>
+            <tr><td class="mono">weather</td><td><code>/v1/weather</code></td><td>NWS / Open-Meteo</td><td><code>zip</code> or <code>state</code></td><td>real-time</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <!-- Response Envelope -->
-    <h2>Response Envelope</h2>
-    <p>Every response returns this structure.</p>
-    <table>
-      <thead>
-        <tr><th>Field</th><th>Type</th><th>Description</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><code>domain</code></td><td>string</td><td>Dataset identifier</td></tr>
-        <tr><td><code>source</code></td><td>string</td><td>Federal agency</td></tr>
-        <tr><td><code>source_url</code></td><td>string</td><td>Upstream URL</td></tr>
-        <tr><td><code>freshness</code></td><td>string</td><td>ISO 8601 timestamp of last data pull</td></tr>
-        <tr><td><code>confidence</code></td><td>number</td><td>0&ndash;1 score of data completeness</td></tr>
-        <tr><td><code>citations</code></td><td>array</td><td>Source references for direct use</td></tr>
-        <tr><td><code>proof</code></td><td>string</td><td>SHA-256 hash of upstream data at query time</td></tr>
-        <tr><td><code>data</code></td><td>object</td><td>Domain-specific payload</td></tr>
-      </tbody>
-    </table>
+    <section class="api-section">
+      <p class="api-section-label">Format</p>
+      <h2>Response Envelope</h2>
+      <p>Every response returns this structure.</p>
+
+      <div class="op-table-wrap">
+        <table>
+          <thead>
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>domain</code></td><td>string</td><td>Dataset identifier</td></tr>
+            <tr><td><code>source</code></td><td>string</td><td>Federal agency</td></tr>
+            <tr><td><code>source_url</code></td><td>string</td><td>Upstream URL</td></tr>
+            <tr><td><code>freshness</code></td><td>string</td><td>ISO 8601 timestamp of last data pull</td></tr>
+            <tr><td><code>confidence</code></td><td>number</td><td>0 to 1 score of data completeness</td></tr>
+            <tr><td><code>citations</code></td><td>array</td><td>Source references for direct use</td></tr>
+            <tr><td><code>proof</code></td><td>string</td><td>Ed25519 signature for verification</td></tr>
+            <tr><td><code>data</code></td><td>object</td><td>Domain-specific payload</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="op-code-block">
+        <span class="op-code-comment">// GET /v1/cars?year=2024&make=honda&model=civic</span>
+{
+  <span class="op-code-key">"domain"</span>: <span class="op-code-string">"cars"</span>,
+  <span class="op-code-key">"source"</span>: <span class="op-code-string">"NHTSA"</span>,
+  <span class="op-code-key">"source_url"</span>: <span class="op-code-url">"https://api.nhtsa.gov/recalls/recallsByVehicle?make=honda&model=civic&modelYear=2024"</span>,
+  <span class="op-code-key">"freshness"</span>: <span class="op-code-string">"2026-03-21T08:14:22Z"</span>,
+  <span class="op-code-key">"confidence"</span>: <span class="op-code-number">0.94</span>,
+  <span class="op-code-key">"citations"</span>: [<span class="op-code-string">"NHTSA Office of Defects Investigation"</span>],
+  <span class="op-code-key">"proof"</span>: <span class="op-code-string">"ed25519:a1b2c3..."</span>,
+  <span class="op-code-key">"data"</span>: {
+    <span class="op-code-key">"recalls"</span>: [...]
+  }
+}</div>
+    </section>
 
     <!-- Data Quality -->
-    <h2>Data Quality</h2>
-    <p>Confidence scores reflect upstream reporting methodology, not API reliability.</p>
-    <table>
-      <thead>
-        <tr><th>Domain</th><th>Methodology</th><th>Confidence</th><th>Known Gaps</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>alerts</td><td>composite, real-time</td><td>0.70</td><td>Dependent on source domain quality</td></tr>
-        <tr><td>cars</td><td>mandatory manufacturer reporting</td><td>0.94</td><td>Pre-2000 vehicles have sparse data</td></tr>
-        <tr><td>compare</td><td>derived from source domains</td><td>varies</td><td>Quality matches the weaker of the two inputs</td></tr>
-        <tr><td>demographics</td><td>American Community Survey, sampled</td><td>0.85</td><td>5-year estimates; rural areas under-sampled</td></tr>
-        <tr><td>drugs</td><td>voluntary reporting (MedWatch)</td><td>0.10</td><td>Captures 1&ndash;10% of actual adverse events</td></tr>
-        <tr><td>flights</td><td>FAA real-time + BTS historical</td><td>0.80</td><td>BTS data is 12&ndash;18 months delayed</td></tr>
-        <tr><td>food</td><td>mandatory enforcement actions</td><td>0.85</td><td>Voluntary recalls may not appear immediately</td></tr>
-        <tr><td>health</td><td>peer-reviewed literature search</td><td>0.60</td><td>Indexed abstracts only; no full-text analysis</td></tr>
-        <tr><td>hospitals</td><td>CMS mandatory reporting</td><td>0.90</td><td>VA and military hospitals excluded</td></tr>
-        <tr><td>jobs</td><td>BLS survey-based estimates</td><td>0.88</td><td>Subject to monthly revision; gig work under-counted</td></tr>
-        <tr><td>location</td><td>composite of Census, EPA, CMS</td><td>0.75</td><td>Cross-domain joins may have ZIP boundary mismatches</td></tr>
-        <tr><td>nutrition</td><td>lab-analyzed and industry-submitted</td><td>0.92</td><td>Branded products self-reported by manufacturers</td></tr>
-        <tr><td>products</td><td>mandatory and voluntary recalls</td><td>0.80</td><td>Voluntary recalls may lag weeks</td></tr>
-        <tr><td>safety</td><td>composite score across domains</td><td>0.65</td><td>Only as strong as weakest contributing domain</td></tr>
-        <tr><td>sec</td><td>mandatory public filings</td><td>0.95</td><td>Private companies not covered</td></tr>
-        <tr><td>water</td><td>mandatory but delayed (SDWIS)</td><td>0.70</td><td>Small systems under-report; data lags up to 6 months</td></tr>
-        <tr><td>weather</td><td>NWS observational + modeled</td><td>0.90</td><td>Forecast accuracy degrades beyond 72 hours</td></tr>
-      </tbody>
-    </table>
+    <section class="api-section">
+      <p class="api-section-label">Trust</p>
+      <h2>Data Quality</h2>
+      <p>Confidence scores reflect upstream reporting methodology, not API reliability.</p>
+
+      <div class="op-table-wrap">
+        <table>
+          <thead>
+            <tr><th>Domain</th><th>Methodology</th><th>Confidence</th><th>Known Gaps</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">alerts</td><td>composite, real-time</td><td class="conf-mid">0.70</td><td>Dependent on source domain quality</td></tr>
+            <tr><td class="mono">cars</td><td>mandatory manufacturer reporting</td><td class="conf-high">0.94</td><td>Pre-2000 vehicles have sparse data</td></tr>
+            <tr><td class="mono">compare</td><td>derived from source domains</td><td class="conf-mid">varies</td><td>Quality matches the weaker input</td></tr>
+            <tr><td class="mono">demographics</td><td>American Community Survey, sampled</td><td class="conf-mid">0.85</td><td>5-year estimates; rural under-sampled</td></tr>
+            <tr><td class="mono">drugs</td><td>voluntary reporting (MedWatch)</td><td class="conf-low">0.10</td><td>Captures 1-10% of actual adverse events</td></tr>
+            <tr><td class="mono">flights</td><td>FAA real-time + BTS historical</td><td class="conf-mid">0.80</td><td>BTS data 12-18 months delayed</td></tr>
+            <tr><td class="mono">food</td><td>mandatory enforcement actions</td><td class="conf-mid">0.85</td><td>Voluntary recalls may not appear immediately</td></tr>
+            <tr><td class="mono">health</td><td>peer-reviewed literature search</td><td class="conf-mid">0.60</td><td>Indexed abstracts only; no full-text</td></tr>
+            <tr><td class="mono">hospitals</td><td>CMS mandatory reporting</td><td class="conf-high">0.90</td><td>VA and military hospitals excluded</td></tr>
+            <tr><td class="mono">jobs</td><td>BLS survey-based estimates</td><td class="conf-mid">0.88</td><td>Subject to revision; gig work under-counted</td></tr>
+            <tr><td class="mono">location</td><td>composite of Census, EPA, CMS</td><td class="conf-mid">0.75</td><td>ZIP boundary mismatches in cross-domain joins</td></tr>
+            <tr><td class="mono">nutrition</td><td>lab-analyzed and industry-submitted</td><td class="conf-high">0.92</td><td>Branded products self-reported</td></tr>
+            <tr><td class="mono">products</td><td>mandatory and voluntary recalls</td><td class="conf-mid">0.80</td><td>Voluntary recalls may lag weeks</td></tr>
+            <tr><td class="mono">safety</td><td>composite score across domains</td><td class="conf-mid">0.65</td><td>Only as strong as weakest domain</td></tr>
+            <tr><td class="mono">sec</td><td>mandatory public filings</td><td class="conf-high">0.95</td><td>Private companies not covered</td></tr>
+            <tr><td class="mono">water</td><td>mandatory but delayed (SDWIS)</td><td class="conf-mid">0.70</td><td>Small systems under-report; data lags 6 months</td></tr>
+            <tr><td class="mono">weather</td><td>NWS observational + modeled</td><td class="conf-high">0.90</td><td>Forecast accuracy degrades beyond 72 hours</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <!-- Authentication -->
-    <h2>Authentication</h2>
-    <p>Free tier requires no key. Rate limited at upstream API speeds.</p>
-    <p>Authenticated requests use the <code>X-API-Key</code> header or <code>?api_key=</code> query parameter.</p>
-    <p>Register:</p>
-    <div class="code-block">POST /v1/register
-Content-Type: application/json
+    <section class="api-section">
+      <p class="api-section-label">Auth</p>
+      <h2>Authentication</h2>
+      <p>Free tier requires no key. Rate limited at upstream API speeds.</p>
+      <p>Authenticated requests use the <code>X-API-Key</code> header or <code>?api_key=</code> query parameter.</p>
 
-{ "email": "you@example.com" }</div>
+      <div class="op-code-block">
+        <span class="op-code-comment"># Register for an API key</span>
+curl -X POST https://api.openprimitive.com/v1/register \
+  -H <span class="op-code-string">"Content-Type: application/json"</span> \
+  -d <span class="op-code-string">'{"email": "you@example.com"}'</span></div>
+
+      <div class="op-code-block">
+        <span class="op-code-comment"># Authenticated request</span>
+curl https://api.openprimitive.com/v1/cars?year=2024&make=toyota \
+  -H <span class="op-code-string">"X-API-Key: op_your_key_here"</span></div>
+    </section>
 
     <!-- Integration -->
-    <h2>Integration</h2>
-    <table>
-      <thead>
-        <tr><th>Protocol</th><th>Location</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>MCP</td><td><code>npx @openprimitive/mcp-server</code></td></tr>
-        <tr><td>A2A</td><td><code><a href="/.well-known/agent.json">/.well-known/agent.json</a></code></td></tr>
-        <tr><td>OpenAPI</td><td><code><a href="/openapi.json">/openapi.json</a></code></td></tr>
-        <tr><td>llms.txt</td><td><code><a href="/llms.txt">/llms.txt</a></code></td></tr>
-        <tr><td>OPP manifest</td><td><code><a href="/.well-known/opp.json">/.well-known/opp.json</a></code></td></tr>
-      </tbody>
-    </table>
+    <section class="api-section">
+      <p class="api-section-label">Connect</p>
+      <h2>Integration</h2>
+
+      <div class="op-table-wrap">
+        <table>
+          <thead>
+            <tr><th>Protocol</th><th>Location</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">MCP</td><td><code>npx @openprimitive/mcp-server</code></td></tr>
+            <tr><td class="mono">A2A</td><td><code><a href="/.well-known/agent.json" style="color:var(--accent);text-decoration:none">/.well-known/agent.json</a></code></td></tr>
+            <tr><td class="mono">OpenAPI</td><td><code><a href="/openapi.json" style="color:var(--accent);text-decoration:none">/openapi.json</a></code></td></tr>
+            <tr><td class="mono">llms.txt</td><td><code><a href="/llms.txt" style="color:var(--accent);text-decoration:none">/llms.txt</a></code></td></tr>
+            <tr><td class="mono">OPP manifest</td><td><code><a href="/.well-known/opp.json" style="color:var(--accent);text-decoration:none">/.well-known/opp.json</a></code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="op-code-block">
+        <span class="op-code-comment"># Add to Claude Desktop config (claude_desktop_config.json)</span>
+{
+  <span class="op-code-key">"mcpServers"</span>: {
+    <span class="op-code-key">"open-primitive"</span>: {
+      <span class="op-code-key">"command"</span>: <span class="op-code-string">"npx"</span>,
+      <span class="op-code-key">"args"</span>: [<span class="op-code-string">"@openprimitive/mcp-server"</span>]
+    }
+  }
+}</div>
+    </section>
 
     <!-- Utility Endpoints -->
-    <h2>Utility Endpoints</h2>
-    <table>
-      <thead>
-        <tr><th>Endpoint</th><th>Description</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><code>/v1</code></td><td>Domain index with all endpoints and sources</td></tr>
-        <tr><td><code>/v1/stats</code></td><td>Request counts and uptime</td></tr>
-        <tr><td><code>/v1/status</code></td><td>Health check for each domain</td></tr>
-        <tr><td><code>/v1/history</code></td><td>Recent query log</td></tr>
-        <tr><td><code>/v1/registry</code></td><td>List registered OPP providers</td></tr>
-        <tr><td><code>/v1/registry/search</code></td><td>Search providers by domain</td></tr>
-        <tr><td><code>/ping</code></td><td>Liveness check</td></tr>
-      </tbody>
-    </table>
+    <section class="api-section">
+      <p class="api-section-label">Internal</p>
+      <h2>Utility Endpoints</h2>
 
-    <div class="footer">
-      <a href="https://openprimitive.com">openprimitive.com</a>
-      <a href="/openapi.json">OpenAPI</a>
-      <a href="/llms.txt">llms.txt</a>
-      <a href="https://github.com/writesdavid/open-primitive-api">GitHub</a>
-    </div>
+      <div class="op-table-wrap">
+        <table>
+          <thead>
+            <tr><th>Endpoint</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/v1</code></td><td>Domain index with all endpoints and sources</td></tr>
+            <tr><td><code>/v1/stats</code></td><td>Request counts and uptime</td></tr>
+            <tr><td><code>/v1/status</code></td><td>Health check for each domain</td></tr>
+            <tr><td><code>/v1/history</code></td><td>Recent query log</td></tr>
+            <tr><td><code>/v1/registry</code></td><td>List registered OPP providers</td></tr>
+            <tr><td><code>/v1/registry/search</code></td><td>Search providers by domain</td></tr>
+            <tr><td><code>/ping</code></td><td>Liveness check</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="op-footer">
+      <span class="op-footer-text">Open Primitive API</span>
+      <div style="display:flex;gap:var(--space-4);font-family:var(--font-mono);font-size:12px;">
+        <a href="https://openprimitive.com" style="color:var(--dim);text-decoration:none">Protocol</a>
+        <a href="/openapi.json" style="color:var(--dim);text-decoration:none">OpenAPI</a>
+        <a href="/llms.txt" style="color:var(--dim);text-decoration:none">llms.txt</a>
+        <a href="https://github.com/writesdavid/open-primitive-api" style="color:var(--dim);text-decoration:none">GitHub</a>
+      </div>
+    </footer>
 
   </div>
 </body>

@@ -1,17 +1,17 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.writesdavid/open-primitive",
-  "description": "16 US federal data domains as MCP tools. Signed responses with provenance.",
+  "description": "22 federal data tools. Signed responses with provenance.",
   "repository": {
     "url": "https://github.com/writesdavid/open-primitive-api",
     "source": "github"
   },
-  "version": "1.0.1",
+  "version": "1.1.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "open-primitive-mcp",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "transport": {
         "type": "stdio"
       }
