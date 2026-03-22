@@ -325,7 +325,7 @@ app.get('/v1', (c) => {
       water: { endpoint: '/v1/water?zip=', source: 'EPA SDWIS', description: 'Drinking water systems and violations by ZIP code' },
       drugs: { endpoint: '/v1/drugs?name=', source: 'FDA FAERS', description: 'Drug adverse events, reactions, and label warnings' },
       'drug-labels': { endpoint: '/v1/drug-labels?name=metformin', source: 'NLM DailyMed', description: 'FDA-approved drug labeling: warnings, interactions, contraindications, adverse reactions' },
-      'drug-interactions': { endpoint: '/v1/drug-interactions?drug1=aspirin&drug2=warfarin', source: 'NIH RxNav', description: 'Drug interaction check between any two medications' },
+      'drug-interactions': { endpoint: '/v1/drug-interactions?drug1=aspirin&drug2=warfarin', source: 'FDA Drug Labels', description: 'Drug interaction check between any two medications via FDA label cross-reference' },
       hospitals: { endpoint: '/v1/hospitals?q=', source: 'CMS Care Compare', description: 'Hospital quality ratings, mortality, readmissions' },
       health: { endpoint: '/v1/health?q=', source: 'PubMed/MEDLINE', description: 'Research evidence for supplements and health claims' },
       nutrition: { endpoint: '/v1/nutrition?q=', source: 'USDA FoodData Central', description: 'Nutrition facts for any food: calories, macros, micronutrients' },
