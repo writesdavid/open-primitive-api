@@ -102,6 +102,7 @@ const risk = require('../sources/risk');
 const federation = require('../sources/federation');
 const air = require('../sources/air');
 const eligible = require('../sources/eligible');
+const drugInteractions = require('../sources/drug-interactions');
 const clinicalTrials = require('../sources/clinical-trials');
 const earthquakes = require('../sources/earthquakes');
 const spending = require('../sources/spending');
@@ -322,6 +323,7 @@ app.get('/v1', (c) => {
       food: { endpoint: '/v1/food', source: 'FDA Enforcement', description: 'Active food recalls and search by product or brand' },
       water: { endpoint: '/v1/water?zip=', source: 'EPA SDWIS', description: 'Drinking water systems and violations by ZIP code' },
       drugs: { endpoint: '/v1/drugs?name=', source: 'FDA FAERS', description: 'Drug adverse events, reactions, and label warnings' },
+      'drug-interactions': { endpoint: '/v1/drug-interactions?drug1=aspirin&drug2=warfarin', source: 'NIH RxNav', description: 'Drug interaction check between any two medications' },
       hospitals: { endpoint: '/v1/hospitals?q=', source: 'CMS Care Compare', description: 'Hospital quality ratings, mortality, readmissions' },
       health: { endpoint: '/v1/health?q=', source: 'PubMed/MEDLINE', description: 'Research evidence for supplements and health claims' },
       nutrition: { endpoint: '/v1/nutrition?q=', source: 'USDA FoodData Central', description: 'Nutrition facts for any food: calories, macros, micronutrients' },
@@ -367,6 +369,9 @@ app.get('/v1/water/:pwsid', (c) => wrap(c, water.getSystem(c.req.param('pwsid'))
 
 // ─── DRUGS ───
 app.get('/v1/drugs', (c) => wrap(c, drugs.getDrug(c.req.query('name'))));
+
+// ─── DRUG INTERACTIONS ───
+app.get('/v1/drug-interactions', (c) => wrap(c, drugInteractions.checkInteractions(c.req.query('drug1'), c.req.query('drug2'))));
 
 // ─── HOSPITALS ───
 app.get('/v1/hospitals', (c) => {
@@ -492,7 +497,7 @@ app.post('/v1/register', async (c) => {
 const HARDCODED_PROVIDERS = [{
   url: 'https://api.openprimitive.com',
   name: 'Open Primitive',
-  domains: ['flights','cars','food','water','drugs','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending'],
+  domains: ['flights','cars','food','water','drugs','drug-interactions','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending'],
   lastVerified: '2026-03-21T00:00:00Z',
   status: 'active',
 }];

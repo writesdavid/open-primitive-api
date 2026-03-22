@@ -39,26 +39,22 @@ async function checkInteractions(drug1, drug2) {
   if (!rxcui1) return { error: `"${drug1}" not found in RxNorm. Check spelling or try the generic name.` };
   if (!rxcui2) return { error: `"${drug2}" not found in RxNorm. Check spelling or try the generic name.` };
 
-  const url = `${RXNAV_BASE}/interaction/interaction.json?rxcui=${rxcui1}`;
+  // Use the list endpoint which checks interactions BETWEEN two specific drugs
+  const url = `${RXNAV_BASE}/interaction/list.json?rxcuis=${rxcui1}+${rxcui2}`;
   const data = await fetchWithTimeout(url);
 
   const interactions = [];
 
-  if (data && data.interactionTypeGroup) {
-    for (const group of data.interactionTypeGroup) {
-      for (const type of group.interactionType || []) {
+  if (data && data.fullInteractionTypeGroup) {
+    for (const group of data.fullInteractionTypeGroup) {
+      for (const type of group.fullInteractionType || []) {
+        const desc = type.comment || type.minConceptItem && type.minConceptItem.name || '';
         for (const pair of type.interactionPair || []) {
-          const concepts = pair.interactionConcept || [];
-          const involvesDrug2 = concepts.some(
-            (ic) => ic.minConceptItem && ic.minConceptItem.rxcui === rxcui2
-          );
-          if (involvesDrug2) {
-            interactions.push({
-              description: pair.description || 'No description available',
-              severity: pair.severity || 'unknown',
-              source: type.interactionTypeSource || 'RxNav',
-            });
-          }
+          interactions.push({
+            description: pair.description || desc || 'Interaction detected',
+            severity: pair.severity || 'N/A',
+            source: group.sourceName || 'RxNav',
+          });
         }
       }
     }
