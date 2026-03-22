@@ -102,6 +102,9 @@ const risk = require('../sources/risk');
 const federation = require('../sources/federation');
 const air = require('../sources/air');
 const eligible = require('../sources/eligible');
+const clinicalTrials = require('../sources/clinical-trials');
+const earthquakes = require('../sources/earthquakes');
+const spending = require('../sources/spending');
 
 // ─── Agent detection (in-memory stats) ───
 
@@ -312,7 +315,7 @@ app.get('/v1', (c) => {
   return c.json({
     name: 'Open Primitive API',
     version: '1.0.0',
-    description: 'Federal data for agents. 17 domains, one API.',
+    description: 'Federal data for agents. 20 domains, one API.',
     domains: {
       flights: { endpoint: '/v1/flights', source: 'FAA NAS + Open-Meteo', description: 'Live airline delays and hub weather for 8 US carriers' },
       cars: { endpoint: '/v1/cars?year=&make=&model=', source: 'NHTSA', description: 'Crash safety ratings and recalls for any US vehicle' },
@@ -332,6 +335,10 @@ app.get('/v1', (c) => {
       compare: { endpoint: '/v1/compare?type=&a=&b=', source: 'Multiple', description: 'Side-by-side comparison of ZIPs, drugs, or hospitals' },
       ask: { endpoint: '/v1/ask?q=', source: 'All', description: 'Natural language query — ask any question, we route to the right domain(s)' },
       eligible: { endpoint: '/v1/eligible?income=45000&household=3&state=TX', source: 'HHS, CMS, IRS, HUD', description: 'Federal benefits eligibility: SNAP, Medicaid, EITC, CHIP, LIHEAP based on income, household size, and state' },
+      context: { endpoint: '/v1/context?entity=zip:10001', source: 'Archive', description: 'Agent memory: query history and change detection for any entity across all domains' },
+      'clinical-trials': { endpoint: '/v1/clinical-trials?q=diabetes', source: 'ClinicalTrials.gov', description: 'Search clinical trials by condition or intervention' },
+      earthquakes: { endpoint: '/v1/earthquakes', source: 'USGS', description: 'Earthquakes in the last 24 hours, magnitude 2.5+' },
+      spending: { endpoint: '/v1/spending?q=defense', source: 'USAspending.gov', description: 'Federal awards and contracts by keyword' },
     },
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
     rateLimit: '500 requests per day (free), higher with API key',
@@ -455,6 +462,15 @@ app.get('/v1/discover', async (c) => {
 // ─── ELIGIBLE ───
 app.get('/v1/eligible', (c) => wrap(c, eligible.checkEligibility(getQueryParams(c))));
 
+// ─── CLINICAL TRIALS ───
+app.get('/v1/clinical-trials', (c) => wrap(c, clinicalTrials.searchTrials(c.req.query('q'))));
+
+// ─── EARTHQUAKES ───
+app.get('/v1/earthquakes', (c) => wrap(c, earthquakes.getRecent()));
+
+// ─── SPENDING ───
+app.get('/v1/spending', (c) => wrap(c, spending.searchSpending(c.req.query('q'))));
+
 // ─── RISK ───
 app.get('/v1/risk', (c) => wrap(c, risk.getRiskProfile(c.req.query('zip'))));
 
@@ -475,7 +491,7 @@ app.post('/v1/register', async (c) => {
 const HARDCODED_PROVIDERS = [{
   url: 'https://api.openprimitive.com',
   name: 'Open Primitive',
-  domains: ['flights','cars','food','water','drugs','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air'],
+  domains: ['flights','cars','food','water','drugs','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending'],
   lastVerified: '2026-03-21T00:00:00Z',
   status: 'active',
 }];
@@ -766,6 +782,178 @@ app.get('/v1/history', async (c) => {
     return c.json({ domain, date, records, count: records.length });
   } catch (err) {
     return c.json({ error: err.message || 'Archive retrieval failed' }, 504);
+  }
+});
+
+// ─── CONTEXT (Agent Memory) ───
+
+// Entity format: "domain:value" e.g. "zip:10001", "drug:aspirin", "hospital:050454"
+// Maps entity types to archive domains and how to match them in archived query URLs
+const ENTITY_DOMAIN_MAP = {
+  zip: ['water', 'safety', 'demographics', 'weather', 'location', 'risk', 'air'],
+  drug: ['drugs'],
+  hospital: ['hospitals'],
+  food: ['food'],
+  car: ['cars'],
+};
+
+function extractEntityFromQuery(queryUrl, entityType, entityValue) {
+  if (!queryUrl) return false;
+  const lower = queryUrl.toLowerCase();
+  const val = entityValue.toLowerCase();
+  // Check if the entity value appears in the query URL
+  if (entityType === 'zip') return lower.includes(`zip=${val}`);
+  if (entityType === 'drug') return lower.includes(`name=${val}`) || lower.includes(`q=${val}`);
+  if (entityType === 'hospital') return lower.includes(`id=${val}`) || lower.includes(`q=${val}`);
+  if (entityType === 'food') return lower.includes(`q=${val}`);
+  if (entityType === 'car') return lower.includes(`make=${val}`) || lower.includes(`model=${val}`);
+  return lower.includes(val);
+}
+
+function diffRecords(oldest, newest) {
+  const changes = [];
+  if (!oldest || !newest) return changes;
+
+  function walk(oldObj, newObj, prefix) {
+    if (!oldObj || !newObj || typeof oldObj !== 'object' || typeof newObj !== 'object') return;
+    const allKeys = new Set([...Object.keys(oldObj), ...Object.keys(newObj)]);
+    for (const key of allKeys) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      const oldVal = oldObj[key];
+      const newVal = newObj[key];
+      // Skip metadata fields
+      if (['domain', 'timestamp', 'proof', 'query'].includes(key)) continue;
+      if (typeof oldVal === 'number' && typeof newVal === 'number' && oldVal !== newVal) {
+        let direction = newVal > oldVal ? 'increased' : 'decreased';
+        // Heuristic: fields with "violation", "recall", "mortality", "readmission" worsening = up
+        if (/violation|recall|mortality|readmission|adverse|complaint/i.test(path)) {
+          direction = newVal > oldVal ? 'worse' : 'better';
+        } else if (/rating|score|quality/i.test(path)) {
+          direction = newVal > oldVal ? 'better' : 'worse';
+        }
+        changes.push({ field: path, was: oldVal, now: newVal, direction });
+      } else if (typeof oldVal === 'string' && typeof newVal === 'string' && oldVal !== newVal) {
+        changes.push({ field: path, was: oldVal, now: newVal, direction: 'changed' });
+      } else if (typeof oldVal === 'object' && typeof newVal === 'object' && !Array.isArray(oldVal)) {
+        walk(oldVal, newVal, path);
+      }
+    }
+  }
+
+  walk(oldest, newest, '');
+  return changes.slice(0, 20); // Cap at 20 changes
+}
+
+function buildSummary(entity, count, firstSeen, changes) {
+  const since = new Date(firstSeen).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  let summary = `${entity}: ${count} ${count === 1 ? 'query' : 'queries'} since ${since}.`;
+  if (changes.length > 0) {
+    const top = changes.slice(0, 3).map(ch =>
+      `${ch.field} ${ch.direction} from ${ch.was} to ${ch.now}`
+    ).join('; ');
+    summary += ` ${top}.`;
+  } else {
+    summary += ' No changes detected.';
+  }
+  return summary;
+}
+
+app.get('/v1/context', async (c) => {
+  const entity = c.req.query('entity');
+  if (!entity || !entity.includes(':')) {
+    return c.json({ error: 'Provide ?entity= in format type:value (e.g. zip:10001, drug:aspirin)' }, 400);
+  }
+
+  const [entityType, ...valueParts] = entity.split(':');
+  const entityValue = valueParts.join(':');
+  if (!entityValue) {
+    return c.json({ error: 'Entity value is empty. Use format type:value' }, 400);
+  }
+
+  const domains = ENTITY_DOMAIN_MAP[entityType];
+  if (!domains) {
+    return c.json({
+      error: `Unknown entity type: ${entityType}. Supported: ${Object.keys(ENTITY_DOMAIN_MAP).join(', ')}`,
+    }, 400);
+  }
+
+  const r = getHistoryRedis(c.env);
+  if (!r) {
+    return c.json({ error: 'Archive storage unavailable. Redis not configured.' }, 503);
+  }
+
+  try {
+    // Scan archive keys across all relevant domains
+    const allRecords = [];
+    const TIMEOUT_MS = 8000;
+
+    for (const domain of domains) {
+      const pattern = `archive:${domain}:*`;
+      let cursor = 0;
+      const keys = [];
+      const scanStart = Date.now();
+
+      do {
+        if (Date.now() - scanStart > TIMEOUT_MS) break;
+        const result = await r.scan(cursor, { match: pattern, count: 100 });
+        cursor = result[0];
+        keys.push(...result[1]);
+        if (keys.length >= 200) break;
+      } while (cursor !== 0 && cursor !== '0');
+
+      if (keys.length === 0) continue;
+
+      // Fetch values and filter for matching entity
+      const batchSize = 50;
+      for (let i = 0; i < keys.length; i += batchSize) {
+        const batch = keys.slice(i, i + batchSize);
+        const values = await Promise.all(batch.map(k => r.get(k)));
+        for (const val of values) {
+          if (!val) continue;
+          const rec = typeof val === 'string' ? JSON.parse(val) : val;
+          if (extractEntityFromQuery(rec.query, entityType, entityValue)) {
+            allRecords.push(rec);
+          }
+        }
+      }
+    }
+
+    if (allRecords.length === 0) {
+      return c.json({
+        domain: 'context',
+        entity,
+        firstSeen: null,
+        lastSeen: null,
+        queriedCount: 0,
+        changes: [],
+        summary: `No archived queries found for ${entity}.`,
+      });
+    }
+
+    // Sort by timestamp
+    allRecords.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    const oldest = allRecords[0];
+    const newest = allRecords[allRecords.length - 1];
+    const changes = allRecords.length > 1 ? diffRecords(oldest.data, newest.data) : [];
+
+    const result = {
+      domain: 'context',
+      entity,
+      firstSeen: oldest.timestamp,
+      lastSeen: newest.timestamp,
+      queriedCount: allRecords.length,
+      changes,
+      summary: buildSummary(entity, allRecords.length, oldest.timestamp, changes),
+    };
+
+    const proof = signResponse(result, c.env);
+    if (proof) result.proof = proof;
+
+    return c.json(result);
+  } catch (err) {
+    console.error('[context]', err);
+    return c.json({ error: 'Context retrieval failed: ' + (err.message || 'unknown error') }, 500);
   }
 });
 
