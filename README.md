@@ -4,6 +4,8 @@
 
 OPP defines how data providers make their data agent-consumable, verifiable, and discoverable. Three components: provider manifest, response envelope, query interface.
 
+[![Open Primitive MCP server](https://glama.ai/mcp/servers/writesdavid/open-primitive-api/badges/card.svg)](https://glama.ai/mcp/servers/writesdavid/open-primitive-api)
+
 ## The Problem
 
 Agents get data naked. No provenance. No freshness guarantee. No confidence score. No way to verify the source. The agent internet is missing its data envelope.
