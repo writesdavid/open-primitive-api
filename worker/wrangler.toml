@@ -13,6 +13,9 @@ custom_domain = true
 [vars]
 ENVIRONMENT = "production"
 
+[triggers]
+crons = ["0 6 * * *"]
+
 # Secrets (set via: npx wrangler secret put SECRET_NAME)
 # UPSTASH_REDIS_REST_URL
 # UPSTASH_REDIS_REST_TOKEN

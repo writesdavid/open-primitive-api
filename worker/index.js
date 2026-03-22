@@ -804,4 +804,28 @@ app.get('/v1/status', async (c) => {
   });
 });
 
-export default { fetch: app.fetch };
+// Cron trigger for daily archive ingestion
+// Hits our own endpoints, which triggers the archive middleware to write to Redis.
+export default {
+  fetch: app.fetch,
+  async scheduled(event, env, ctx) {
+    const domains = [
+      { name: 'food', url: 'https://api.openprimitive.com/v1/food' },
+      { name: 'products', url: 'https://api.openprimitive.com/v1/products' },
+      { name: 'jobs', url: 'https://api.openprimitive.com/v1/jobs' },
+      { name: 'flights', url: 'https://api.openprimitive.com/v1/flights' },
+    ];
+
+    const results = [];
+    for (const d of domains) {
+      try {
+        const res = await fetch(d.url);
+        if (res.ok) results.push({ domain: d.name, status: 'archived' });
+        else results.push({ domain: d.name, status: 'failed', error: `HTTP ${res.status}` });
+      } catch (e) {
+        results.push({ domain: d.name, status: 'failed', error: e.message });
+      }
+    }
+    console.log('Cron ingestion:', JSON.stringify(results));
+  },
+};
