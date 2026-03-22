@@ -107,6 +107,7 @@ const clinicalTrials = require('../sources/clinical-trials');
 const earthquakes = require('../sources/earthquakes');
 const spending = require('../sources/spending');
 const dailymed = require('../sources/dailymed');
+const meat = require('../sources/meat');
 
 // ─── Agent detection (in-memory stats) ───
 
@@ -146,6 +147,7 @@ const QUERY_EXTRACTORS = {
   hospitals: (q) => q.q || q.id,
   nutrition: (q) => q.q || q.id,
   health:    (q) => q.q,
+  meat:      (q) => q.q || q.est,
 };
 
 function trackQuery(domain, queryValue) {
@@ -317,7 +319,7 @@ app.get('/v1', (c) => {
   return c.json({
     name: 'Open Primitive API',
     version: '1.0.0',
-    description: 'Federal data for agents. 20 domains, one API.',
+    description: 'Federal data for agents. 21 domains, one API.',
     domains: {
       flights: { endpoint: '/v1/flights', source: 'FAA NAS + Open-Meteo', description: 'Live airline delays and hub weather for 8 US carriers' },
       cars: { endpoint: '/v1/cars?year=&make=&model=', source: 'NHTSA', description: 'Crash safety ratings and recalls for any US vehicle' },
@@ -343,6 +345,7 @@ app.get('/v1', (c) => {
       'clinical-trials': { endpoint: '/v1/clinical-trials?q=diabetes', source: 'ClinicalTrials.gov', description: 'Search clinical trials by condition or intervention' },
       earthquakes: { endpoint: '/v1/earthquakes', source: 'USGS', description: 'Earthquakes in the last 24 hours, magnitude 2.5+' },
       spending: { endpoint: '/v1/spending?q=defense', source: 'USAspending.gov', description: 'Federal awards and contracts by keyword' },
+      meat: { endpoint: '/v1/meat', source: 'USDA FSIS', description: 'Meat, poultry, egg product recalls and FSIS-inspected establishment data' },
       changes: { endpoint: '/v1/changes?date=2026-03-22', source: 'Archive', description: 'Daily change detection: what changed overnight across all federal domains' },
     },
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
@@ -486,6 +489,15 @@ app.get('/v1/earthquakes', (c) => wrap(c, earthquakes.getRecent()));
 // ─── SPENDING ───
 app.get('/v1/spending', (c) => wrap(c, spending.searchSpending(c.req.query('q'))));
 
+// ─── MEAT (FSIS) ───
+app.get('/v1/meat', (c) => {
+  const q = c.req.query('q');
+  const est = c.req.query('est');
+  if (est) return wrap(c, meat.getEstablishment(est));
+  if (q) return wrap(c, meat.search(q));
+  return wrap(c, meat.getRecent());
+});
+
 // ─── RISK ───
 app.get('/v1/risk', (c) => wrap(c, risk.getRiskProfile(c.req.query('zip'))));
 
@@ -506,7 +518,7 @@ app.post('/v1/register', async (c) => {
 const HARDCODED_PROVIDERS = [{
   url: 'https://api.openprimitive.com',
   name: 'Open Primitive',
-  domains: ['flights','cars','food','water','drugs','drug-labels','drug-interactions','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending'],
+  domains: ['flights','cars','food','water','drugs','drug-labels','drug-interactions','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending','meat'],
   lastVerified: '2026-03-21T00:00:00Z',
   status: 'active',
 }];
@@ -1290,6 +1302,7 @@ const SNAPSHOT_DOMAINS = [
   { name: 'jobs', url: '/v1/jobs' },
   { name: 'flights', url: '/v1/flights' },
   { name: 'earthquakes', url: '/v1/earthquakes' },
+  { name: 'meat', url: '/v1/meat' },
   // ZIP-based domains for major metro areas
   { name: 'water-10001', url: '/v1/water?zip=10001' },
   { name: 'water-90210', url: '/v1/water?zip=90210' },

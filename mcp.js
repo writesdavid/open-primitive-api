@@ -25,6 +25,7 @@ const eligible = require('./sources/eligible');
 const air = require('./sources/air');
 const alerts = require('./sources/alerts');
 const federation = require('./sources/federation');
+const meat = require('./sources/meat');
 
 const server = new McpServer({
   name: 'open-primitive',
@@ -307,6 +308,22 @@ server.registerTool('federated-query', {
   }),
 }, async ({ domains, zip, q }) => {
   const data = await federation.federatedQuery({ domains, zip, q });
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── MEAT (FSIS) ───
+server.registerTool('get-meat-safety', {
+  title: 'Get Meat Safety',
+  description: 'Get FSIS meat, poultry, and egg product recalls or look up inspected establishments. Source: USDA FSIS.',
+  inputSchema: z.object({
+    query: z.string().optional().describe('Search term for recalls (e.g. "chicken", "salmonella"). Omit for recent recalls.'),
+    establishment: z.string().optional().describe('FSIS establishment number for inspection data (e.g. "12345").'),
+  }),
+}, async ({ query, establishment }) => {
+  let data;
+  if (establishment) data = await meat.getEstablishment(establishment);
+  else if (query) data = await meat.search(query);
+  else data = await meat.getRecent();
   return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
 });
 
