@@ -6,10 +6,9 @@ compatibility_flags = ["nodejs_compat"]
 # Static files (llms.txt, robots.txt, .well-known, HTML pages)
 assets = { directory = "../public" }
 
-# Custom domain (activate after testing on workers.dev)
-# [[routes]]
-# pattern = "api.openprimitive.com"
-# custom_domain = true
+[[routes]]
+pattern = "api.openprimitive.com"
+custom_domain = true
 
 [vars]
 ENVIRONMENT = "production"
