@@ -231,7 +231,7 @@ app.use('*', async (c, next) => {
 
 // ─── Archive helper ───
 
-const SKIP_ARCHIVE = new Set(['/v1/stats', '/v1/status', '/ping', '/v1', '/v1/history']);
+const SKIP_ARCHIVE = new Set(['/v1/stats', '/v1/status', '/ping', '/v1', '/v1/history', '/v1/changes']);
 
 async function simpleHash(str) {
   try {
@@ -339,6 +339,7 @@ app.get('/v1', (c) => {
       'clinical-trials': { endpoint: '/v1/clinical-trials?q=diabetes', source: 'ClinicalTrials.gov', description: 'Search clinical trials by condition or intervention' },
       earthquakes: { endpoint: '/v1/earthquakes', source: 'USGS', description: 'Earthquakes in the last 24 hours, magnitude 2.5+' },
       spending: { endpoint: '/v1/spending?q=defense', source: 'USAspending.gov', description: 'Federal awards and contracts by keyword' },
+      changes: { endpoint: '/v1/changes?date=2026-03-22', source: 'Archive', description: 'Daily change detection: what changed overnight across all federal domains' },
     },
     auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
     rateLimit: '500 requests per day (free), higher with API key',
@@ -954,6 +955,205 @@ app.get('/v1/context', async (c) => {
   } catch (err) {
     console.error('[context]', err);
     return c.json({ error: 'Context retrieval failed: ' + (err.message || 'unknown error') }, 500);
+  }
+});
+
+// ─── CHANGES (daily change detection) ───
+
+const CHANGE_DOMAINS = {
+  food: {
+    extract: (records) => {
+      const recalls = [];
+      for (const rec of records) {
+        const d = rec.data;
+        if (d && d.recalls && Array.isArray(d.recalls)) {
+          for (const r of d.recalls) recalls.push(r.recall_number || r.product_description || JSON.stringify(r).substring(0, 80));
+        }
+        if (d && d.results && Array.isArray(d.results)) {
+          for (const r of d.results) recalls.push(r.recall_number || r.product_description || JSON.stringify(r).substring(0, 80));
+        }
+      }
+      return new Set(recalls);
+    },
+    compare: (todaySet, yesterdaySet) => {
+      const newItems = [...todaySet].filter(x => !yesterdaySet.has(x));
+      if (newItems.length === 0) return null;
+      return { domain: 'food', type: 'new_recall', summary: `${newItems.length} new food recall${newItems.length === 1 ? '' : 's'} since yesterday`, severity: newItems.length >= 3 ? 'high' : 'medium' };
+    },
+  },
+  drugs: {
+    extract: (records) => {
+      let total = 0;
+      for (const rec of records) {
+        const d = rec.data;
+        if (d && typeof d.total_adverse_events === 'number') total = Math.max(total, d.total_adverse_events);
+        if (d && d.adverse_events && typeof d.adverse_events.total === 'number') total = Math.max(total, d.adverse_events.total);
+      }
+      return total;
+    },
+    compare: (todayVal, yesterdayVal) => {
+      if (!todayVal || !yesterdayVal) return null;
+      const diff = todayVal - yesterdayVal;
+      if (diff === 0) return null;
+      return { domain: 'drugs', type: 'adverse_events_change', summary: `Total adverse events ${diff > 0 ? 'increased' : 'decreased'} by ${Math.abs(diff)}`, severity: Math.abs(diff) > 100 ? 'high' : 'low' };
+    },
+  },
+  water: {
+    extract: (records) => {
+      const violations = [];
+      for (const rec of records) {
+        const d = rec.data;
+        if (d && d.violations && Array.isArray(d.violations)) {
+          for (const v of d.violations) violations.push(v.violation_id || v.violation_type_code || JSON.stringify(v).substring(0, 80));
+        }
+      }
+      return new Set(violations);
+    },
+    compare: (todaySet, yesterdaySet) => {
+      const newItems = [...todaySet].filter(x => !yesterdaySet.has(x));
+      if (newItems.length === 0) return null;
+      return { domain: 'water', type: 'new_violation', summary: `${newItems.length} new water violation${newItems.length === 1 ? '' : 's'} since yesterday`, severity: newItems.length >= 3 ? 'high' : 'medium' };
+    },
+  },
+  products: {
+    extract: (records) => {
+      const recalls = [];
+      for (const rec of records) {
+        const d = rec.data;
+        if (d && d.recalls && Array.isArray(d.recalls)) {
+          for (const r of d.recalls) recalls.push(r.recall_id || r.RecallID || r.title || JSON.stringify(r).substring(0, 80));
+        }
+        if (d && d.results && Array.isArray(d.results)) {
+          for (const r of d.results) recalls.push(r.recall_id || r.RecallID || r.title || JSON.stringify(r).substring(0, 80));
+        }
+      }
+      return new Set(recalls);
+    },
+    compare: (todaySet, yesterdaySet) => {
+      const newItems = [...todaySet].filter(x => !yesterdaySet.has(x));
+      if (newItems.length === 0) return null;
+      return { domain: 'products', type: 'new_recall', summary: `${newItems.length} new product recall${newItems.length === 1 ? '' : 's'} since yesterday`, severity: newItems.length >= 3 ? 'high' : 'medium' };
+    },
+  },
+  earthquakes: {
+    extract: (records) => {
+      const significant = [];
+      for (const rec of records) {
+        const d = rec.data;
+        const quakes = d && d.earthquakes ? d.earthquakes : (d && d.features ? d.features : []);
+        for (const q of quakes) {
+          const mag = q.magnitude || (q.properties && q.properties.mag) || 0;
+          const place = q.place || (q.properties && q.properties.place) || 'unknown location';
+          if (mag >= 5) significant.push({ mag, place });
+        }
+      }
+      return significant;
+    },
+    compare: (todayQuakes, yesterdayQuakes) => {
+      if (todayQuakes.length === 0) return null;
+      const yesterdayPlaces = new Set(yesterdayQuakes.map(q => q.place));
+      const newQuakes = todayQuakes.filter(q => !yesterdayPlaces.has(q.place));
+      if (newQuakes.length === 0) return null;
+      const top = newQuakes.sort((a, b) => b.mag - a.mag)[0];
+      return { domain: 'earthquakes', type: 'significant_event', summary: `M${top.mag} earthquake near ${top.place}${newQuakes.length > 1 ? ` and ${newQuakes.length - 1} more` : ''}`, severity: top.mag >= 6 ? 'high' : 'medium' };
+    },
+  },
+  jobs: {
+    extract: (records) => {
+      for (const rec of records) {
+        const d = rec.data;
+        if (d && typeof d.unemployment_rate === 'number') return d.unemployment_rate;
+        if (d && d.rate !== undefined) return d.rate;
+      }
+      return null;
+    },
+    compare: (todayRate, yesterdayRate) => {
+      if (todayRate === null || yesterdayRate === null) return null;
+      const diff = todayRate - yesterdayRate;
+      if (diff === 0) return null;
+      return { domain: 'jobs', type: 'rate_change', summary: `Unemployment rate ${diff > 0 ? 'rose' : 'fell'} from ${yesterdayRate}% to ${todayRate}%`, severity: Math.abs(diff) >= 0.3 ? 'high' : 'low' };
+    },
+  },
+};
+
+async function fetchArchiveRecords(r, domain, date) {
+  const pattern = `archive:${domain}:${date}:*`;
+  const keys = [];
+  let cursor = 0;
+  const start = Date.now();
+  do {
+    if (Date.now() - start > 5000) break;
+    const result = await r.scan(cursor, { match: pattern, count: 100 });
+    cursor = result[0];
+    keys.push(...result[1]);
+    if (keys.length >= 100) break;
+  } while (cursor !== 0 && cursor !== '0');
+
+  if (keys.length === 0) return [];
+
+  const values = await Promise.all(keys.slice(0, 100).map(k => r.get(k)));
+  return values.map(val => {
+    if (!val) return null;
+    try { return typeof val === 'string' ? JSON.parse(val) : val; } catch { return null; }
+  }).filter(Boolean);
+}
+
+app.get('/v1/changes', async (c) => {
+  const dateParam = c.req.query('date');
+  const date = dateParam || new Date().toISOString().slice(0, 10);
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return c.json({ error: 'date must be YYYY-MM-DD' }, 400);
+  }
+
+  const yesterday = new Date(date + 'T00:00:00Z');
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+  const r = getHistoryRedis(c.env);
+  if (!r) {
+    return c.json({ error: 'Archive storage unavailable. Redis not configured.' }, 503);
+  }
+
+  try {
+    const changes = [];
+
+    for (const [domain, handler] of Object.entries(CHANGE_DOMAINS)) {
+      try {
+        const [todayRecords, yesterdayRecords] = await Promise.all([
+          fetchArchiveRecords(r, domain, date),
+          fetchArchiveRecords(r, domain, yesterdayStr),
+        ]);
+
+        if (todayRecords.length === 0 && yesterdayRecords.length === 0) continue;
+
+        const todayData = handler.extract(todayRecords);
+        const yesterdayData = handler.extract(yesterdayRecords);
+        const change = handler.compare(todayData, yesterdayData);
+        if (change) changes.push(change);
+      } catch (err) {
+        console.error(`[changes] ${domain} failed:`, err.message);
+      }
+    }
+
+    const result = {
+      domain: 'changes',
+      date,
+      compared_to: yesterdayStr,
+      changes,
+      total_changes: changes.length,
+      summary: changes.length === 0
+        ? 'No significant changes detected.'
+        : `${changes.length} significant change${changes.length === 1 ? '' : 's'} detected across federal data.`,
+    };
+
+    const proof = signResponse(result, c.env);
+    if (proof) result.proof = proof;
+
+    return c.json(result);
+  } catch (err) {
+    console.error('[changes]', err);
+    return c.json({ error: 'Change detection failed: ' + (err.message || 'unknown error') }, 500);
   }
 });
 
