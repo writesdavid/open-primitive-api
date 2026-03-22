@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="print-friendly" content="true">
   <title>When Agents Get Drug Data Wrong | Open Primitive</title>
   <meta name="description" content="63% of ChatGPT drug interaction responses contain errors. Why AI needs verified federal sources.">
   <meta property="og:title" content="When Agents Get Drug Data Wrong">
@@ -11,292 +12,390 @@
   <meta property="og:url" content="https://api.openprimitive.com/white-paper.html">
   <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
   <style>
-    :root {
-      --bg: #fafaf9;
-      --text: #1c1917;
-      --text-secondary: #57534e;
-      --accent: #0c0a09;
-      --border: #e7e5e4;
-      --code-bg: #f5f5f4;
-      --highlight: #fef3c7;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* ── White Paper Page Styles ──────────────────────── */
 
     body {
       background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      line-height: 1.7;
-      -webkit-font-smoothing: antialiased;
+      color: var(--body);
     }
 
-    .wp-header {
-      padding: 80px 24px 60px;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .wp-header .download-note {
-      display: inline-block;
-      font-size: 13px;
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-      padding: 6px 16px;
-      border-radius: 4px;
-      margin-bottom: 40px;
-      letter-spacing: 0.02em;
-    }
-
-    .wp-header .download-note a {
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .wp-header .download-note a:hover {
-      text-decoration: underline;
-    }
-
-    .wp-header h1 {
-      font-size: clamp(28px, 5vw, 42px);
-      font-weight: 700;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
+    /* Title section */
+    .wp-title-section {
       max-width: 680px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 0 auto;
+      padding: 120px 48px 80px;
+      position: relative;
+      z-index: 1;
     }
 
-    .wp-header .subtitle {
-      font-size: 18px;
-      color: var(--text-secondary);
+    .wp-byline {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
+    .wp-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .wp-subtitle {
+      font-family: var(--font-display);
+      font-size: clamp(18px, 2.5vw, 24px);
       font-weight: 400;
+      color: var(--muted);
+      line-height: 1.4;
+      letter-spacing: -0.005em;
+    }
+
+    /* Abstract */
+    .wp-abstract {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wp-abstract-inner {
+      background: var(--bg-subtle);
+      border-left: 3px solid var(--accent);
+      padding: 32px 36px;
+      margin-bottom: 64px;
+    }
+
+    .wp-abstract-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .wp-abstract-inner p {
+      font-size: 16px;
+      color: var(--body);
+      line-height: 1.75;
+      margin-bottom: 12px;
+    }
+
+    .wp-abstract-inner p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Section numbers */
+    .wp-section {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      margin-top: 64px;
       margin-bottom: 24px;
     }
 
-    .wp-header .byline {
-      font-size: 14px;
-      color: var(--text-secondary);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .op-prose {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 60px 24px 100px;
-    }
-
-    .op-prose h2 {
-      font-size: 24px;
+    .wp-section-num {
+      font-family: var(--font-display);
+      font-size: 48px;
       font-weight: 700;
-      margin-top: 56px;
-      margin-bottom: 20px;
-      letter-spacing: -0.01em;
-      line-height: 1.3;
+      color: var(--accent);
+      line-height: 1;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
     }
 
-    .op-prose h2:first-child {
-      margin-top: 0;
-    }
-
-    .op-prose p {
-      margin-bottom: 20px;
-      font-size: 17px;
-    }
-
-    .op-prose strong {
+    .wp-section-heading {
+      font-family: var(--font-display);
+      font-size: 26px;
       font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.015em;
+      line-height: 1.2;
     }
 
-    .op-prose .pull-stat {
-      font-size: 22px;
+    /* Pull quotes */
+    .wp-pullquote {
+      margin: 56px -40px;
+      padding: 40px 48px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .wp-pullquote p {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 3vw, 28px);
       font-weight: 600;
-      border-left: 3px solid var(--accent);
-      padding: 16px 0 16px 24px;
-      margin: 36px 0;
-      line-height: 1.5;
+      color: var(--text);
+      line-height: 1.35;
+      letter-spacing: -0.015em;
+      margin: 0;
     }
 
-    .op-prose table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 28px 0;
-      font-size: 15px;
+    .wp-pullquote .wp-pullquote-accent {
+      color: var(--accent);
     }
 
-    .op-prose thead th {
-      text-align: left;
-      padding: 10px 16px;
-      border-bottom: 2px solid var(--accent);
-      font-weight: 600;
-      font-size: 13px;
+    /* Comparison table */
+    .wp-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin: 40px 0;
+    }
+
+    .wp-comparison-col {
+      background: var(--bg-card);
+      padding: 28px 24px;
+    }
+
+    .wp-comparison-header {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-secondary);
+      padding: 16px 24px;
+      font-weight: 600;
     }
 
-    .op-prose tbody td {
-      padding: 10px 16px;
+    .wp-comparison-header.col-fail {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-bottom: 2px solid var(--danger);
+    }
+
+    .wp-comparison-header.col-pass {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border-bottom: 2px solid var(--ok);
+    }
+
+    .wp-comparison-row {
+      display: contents;
+    }
+
+    .wp-comparison-cell {
+      background: var(--bg-card);
+      padding: 14px 24px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--body);
       border-bottom: 1px solid var(--border);
     }
 
-    .op-prose tbody tr:last-child td {
-      border-bottom: none;
+    .wp-comparison-cell.fail {
+      border-left: 2px solid rgba(191, 32, 32, 0.2);
     }
 
-    .op-prose pre {
-      background: #1c1917;
-      color: #e7e5e4;
-      padding: 24px;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 13.5px;
-      line-height: 1.6;
-      margin: 28px 0;
+    .wp-comparison-cell.pass {
+      border-left: 2px solid rgba(26, 107, 64, 0.2);
     }
 
-    .op-prose pre code {
-      background: none;
-      padding: 0;
-      font-size: inherit;
-      color: inherit;
-    }
-
-    .op-prose code {
-      background: var(--code-bg);
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 15px;
-      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace;
-    }
-
-    .op-prose .json-key { color: #93c5fd; }
-    .op-prose .json-string { color: #86efac; }
-    .op-prose .json-number { color: #fde68a; }
-
-    .op-prose .field-label {
-      font-weight: 600;
+    .wp-comparison-cell-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
       margin-bottom: 4px;
     }
 
-    .op-prose .section-divider {
-      border: none;
+    /* Footnotes */
+    .wp-ref {
+      font-size: 12px;
+      color: var(--accent);
+      vertical-align: super;
+      line-height: 0;
+      cursor: default;
+      font-family: var(--font-mono);
+      letter-spacing: 0;
+    }
+
+    .wp-footnotes {
+      margin-top: 64px;
+      padding-top: 32px;
       border-top: 1px solid var(--border);
-      margin: 56px 0;
     }
 
-    .op-prose .ref-list {
-      list-style: none;
-      padding: 0;
+    .wp-footnotes-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
     }
 
-    .op-prose .ref-list li {
-      font-size: 14px;
-      color: var(--text-secondary);
+    .wp-footnote {
+      display: flex;
+      gap: 12px;
       margin-bottom: 12px;
-      padding-left: 20px;
-      text-indent: -20px;
+      font-size: 13px;
+      color: var(--muted);
       line-height: 1.6;
     }
 
-    .op-prose .ref-list li a {
-      color: var(--text-secondary);
+    .wp-footnote-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+
+    .wp-footnote a {
+      color: var(--muted);
       text-decoration: underline;
       text-underline-offset: 2px;
     }
 
-    .op-prose .citation {
-      color: var(--text-secondary);
-      font-size: 14px;
+    .wp-footnote a:hover {
+      color: var(--accent);
     }
 
-    .wp-footer {
-      border-top: 1px solid var(--border);
-      padding: 40px 24px;
-      text-align: center;
-    }
-
-    .wp-footer p {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .wp-footer a {
+    /* Conclusion heading (no number) */
+    .wp-conclusion-heading {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 600;
       color: var(--text);
-      text-decoration: none;
-      font-weight: 500;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      margin-top: 64px;
+      margin-bottom: 24px;
     }
 
-    .wp-footer a:hover {
-      text-decoration: underline;
+    /* Footer */
+    .wp-footer {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 48px 80px;
+      position: relative;
+      z-index: 1;
     }
 
-    .wp-footer .footer-links {
+    .wp-footer-inner {
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
       display: flex;
-      gap: 32px;
-      justify-content: center;
-      margin-top: 16px;
-      font-size: 14px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
     }
 
+    .wp-footer-text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .wp-footer-text a {
+      color: var(--dim);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .wp-footer-text a:hover {
+      color: var(--accent);
+    }
+
+    .wp-footer-sep {
+      color: var(--border-strong);
+      margin: 0 8px;
+    }
+
+    /* Print styles */
     @media print {
-      .wp-header .download-note { display: none; }
-      .wp-footer { display: none; }
       body { background: white; }
-      .op-prose { padding-top: 20px; }
+      body::before { display: none; }
+      .wp-title-section { padding-top: 48px; }
+      .wp-pullquote { margin-left: 0; margin-right: 0; }
+      .wp-footer { display: none; }
+      .wp-download { display: none; }
+      .op-code-block { break-inside: avoid; }
+      .wp-comparison { break-inside: avoid; }
+    }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+      .wp-title-section { padding: 72px 24px 48px; }
+      .wp-abstract { padding: 0 24px; }
+      .wp-abstract-inner { padding: 24px; }
+      .op-prose { padding: 0 24px 72px; }
+      .wp-pullquote { margin-left: 0; margin-right: 0; padding: 32px 0; }
+      .wp-section { gap: 14px; }
+      .wp-section-num { font-size: 36px; }
+      .wp-section-heading { font-size: 22px; }
+      .wp-comparison { grid-template-columns: 1fr; }
+      .wp-footer { padding: 32px 24px 56px; }
     }
   </style>
 </head>
 <body>
 
-  <header class="wp-header">
-    <div class="download-note">
-      <a href="javascript:window.print()">Download PDF</a> &mdash; Print this page to save as PDF
-    </div>
-    <h1>When Agents Get Drug Data Wrong</h1>
-    <p class="subtitle">Why AI Needs Verified Federal Sources</p>
-    <p class="byline">Open Primitive &middot; March 2026</p>
+  <!-- Title -->
+  <header class="wp-title-section">
+    <p class="wp-byline">Open Primitive &nbsp;|&nbsp; March 2026</p>
+    <h1 class="wp-title">When Agents Get<br>Drug Data Wrong</h1>
+    <p class="wp-subtitle">Why AI needs verified federal sources</p>
   </header>
 
+  <!-- Abstract -->
+  <div class="wp-abstract">
+    <div class="wp-abstract-inner">
+      <p class="wp-abstract-label">Abstract</p>
+      <p>AI agents answer drug safety questions with fabricated data. 63% of ChatGPT drug interaction responses contain errors. 56% of GPT-4o medical citations are fabricated. When an agent tells a patient "no interactions found" between aspirin and warfarin&mdash;drugs that genuinely interact and cause hemorrhage&mdash;the failure is not intelligence. It is data.</p>
+      <p>This paper examines why AI agents hallucinate drug information, what verified federal sources exist, and how the Open Primitive Protocol provides structured, signed access to FDA adverse event data for any AI system.</p>
+    </div>
+  </div>
+
+  <!-- Body -->
   <article class="op-prose">
 
-    <h2>Abstract</h2>
+    <!-- Section 1 -->
+    <div class="wp-section">
+      <span class="wp-section-num">1</span>
+      <h2 class="wp-section-heading">The Failure</h2>
+    </div>
 
-    <p>AI agents answer drug safety questions with fabricated data. 63% of ChatGPT drug interaction responses contain errors. 56% of GPT-4o medical citations are fabricated. When an agent tells a patient "no interactions found" between aspirin and warfarin&mdash;drugs that genuinely interact and cause hemorrhage&mdash;the failure is not intelligence. It is data.</p>
-
-    <p>This paper examines why AI agents hallucinate drug information, what verified federal sources exist, and how the Open Primitive Protocol provides structured, signed access to FDA adverse event data for any AI system.</p>
-
-    <hr class="section-divider">
-
-    <h2>1. The Failure</h2>
-
-    <p>On March 15, 2023, a user asked ChatGPT whether Paxlovid interacts with verapamil. ChatGPT said it found no significant interaction. Paxlovid (nirmatrelvir/ritonavir) inhibits CYP3A4. Verapamil is metabolized by CYP3A4. Co-administration can cause fatal cardiac arrhythmia. The FDA label states this in bold text. The model missed it <span class="citation">[Shen et al., 2023]</span>.</p>
+    <p>On March 15, 2023, a user asked ChatGPT whether Paxlovid interacts with verapamil. ChatGPT said it found no significant interaction. Paxlovid (nirmatrelvir/ritonavir) inhibits CYP3A4. Verapamil is metabolized by CYP3A4. Co-administration can cause fatal cardiac arrhythmia. The FDA label states this in bold text. The model missed it.<sup class="wp-ref">1</sup></p>
 
     <p>This is not an isolated case. It is the norm.</p>
 
-    <div class="pull-stat">63% of ChatGPT drug interaction responses contain errors. It missed 39% of contraindicated combinations entirely&mdash;the most dangerous category.</div>
+    <div class="wp-pullquote">
+      <p><span class="wp-pullquote-accent">63%</span> of ChatGPT drug interaction responses contain errors. It missed <span class="wp-pullquote-accent">39%</span> of contraindicated combinations entirely&mdash;the most dangerous category.</p>
+    </div>
 
-    <p>A study published in the Journal of the American Medical Informatics Association tested ChatGPT on 308 drug interaction pairs with known FDA classifications. The model produced incorrect responses 63% of the time. It missed 39% of contraindicated combinations entirely&mdash;the most dangerous category <span class="citation">[Haver et al., 2024]</span>.</p>
+    <p>A study published in the Journal of the American Medical Informatics Association tested ChatGPT on 308 drug interaction pairs with known FDA classifications. The model produced incorrect responses 63% of the time. It missed 39% of contraindicated combinations entirely&mdash;the most dangerous category.<sup class="wp-ref">2</sup></p>
 
-    <p>GPT-4o performs worse in a different way. Researchers at Stanford tested 100 medical queries and found that 56.2% of returned citations were fabricated. The papers did not exist. The authors did not exist. The journals sometimes did not exist <span class="citation">[Gao et al., 2024]</span>. The model generated plausible-sounding references to support its answers, creating a false trail of evidence that a patient or clinician might follow to a dead end.</p>
+    <p>GPT-4o performs worse in a different way. Researchers at Stanford tested 100 medical queries and found that 56.2% of returned citations were fabricated. The papers did not exist. The authors did not exist. The journals sometimes did not exist.<sup class="wp-ref">3</sup> The model generated plausible-sounding references to support its answers, creating a false trail of evidence that a patient or clinician might follow to a dead end.</p>
 
-    <p>In February 2024, a Reddit AI chatbot built on an open-source LLM recommended heroin as a pain management option to a user describing chronic back pain. The bot framed it as an alternative to prescription opioids. The post stayed live for 11 hours before moderators removed it <span class="citation">[Vice News, 2024]</span>.</p>
+    <p>In February 2024, a Reddit AI chatbot built on an open-source LLM recommended heroin as a pain management option to a user describing chronic back pain. The bot framed it as an alternative to prescription opioids. The post stayed live for 11 hours before moderators removed it.<sup class="wp-ref">4</sup></p>
 
-    <p>The sodium bromide incident followed a similar pattern. A user asked ChatGPT for a healthier salt substitute. The model recommended sodium bromide&mdash;a chemical used in fumigation and photographic processing. Ingestion causes bromism: neurological damage, skin lesions, psychosis. Table salt is sodium chloride. The model confused two compounds that share a first name <span class="citation">[NBC News, 2023]</span>.</p>
+    <p>The sodium bromide incident followed a similar pattern. A user asked ChatGPT for a healthier salt substitute. The model recommended sodium bromide&mdash;a chemical used in fumigation and photographic processing. Ingestion causes bromism: neurological damage, skin lesions, psychosis. Table salt is sodium chloride. The model confused two compounds that share a first name.<sup class="wp-ref">5</sup></p>
 
     <p>These are consumer-facing failures. The institutional failures run deeper.</p>
 
-    <p>In November 2023, a lawsuit revealed that UnitedHealth Group's AI system, naviHealth, denied post-acute care claims at a 90% rate. Internal documents showed the company knew the AI's error rate exceeded 90% and continued using it. Elderly patients were discharged from nursing facilities while still unable to walk, eat, or use the bathroom independently <span class="citation">[Stat News, 2023]</span>.</p>
+    <p>In November 2023, a lawsuit revealed that UnitedHealth Group's AI system, naviHealth, denied post-acute care claims at a 90% rate. Internal documents showed the company knew the AI's error rate exceeded 90% and continued using it. Elderly patients were discharged from nursing facilities while still unable to walk, eat, or use the bathroom independently.<sup class="wp-ref">6</sup></p>
 
     <p>The common thread across all of these failures: no system queried a verified source. Every answer came from pattern completion over training data. The models did not check. They generated.</p>
 
-    <hr class="section-divider">
-
-    <h2>2. Why It Happens</h2>
+    <!-- Section 2 -->
+    <div class="wp-section">
+      <span class="wp-section-num">2</span>
+      <h2 class="wp-section-heading">Why It Happens</h2>
+    </div>
 
     <p>Language models do not look things up. They predict the next token based on statistical patterns in training data. That distinction matters for every domain. It is lethal for drug safety.</p>
 
@@ -304,9 +403,11 @@
 
     <p>The problem compounds through layers of summarization. Medical blogs summarize journal articles. Health forums summarize medical blogs. Social media posts summarize forum threads. Each layer strips context, drops caveats, and introduces error. By the time a claim reaches the training corpus through five layers of summarization, it may bear no resemblance to the original finding.</p>
 
-    <p>No production LLM has real-time access to the FDA Adverse Event Reporting System (FAERS). FAERS updates quarterly. It contains over 28 million adverse event reports as of Q4 2025 <span class="citation">[FDA, 2025]</span>. When a user asks about aspirin side effects, the model cannot query this database. It interpolates from whatever text about aspirin appeared in its training window&mdash;which closed months or years before the query.</p>
+    <p>No production LLM has real-time access to the FDA Adverse Event Reporting System (FAERS). FAERS updates quarterly. It contains over 28 million adverse event reports as of Q4 2025.<sup class="wp-ref">7</sup> When a user asks about aspirin side effects, the model cannot query this database. It interpolates from whatever text about aspirin appeared in its training window&mdash;which closed months or years before the query.</p>
 
-    <div class="pull-stat">The model does not say "I don't know." It generates a plausible-sounding answer with plausible-sounding citations.</div>
+    <div class="wp-pullquote">
+      <p>The model does not say "I don't know." It generates a plausible-sounding answer with <span class="wp-pullquote-accent">plausible-sounding citations</span>.</p>
+    </div>
 
     <p>The result is confident fabrication. The model does not say "I don't know." It generates a plausible-sounding answer with plausible-sounding citations. The fluency of the response actively disguises the absence of grounding.</p>
 
@@ -314,26 +415,30 @@
 
     <p>The fix is not a better model. The fix is a better data source.</p>
 
-    <hr class="section-divider">
+    <!-- Section 3 -->
+    <div class="wp-section">
+      <span class="wp-section-num">3</span>
+      <h2 class="wp-section-heading">What the Federal Data Actually Says</h2>
+    </div>
 
-    <h2>3. What the Federal Data Actually Says</h2>
-
-    <p>The FDA FAERS database contains 601,477 adverse event reports for aspirin as of Q1 2026. Of those, 424,005 are classified as serious&mdash;meaning they resulted in death, hospitalization, disability, or a life-threatening condition <span class="citation">[FDA FAERS, 2026]</span>.</p>
+    <p>The FDA FAERS database contains 601,477 adverse event reports for aspirin as of Q1 2026. Of those, 424,005 are classified as serious&mdash;meaning they resulted in death, hospitalization, disability, or a life-threatening condition.<sup class="wp-ref">8</sup></p>
 
     <p>The top five reported adverse reactions for aspirin:</p>
 
-    <table>
-      <thead>
-        <tr><th>Reaction</th><th>Report Count</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Drug ineffective</td><td>48,291</td></tr>
-        <tr><td>Fatigue</td><td>31,847</td></tr>
-        <tr><td>Nausea</td><td>29,103</td></tr>
-        <tr><td>Headache</td><td>27,456</td></tr>
-        <tr><td>Dyspnoea</td><td>24,882</td></tr>
-      </tbody>
-    </table>
+    <div class="op-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Reaction</th><th>Report Count</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Drug ineffective</td><td class="mono">48,291</td></tr>
+          <tr><td>Fatigue</td><td class="mono">31,847</td></tr>
+          <tr><td>Nausea</td><td class="mono">29,103</td></tr>
+          <tr><td>Headache</td><td class="mono">27,456</td></tr>
+          <tr><td>Dyspnoea</td><td class="mono">24,882</td></tr>
+        </tbody>
+      </table>
+    </div>
 
     <p>This data is real. It carries timestamps. Every report traces back to a submission from a healthcare professional, a consumer, or a manufacturer as required by law.</p>
 
@@ -341,41 +446,48 @@
 
     <p>A typical ChatGPT response lists: stomach irritation, bleeding, tinnitus, allergic reactions, Reye's syndrome. It provides no numbers. No source. No timestamp. No way to verify whether the information reflects 2024 data or a 2011 blog post. The response reads like a textbook summary&mdash;because it is one, reconstructed from fragments of textbook-like text in the training corpus.</p>
 
-    <div class="pull-stat">FAERS gives you 601,477 data points with provenance. ChatGPT gives you a paragraph with none.</div>
+    <div class="wp-pullquote">
+      <p>FAERS gives you <span class="wp-pullquote-accent">601,477</span> data points with provenance. ChatGPT gives you a paragraph with none.</p>
+    </div>
 
     <p>This data is freely accessible. The FDA publishes FAERS through an open API at <code>api.fda.gov</code>. Anyone can query it. But the API returns raw JSON with inconsistent field names, nested structures that vary by endpoint, and no built-in mechanism for verifying data freshness or integrity. Building a reliable pipeline from the FDA API to an AI agent requires parsing, normalization, caching, and verification infrastructure that most developers do not build.</p>
 
     <p>The data exists. The access layer does not.</p>
 
-    <hr class="section-divider">
-
-    <h2>4. The Open Primitive Approach</h2>
+    <!-- Section 4 -->
+    <div class="wp-section">
+      <span class="wp-section-num">4</span>
+      <h2 class="wp-section-heading">The Open Primitive Approach</h2>
+    </div>
 
     <p>Open Primitive provides a single API endpoint that returns structured FDA adverse event data with four guarantees: source provenance, freshness timestamp, confidence score, and cryptographic signature.</p>
 
     <p>A query to the drugs endpoint returns a response shaped like this:</p>
 
-    <pre><code>{
-  <span class="json-key">"drug"</span>: <span class="json-string">"aspirin"</span>,
-  <span class="json-key">"total_reports"</span>: <span class="json-number">601477</span>,
-  <span class="json-key">"serious_reports"</span>: <span class="json-number">424005</span>,
-  <span class="json-key">"top_reactions"</span>: [
-    {<span class="json-key">"reaction"</span>: <span class="json-string">"Drug ineffective"</span>, <span class="json-key">"count"</span>: <span class="json-number">48291</span>},
-    {<span class="json-key">"reaction"</span>: <span class="json-string">"Fatigue"</span>, <span class="json-key">"count"</span>: <span class="json-number">31847</span>},
-    {<span class="json-key">"reaction"</span>: <span class="json-string">"Nausea"</span>, <span class="json-key">"count"</span>: <span class="json-number">29103</span>},
-    {<span class="json-key">"reaction"</span>: <span class="json-string">"Headache"</span>, <span class="json-key">"count"</span>: <span class="json-number">27456</span>},
-    {<span class="json-key">"reaction"</span>: <span class="json-string">"Dyspnoea"</span>, <span class="json-key">"count"</span>: <span class="json-number">24882</span>}
+    <div class="op-code-block">
+      <span class="op-code-label">JSON Response</span>
+<pre><code>{
+  <span class="op-code-key">"drug"</span>: <span class="op-code-string">"aspirin"</span>,
+  <span class="op-code-key">"total_reports"</span>: <span class="op-code-number">601477</span>,
+  <span class="op-code-key">"serious_reports"</span>: <span class="op-code-number">424005</span>,
+  <span class="op-code-key">"top_reactions"</span>: [
+    {<span class="op-code-key">"reaction"</span>: <span class="op-code-string">"Drug ineffective"</span>, <span class="op-code-key">"count"</span>: <span class="op-code-number">48291</span>},
+    {<span class="op-code-key">"reaction"</span>: <span class="op-code-string">"Fatigue"</span>, <span class="op-code-key">"count"</span>: <span class="op-code-number">31847</span>},
+    {<span class="op-code-key">"reaction"</span>: <span class="op-code-string">"Nausea"</span>, <span class="op-code-key">"count"</span>: <span class="op-code-number">29103</span>},
+    {<span class="op-code-key">"reaction"</span>: <span class="op-code-string">"Headache"</span>, <span class="op-code-key">"count"</span>: <span class="op-code-number">27456</span>},
+    {<span class="op-code-key">"reaction"</span>: <span class="op-code-string">"Dyspnoea"</span>, <span class="op-code-key">"count"</span>: <span class="op-code-number">24882</span>}
   ],
-  <span class="json-key">"source"</span>: <span class="json-string">"FDA FAERS"</span>,
-  <span class="json-key">"freshness"</span>: <span class="json-string">"2026-01-15T00:00:00Z"</span>,
-  <span class="json-key">"confidence"</span>: <span class="json-number">0.97</span>,
-  <span class="json-key">"proof"</span>: {
-    <span class="json-key">"algorithm"</span>: <span class="json-string">"Ed25519"</span>,
-    <span class="json-key">"public_key"</span>: <span class="json-string">"open-primitive-signing-key-v1"</span>,
-    <span class="json-key">"signature"</span>: <span class="json-string">"a1b2c3...signed_hash"</span>,
-    <span class="json-key">"chain"</span>: [<span class="json-string">"FDA FAERS API"</span>, <span class="json-string">"Open Primitive normalization"</span>, <span class="json-string">"Ed25519 signing"</span>]
+  <span class="op-code-key">"source"</span>: <span class="op-code-string">"FDA FAERS"</span>,
+  <span class="op-code-key">"freshness"</span>: <span class="op-code-string">"2026-01-15T00:00:00Z"</span>,
+  <span class="op-code-key">"confidence"</span>: <span class="op-code-number">0.97</span>,
+  <span class="op-code-key">"proof"</span>: {
+    <span class="op-code-key">"algorithm"</span>: <span class="op-code-string">"Ed25519"</span>,
+    <span class="op-code-key">"public_key"</span>: <span class="op-code-string">"open-primitive-signing-key-v1"</span>,
+    <span class="op-code-key">"signature"</span>: <span class="op-code-string">"a1b2c3...signed_hash"</span>,
+    <span class="op-code-key">"chain"</span>: [<span class="op-code-string">"FDA FAERS API"</span>, <span class="op-code-string">"Open Primitive normalization"</span>, <span class="op-code-string">"Ed25519 signing"</span>]
   }
 }</code></pre>
+    </div>
 
     <p>Each field serves a specific function.</p>
 
@@ -389,35 +501,89 @@
 
     <p>This is not a wrapper around ChatGPT. This is a direct pipeline from a federal database to an AI agent, with every step auditable.</p>
 
+    <!-- Comparison -->
+    <div class="wp-comparison">
+      <div class="wp-comparison-header col-fail">ChatGPT</div>
+      <div class="wp-comparison-header col-pass">Open Primitive</div>
+
+      <div class="wp-comparison-cell fail">
+        <div class="wp-comparison-cell-label">Source</div>
+        Training data (web scrape, unknown provenance)
+      </div>
+      <div class="wp-comparison-cell pass">
+        <div class="wp-comparison-cell-label">Source</div>
+        FDA FAERS (federal database, auditable)
+      </div>
+
+      <div class="wp-comparison-cell fail">
+        <div class="wp-comparison-cell-label">Freshness</div>
+        Unknown. Training cutoff months or years old.
+      </div>
+      <div class="wp-comparison-cell pass">
+        <div class="wp-comparison-cell-label">Freshness</div>
+        Timestamped. Q1 2026 data, verifiable.
+      </div>
+
+      <div class="wp-comparison-cell fail">
+        <div class="wp-comparison-cell-label">Numbers</div>
+        None. Qualitative summaries only.
+      </div>
+      <div class="wp-comparison-cell pass">
+        <div class="wp-comparison-cell-label">Numbers</div>
+        601,477 reports. Exact counts per reaction.
+      </div>
+
+      <div class="wp-comparison-cell fail">
+        <div class="wp-comparison-cell-label">Citations</div>
+        56% fabricated (Stanford, 2024).
+      </div>
+      <div class="wp-comparison-cell pass">
+        <div class="wp-comparison-cell-label">Citations</div>
+        Ed25519 signed. Cryptographically verifiable.
+      </div>
+
+      <div class="wp-comparison-cell fail">
+        <div class="wp-comparison-cell-label">Confidence</div>
+        Appears confident regardless of accuracy.
+      </div>
+      <div class="wp-comparison-cell pass">
+        <div class="wp-comparison-cell-label">Confidence</div>
+        0.97 score. Agent calibrates response accordingly.
+      </div>
+    </div>
+
     <p>An agent using Open Primitive does not hallucinate aspirin data because it does not need to. It calls an endpoint. It receives signed data. It presents that data with attribution. The answer comes from 601,477 reports, not from token prediction.</p>
 
     <p>The protocol is open. The signing keys are published. Any AI system&mdash;commercial or open-source&mdash;can integrate the endpoint without licensing fees or proprietary SDKs.</p>
 
-    <hr class="section-divider">
-
-    <h2>5. Implications</h2>
+    <!-- Section 5 -->
+    <div class="wp-section">
+      <span class="wp-section-num">5</span>
+      <h2 class="wp-section-heading">Implications</h2>
+    </div>
 
     <p>The regulatory environment is moving toward mandatory data provenance for AI systems that touch healthcare.</p>
 
-    <p>The European Union AI Act, which takes full effect on August 2, 2026, classifies AI systems that provide medical information as high-risk. Article 10 requires that training and inference data meet quality criteria including traceability, provenance documentation, and appropriate data governance <span class="citation">[EU AI Act, 2024]</span>. An AI agent that answers drug safety questions from unverified training data does not meet these requirements.</p>
+    <p>The European Union AI Act, which takes full effect on August 2, 2026, classifies AI systems that provide medical information as high-risk. Article 10 requires that training and inference data meet quality criteria including traceability, provenance documentation, and appropriate data governance.<sup class="wp-ref">9</sup> An AI agent that answers drug safety questions from unverified training data does not meet these requirements.</p>
 
-    <p>The FDA published draft guidance in January 2025 for AI-enabled medical devices. Section 4.2 requires "data lineage documentation"&mdash;a record of where input data originated, how it was transformed, and how its integrity was maintained through the pipeline <span class="citation">[FDA, 2025]</span>. The guidance applies to any software that processes health data to support clinical decisions, a definition broad enough to cover AI chatbots that answer drug questions.</p>
+    <p>The FDA published draft guidance in January 2025 for AI-enabled medical devices. Section 4.2 requires "data lineage documentation"&mdash;a record of where input data originated, how it was transformed, and how its integrity was maintained through the pipeline.<sup class="wp-ref">10</sup> The guidance applies to any software that processes health data to support clinical decisions, a definition broad enough to cover AI chatbots that answer drug questions.</p>
 
-    <p>The NIST AI Risk Management Framework, updated in September 2025, identifies content provenance as one of four pillars of trustworthy AI alongside fairness, security, and transparency <span class="citation">[NIST AI RMF 2.0, 2025]</span>. NIST specifically calls out healthcare as a domain where provenance failures create "cascading downstream harms."</p>
+    <p>The NIST AI Risk Management Framework, updated in September 2025, identifies content provenance as one of four pillars of trustworthy AI alongside fairness, security, and transparency.<sup class="wp-ref">11</sup> NIST specifically calls out healthcare as a domain where provenance failures create "cascading downstream harms."</p>
 
     <p>Three regulatory bodies. Three frameworks. One shared requirement: know where your data came from and prove it.</p>
 
     <p>Most AI systems cannot meet this requirement today. They train on web-scraped data with no provenance chain. They generate responses with no source attribution. They provide no mechanism for downstream verification. When the EU AI Act enforcement begins in August 2026, every AI system that answers drug safety questions from unattributed training data faces compliance exposure.</p>
 
-    <div class="pull-stat">Verified federal data access is not a feature. It is compliance infrastructure.</div>
+    <div class="wp-pullquote">
+      <p>Verified federal data access is not a feature. It is <span class="wp-pullquote-accent">compliance infrastructure</span>.</p>
+    </div>
 
     <p>The Open Primitive proof object&mdash;source, freshness, confidence, signature&mdash;maps directly to what these frameworks require. An agent that returns an Open Primitive response can demonstrate: the data came from the FDA (provenance), it reflects Q1 2026 (freshness), the match quality is 0.97 (confidence), and the payload has not been modified (integrity). That chain satisfies Article 10. That chain satisfies Section 4.2. That chain satisfies NIST's provenance pillar.</p>
 
     <p>The organizations that build this infrastructure now will meet compliance deadlines. The organizations that do not will face a choice between rushing implementation and withdrawing from regulated markets.</p>
 
-    <hr class="section-divider">
-
-    <h2>Conclusion</h2>
+    <!-- Conclusion -->
+    <h2 class="wp-conclusion-heading">Conclusion</h2>
 
     <p>The question is not whether AI agents will make drug safety decisions. They already do. Millions of users ask ChatGPT about drug interactions every month. AI-powered triage systems process insurance claims that determine whether patients receive care. Chatbots embedded in pharmacy websites answer questions about side effects.</p>
 
@@ -429,31 +595,29 @@
 
     <p>What remains is adoption.</p>
 
-    <hr class="section-divider">
-
-    <h2>References</h2>
-
-    <ul class="ref-list">
-      <li>EU AI Act, Regulation (EU) 2024/1689, Article 10: Data and Data Governance, 2024.</li>
-      <li>FDA. "Draft Guidance: Artificial Intelligence-Enabled Device Software Functions." January 2025.</li>
-      <li>FDA FAERS Public Dashboard. Accessed March 2026. <a href="https://api.fda.gov">https://api.fda.gov</a></li>
-      <li>Gao, Y. et al. "Accuracy of Citations Generated by Large Language Models." Stanford University, 2024.</li>
-      <li>Haver, H. et al. "Assessing ChatGPT Responses to Drug Interaction Queries." Journal of the American Medical Informatics Association, 2024.</li>
-      <li>NBC News. "ChatGPT Suggested a Toxic Chemical as a Healthy Salt Alternative." December 2023.</li>
-      <li>NIST. "AI Risk Management Framework 2.0." September 2025.</li>
-      <li>Shen, Y. et al. "ChatGPT and Other Large Language Models Are Double-edged Swords." Radiology, 2023.</li>
-      <li>Stat News. "UnitedHealth AI Denials Lawsuit." November 2023.</li>
-      <li>Vice News. "AI Chatbot Recommended Heroin for Pain Management." February 2024.</li>
-    </ul>
+    <!-- Footnotes -->
+    <div class="wp-footnotes">
+      <p class="wp-footnotes-label">References</p>
+      <div class="wp-footnote"><span class="wp-footnote-num">1</span><span>Shen, Y. et al. "ChatGPT and Other Large Language Models Are Double-edged Swords." <em>Radiology</em>, 2023.</span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">2</span><span>Haver, H. et al. "Assessing ChatGPT Responses to Drug Interaction Queries." <em>Journal of the American Medical Informatics Association</em>, 2024.</span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">3</span><span>Gao, Y. et al. "Accuracy of Citations Generated by Large Language Models." Stanford University, 2024.</span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">4</span><span>Vice News. "AI Chatbot Recommended Heroin for Pain Management." February 2024.</span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">5</span><span>NBC News. "ChatGPT Suggested a Toxic Chemical as a Healthy Salt Alternative." December 2023.</span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">6</span><span>Stat News. "UnitedHealth AI Denials Lawsuit." November 2023.</span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">7</span><span>FDA FAERS Public Dashboard. Accessed March 2026. <a href="https://api.fda.gov">api.fda.gov</a></span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">8</span><span>FDA FAERS Public Dashboard. Q1 2026 data. <a href="https://api.fda.gov">api.fda.gov</a></span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">9</span><span>EU AI Act, Regulation (EU) 2024/1689, Article 10: Data and Data Governance, 2024.</span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">10</span><span>FDA. "Draft Guidance: Artificial Intelligence-Enabled Device Software Functions." January 2025.</span></div>
+      <div class="wp-footnote"><span class="wp-footnote-num">11</span><span>NIST. "AI Risk Management Framework 2.0." September 2025.</span></div>
+    </div>
 
   </article>
 
+  <!-- Footer -->
   <footer class="wp-footer">
-    <p>Published by Open Primitive. March 2026.</p>
-    <div class="footer-links">
-      <a href="https://openprimitive.com">openprimitive.com</a>
-      <a href="https://api.openprimitive.com">API</a>
-      <a href="https://api.openprimitive.com/protocol">Protocol Spec</a>
+    <div class="wp-footer-inner">
+      <span class="wp-footer-text">Full API: <a href="https://api.openprimitive.com">api.openprimitive.com</a></span>
+      <span class="wp-footer-text">Protocol: <a href="https://openprimitive.com/protocol.html">openprimitive.com/protocol.html</a></span>
     </div>
   </footer>
 
