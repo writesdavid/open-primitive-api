@@ -53,20 +53,7 @@ Fields:
 
 ## Authentication
 
-Register at https://api.openprimitive.com/register.html to get a free API key.
-
-Free tier: 200 requests per hour. No credit card required.
-
-Pass your key one of two ways:
-- Header: X-API-Key: YOUR_KEY
-- Query parameter: ?api_key=YOUR_KEY
-
-Missing key returns 401. Invalid key returns 403. Exceeding rate limit returns 429.
-
-Rate limit headers on every response:
-- X-RateLimit-Limit
-- X-RateLimit-Remaining
-- X-RateLimit-Reset
+No API key required. Completely free, no limits. Just call the endpoints.
 
 
 ---
@@ -1197,9 +1184,6 @@ OPP is open. Any organization serving structured data can publish a manifest and
 
 All errors return JSON with an "error" field:
 
-- 401: Missing API key — `{ "error": "Missing API key", "hint": "Pass your key via X-API-Key header or ?api_key= query parameter" }`
-- 403: Invalid or inactive key — `{ "error": "Invalid or inactive API key" }`
-- 429: Rate limit exceeded — `{ "error": "Rate limit exceeded. 200 requests per hour." }`
 - 400: Bad request (missing required params) — `{ "error": "year, make, and model are required" }`
 - 500: Upstream failure — `{ "error": "Internal server error" }`
 

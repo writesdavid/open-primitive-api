@@ -9,7 +9,7 @@ canonical_url: https://api.openprimitive.com
 
 The FDA publishes food recall data. Good. But the format changes, the pagination breaks, and the field names shift between endpoints. You spend more time parsing than building.
 
-Open Primitive pulls from the FDA recall enforcement database, normalizes every field, and returns clean JSON. One endpoint. No auth required on the free tier.
+Open Primitive pulls from the FDA recall enforcement database, normalizes every field, and returns clean JSON. One endpoint. Free. No API key. No limits.
 
 ## The endpoint
 
@@ -64,4 +64,4 @@ The raw FDA data works. This is faster.
 
 ## Rate limits
 
-Free tier: 500 calls/day. [RapidAPI](https://rapidapi.com/writesdavid/api/open-primitive-api). Docs: [api.openprimitive.com](https://api.openprimitive.com)
+Free. No API key. No limits. Docs: [api.openprimitive.com](https://api.openprimitive.com)

@@ -43,7 +43,7 @@ Base URL: https://api.openprimitive.com
 - GET /v1/weather?lat=&lng= — NOAA 7-day forecast with temperature, wind, precipitation detail.
 
 ## Authentication
-Pass API key via X-API-Key header or ?api_key= query parameter. Register at https://api.openprimitive.com/register.html.
+No API key required. Completely free, no limits.
 
 ## Response Format
 Every response includes: domain, source, source_url, freshness (ISO 8601 timestamp), confidence, citations, proof.

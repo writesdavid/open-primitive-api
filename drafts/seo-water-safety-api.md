@@ -75,4 +75,4 @@ Returns only unresolved violations. Useful for real-time safety dashboards and t
 
 ## Rate limits
 
-Free tier: 500 calls/day. [RapidAPI](https://rapidapi.com/writesdavid/api/open-primitive-api). Docs: [api.openprimitive.com](https://api.openprimitive.com)
+Free. No API key. No limits. Docs: [api.openprimitive.com](https://api.openprimitive.com)

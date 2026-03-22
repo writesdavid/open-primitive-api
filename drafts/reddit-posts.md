@@ -32,7 +32,7 @@ curl "https://api.openprimitive.com/v1/drugs/search?query=metformin"
 
 Returns adverse events, recall history, and labeling data from three separate FDA endpoints — stitched into one response.
 
-Also listed on RapidAPI if that's your workflow. Free tier covers most use cases.
+Also listed on RapidAPI if that's your workflow. Free. No API key. No limits.
 
 Curious what people think about the response format. Right now every response nests data under `source` metadata (agency, endpoint, freshness). Useful or noisy? Would you rather have raw data with source info in headers?
 

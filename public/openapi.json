@@ -13,19 +13,8 @@
       "url": "https://api.openprimitive.com"
     }
   ],
-  "security": [
-    {
-      "apiKey": []
-    }
-  ],
+  "security": [],
   "components": {
-    "securitySchemes": {
-      "apiKey": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-API-Key"
-      }
-    },
     "schemas": {
       "Confidence": {
         "type": "object",

@@ -43,6 +43,6 @@
     "agentCard": "/.well-known/agent-card.json"
   },
   "geographic": { "scope": "US", "granularity": "zip-code" },
-  "authentication": { "type": "api-key", "header": "X-API-Key", "registration": "https://api.openprimitive.com/register.html" },
+  "authentication": { "type": "none", "description": "No API key required. Completely free, no limits." },
   "lastUpdated": "2026-03-19T00:00:00Z"
 }

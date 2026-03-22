@@ -154,8 +154,6 @@
         <span class="api-nav-sep">&middot;</span>
         <a href="/stats.html">Traffic</a>
         <span class="api-nav-sep">&middot;</span>
-        <a href="/pricing.html">Pricing</a>
-        <span class="api-nav-sep">&middot;</span>
         <a href="https://github.com/writesdavid/open-primitive-api">GitHub</a>
       </nav>
     </header>
@@ -281,19 +279,11 @@
     <section class="api-section">
       <p class="api-section-label">Auth</p>
       <h2>Authentication</h2>
-      <p>Free tier requires no key. Rate limited at upstream API speeds.</p>
-      <p>Authenticated requests use the <code>X-API-Key</code> header or <code>?api_key=</code> query parameter.</p>
+      <p>No API key required. Completely free, no limits. Just call the endpoints.</p>
 
       <div class="op-code-block">
-        <span class="op-code-comment"># Register for an API key</span>
-curl -X POST https://api.openprimitive.com/v1/register \
-  -H <span class="op-code-string">"Content-Type: application/json"</span> \
-  -d <span class="op-code-string">'{"email": "you@example.com"}'</span></div>
-
-      <div class="op-code-block">
-        <span class="op-code-comment"># Authenticated request</span>
-curl https://api.openprimitive.com/v1/cars?year=2024&make=toyota \
-  -H <span class="op-code-string">"X-API-Key: op_your_key_here"</span></div>
+        <span class="op-code-comment"># Just call it</span>
+curl https://api.openprimitive.com/v1/cars?year=2024&make=toyota&model=camry</div>
     </section>
 
     <!-- Integration -->

@@ -39,46 +39,6 @@ function signResponse(data, env) {
   }
 }
 
-// x402 micropayments (activate by setting X402_PAY_TO env var)
-let x402Middleware = null;
-try {
-  const { paymentMiddleware, x402ResourceServer } = require('@x402/hono');
-  const { ExactEvmScheme } = require('@x402/evm/exact/server');
-  const { HTTPFacilitatorClient } = require('@x402/core/server');
-
-  x402Middleware = (payTo) => {
-    const facilitatorClient = new HTTPFacilitatorClient({
-      url: 'https://facilitator.x402.org',
-    });
-    const resourceServer = new x402ResourceServer(facilitatorClient)
-      .register('eip155:8453', new ExactEvmScheme());
-
-    return paymentMiddleware(
-      {
-        'GET /v1/eligible': {
-          accepts: { scheme: 'exact', price: '$0.005', network: 'eip155:8453', payTo },
-          description: 'Federal benefits eligibility check',
-        },
-        'GET /v1/compare': {
-          accepts: { scheme: 'exact', price: '$0.003', network: 'eip155:8453', payTo },
-          description: 'Cross-domain federal data comparison',
-        },
-        'GET /v1/risk': {
-          accepts: { scheme: 'exact', price: '$0.003', network: 'eip155:8453', payTo },
-          description: 'Cross-domain risk assessment by ZIP',
-        },
-        'GET /v1/location': {
-          accepts: { scheme: 'exact', price: '$0.003', network: 'eip155:8453', payTo },
-          description: 'Complete location profile by ZIP',
-        },
-      },
-      resourceServer,
-    );
-  };
-} catch (e) {
-  // x402 packages not available — all endpoints free
-}
-
 // Source modules (CommonJS — nodejs_compat handles require)
 const flights = require('../sources/flights');
 const cars = require('../sources/cars');
@@ -304,13 +264,6 @@ async function wrap(c, promise) {
   }
 }
 
-// ─── x402 MICROPAYMENTS (optional — activate with X402_PAY_TO secret) ───
-// When active, /v1/eligible, /v1/compare, /v1/risk, /v1/location require payment
-// All other endpoints remain free
-if (x402Middleware && typeof process !== 'undefined' && process.env && process.env.X402_PAY_TO) {
-  app.use(x402Middleware(process.env.X402_PAY_TO));
-}
-
 // ─── PING ───
 app.get('/ping', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
@@ -348,8 +301,7 @@ app.get('/v1', (c) => {
       meat: { endpoint: '/v1/meat', source: 'USDA FSIS', description: 'Meat, poultry, egg product recalls and FSIS-inspected establishment data' },
       changes: { endpoint: '/v1/changes?date=2026-03-22', source: 'Archive', description: 'Daily change detection: what changed overnight across all federal domains' },
     },
-    auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
-    rateLimit: '500 requests per day (free), higher with API key',
+    auth: 'No API key required. Completely free, no limits.',
     mcp: 'MCP server available at /mcp or via stdio (node mcp.js)',
   });
 });
@@ -665,20 +617,6 @@ app.get('/v1/registry/search', async (c) => {
     console.error(err);
     return c.json({ error: 'Search failed' }, 500);
   }
-});
-
-// ─── BILLING (stub — needs Stripe + Redis) ───
-app.post('/v1/billing/checkout', async (c) => {
-  return c.json({ error: 'Billing not yet available on Workers' }, 501);
-});
-app.post('/v1/billing/founding', async (c) => {
-  return c.json({ error: 'Billing not yet available on Workers' }, 501);
-});
-app.post('/v1/billing/webhook', async (c) => {
-  return c.json({ error: 'Billing not yet available on Workers' }, 501);
-});
-app.get('/v1/billing/usage', async (c) => {
-  return c.json({ error: 'Billing not yet available on Workers' }, 501);
 });
 
 // ─── ARCHIVE TEST ───

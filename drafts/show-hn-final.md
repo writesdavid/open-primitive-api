@@ -28,6 +28,6 @@ MCP server with 17 tools, listed on the official MCP Registry:
 npx open-primitive-mcp
 ```
 
-Also on RapidAPI (free tier).
+Also on RapidAPI. Free. No API key. No limits.
 
 Looking for feedback: which data domains matter most for agent workflows? Is the response envelope structure useful, or does your stack need something different?

@@ -23,7 +23,6 @@ const compare = require('./sources/compare');
 const { getStatus } = require('./routes/status');
 const { handleRegister } = require('./routes/register');
 const { registerProvider, listProviders, searchProviders } = require('./routes/registry');
-const { handleCheckout, handleWebhook, handleUsage, handleFoundingCheckout } = require('./routes/billing');
 const { addQualityGrade } = require('./middleware/quality');
 const { getFreshnessReport } = require('./middleware/freshness');
 const { rateLimitMiddleware } = require('./middleware/rate-limit-memory');
@@ -37,11 +36,8 @@ const eligible = require('./sources/eligible');
 
 const app = express();
 
-// JSON body parsing for POST routes (skip webhook — Stripe needs raw body)
-app.use((req, res, next) => {
-  if (req.path === '/v1/billing/webhook') return next();
-  express.json()(req, res, next);
-});
+// JSON body parsing for POST routes
+app.use(express.json());
 
 // Static docs page
 app.use(express.static(path.join(__dirname, 'public')));
@@ -57,7 +53,7 @@ app.use((req, res, next) => {
 // Agent detection on ALL requests
 app.use(agentDetect);
 
-// Rate limiting: in-memory for free tier, Redis with 2s timeout for paid
+// Anonymous usage counting (analytics only, no limits)
 app.use('/v1', rateLimitMiddleware);
 
 // Single response handler: citations, signing, freshness headers BEFORE send;
@@ -206,12 +202,6 @@ app.get('/v1/registry', listProviders);
 // ─── FEDERATED (cross-provider query engine) ───
 app.get('/v1/federated', (req, res) => wrap(res, federation.federatedQuery(req.query)));
 
-// ─── BILLING ───
-app.post('/v1/billing/checkout', handleCheckout);
-app.post('/v1/billing/founding', handleFoundingCheckout);
-app.post('/v1/billing/webhook', express.raw({ type: 'application/json' }), handleWebhook);
-app.get('/v1/billing/usage', handleUsage);
-
 // ─── META ───
 app.get('/v1', (req, res) => {
   res.json({
@@ -238,8 +228,7 @@ app.get('/v1', (req, res) => {
       ask: { endpoint: '/v1/ask?q=', source: 'All', description: 'Natural language query — ask any question, we route to the right domain(s)' },
       eligible: { endpoint: '/v1/eligible?income=45000&household=3&state=TX', source: 'HHS, CMS, IRS, HUD', description: 'Federal benefits eligibility: SNAP, Medicaid, EITC, CHIP, LIHEAP based on income, household size, and state' },
     },
-    auth: 'Pass API key via X-API-Key header or ?api_key= query parameter',
-    rateLimit: '500 requests per day (free), higher with API key',
+    auth: 'No API key required. Completely free, no limits.',
     mcp: 'MCP server available at /mcp or via stdio (node mcp.js)',
   });
 });
