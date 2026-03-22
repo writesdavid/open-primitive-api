@@ -124,7 +124,7 @@
   <p class="tag">Open Primitive | March 2026</p>
   <h1>When Agents<br>Get Drug<br>Data Wrong</h1>
   <p class="subtitle">AI agents answer drug questions with fabricated data. The infrastructure to fix that exists now.</p>
-  <p class="page-num">1 / 8</p>
+  <p class="page-num">1 / 9</p>
 </div>
 
 <!-- SLIDE 2: The problem stat -->
@@ -134,7 +134,7 @@
   <p class="stat-label">of AI medical responses hallucinate on clinical cases.</p>
   <p class="subtitle" style="margin-top:40px; font-size:22px;">MedRxiv, Feb 2025. 300 physician-validated clinical vignettes. All major models tested.</p>
   <p class="byline">Open Primitive</p>
-  <p class="page-num" style="color:#555;">2 / 8</p>
+  <p class="page-num" style="color:#555;">2 / 9</p>
 </div>
 
 <!-- SLIDE 3: Drug interaction stat -->
@@ -144,7 +144,7 @@
   <p class="stat-label">drug interaction queries return <span class="emphasis">wrong answers</span> across all major models.</p>
   <p class="subtitle" style="margin-top:40px; font-size:22px;">Rx-LLM Benchmark, Dec 2025. GPT-4o-mini achieved 70.4% accuracy — the best performer. The rest scored lower.</p>
   <p class="byline">Open Primitive</p>
-  <p class="page-num">3 / 8</p>
+  <p class="page-num">3 / 9</p>
 </div>
 
 <!-- SLIDE 4: The human cost -->
@@ -153,7 +153,7 @@
   <h1>92% of clinicians have encountered AI medical hallucinations.</h1>
   <p class="body-text">85% said those hallucinations could cause patient harm. The models work. The data underneath them does not.</p>
   <p class="byline">Open Primitive</p>
-  <p class="page-num" style="color:rgba(255,255,255,0.4);">4 / 8</p>
+  <p class="page-num" style="color:rgba(255,255,255,0.4);">4 / 9</p>
 </div>
 
 <!-- SLIDE 5: All models, not one -->
@@ -181,7 +181,7 @@
   </div>
   <p class="subtitle" style="margin-top:40px; font-size:20px;">General hallucination rates. On medical tasks, all models exceed 10%. Vectara Leaderboard, 2026.</p>
   <p class="byline">Open Primitive</p>
-  <p class="page-num" style="color:#555;">5 / 8</p>
+  <p class="page-num" style="color:#555;">5 / 9</p>
 </div>
 
 <!-- SLIDE 6: What exists -->
@@ -191,32 +191,41 @@
   <p class="stat-label">FDA adverse event reports for aspirin alone. 424,005 classified as serious.</p>
   <p class="body-text" style="margin-top:40px; font-size:26px;">Real. Timestamped. Freely accessible. No model queries the FDA directly. Every model guesses instead.</p>
   <p class="byline">Open Primitive</p>
-  <p class="page-num">6 / 8</p>
+  <p class="page-num">6 / 9</p>
 </div>
 
-<!-- SLIDE 7: The fix -->
+<!-- SLIDE 7: The gap -->
+<div class="slide">
+  <p class="tag">So why don't agents use it?</p>
+  <h1 style="font-size:52px;">The FDA publishes the data. No agent reads it.</h1>
+  <p class="body-text" style="margin-top:40px;">11 federal agencies. 11 different APIs. 11 different schemas. No standard envelope. No provenance. No way for an agent to know if the data arrived intact or arrived at all.</p>
+  <p class="body-text" style="margin-top:30px;">So every model guesses. The data exists ten feet away. The plumbing between source and agent does not.</p>
+  <p class="byline">Open Primitive</p>
+  <p class="page-num">7 / 9</p>
+</div>
+
+<!-- SLIDE 8: The fix -->
 <div class="slide slide-dark">
-  <p class="tag">The infrastructure</p>
-  <h1 style="font-size:56px;">Every response carries<br>four guarantees.</h1>
+  <p class="tag">The plumbing</p>
+  <h1 style="font-size:56px;">One API call. Four guarantees.</h1>
   <p class="body-text" style="margin-top:40px;">
-    <span class="emphasis">Source provenance</span> — which federal database.<br><br>
-    <span class="emphasis">Freshness timestamp</span> — when it was fetched.<br><br>
-    <span class="emphasis">Confidence score</span> — how reliable.<br><br>
-    <span class="emphasis">Cryptographic signature</span> — proof it wasn't altered.
+    <span class="emphasis">Source provenance</span> names the federal database. Not "the internet."<br><br>
+    <span class="emphasis">Freshness timestamp</span> marks when the data was pulled. Not "sometime."<br><br>
+    <span class="emphasis">Confidence score</span> rates how complete the source reports. Not "trust me."<br><br>
+    <span class="emphasis">Cryptographic signature</span> proves nothing changed in transit. Not "probably fine."
   </p>
   <p class="byline">Open Primitive</p>
-  <p class="page-num" style="color:#555;">7 / 8</p>
+  <p class="page-num" style="color:#555;">8 / 9</p>
 </div>
 
-<!-- SLIDE 8: Close -->
-<div class="slide">
+<!-- SLIDE 9: Close -->
+<div class="slide slide-accent">
   <p class="tag">Open Primitive Protocol</p>
-  <h1 style="font-size:48px;">AI agents already make drug safety decisions.</h1>
-  <p class="body-text" style="margin-top:30px;">Every day. For millions of people.</p>
-  <p class="body-text" style="margin-top:30px;">Those decisions draw from <span class="emphasis">verified federal sources</span> or fabricated citations. One works. One kills.</p>
-  <p class="subtitle" style="margin-top:60px; font-size:22px;">api.openprimitive.com/white-paper</p>
+  <h1 style="font-size:48px;">AI agents already make drug safety decisions. Every day. For millions of people.</h1>
+  <p class="body-text" style="margin-top:40px;">The patient at the end of the chain did not choose to trust an AI. The agent chose to answer. The least the agent can do is cite a real source.</p>
+  <p class="subtitle" style="margin-top:60px; font-size:22px; color:rgba(255,255,255,0.6);">api.openprimitive.com/white-paper</p>
   <p class="byline">Open Primitive</p>
-  <p class="page-num">8 / 8</p>
+  <p class="page-num" style="color:rgba(255,255,255,0.4);">9 / 9</p>
 </div>
 
 </body>
