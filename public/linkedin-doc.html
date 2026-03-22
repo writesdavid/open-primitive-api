@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Document — When Agents Get Drug Data Wrong</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; }
+    .slide {
+      width: 1080px;
+      height: 1350px;
+      background: #faf9f7;
+      margin: 20px auto;
+      padding: 120px 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      page-break-after: always;
+    }
+    .slide-dark {
+      background: #1a1918;
+      color: #e8e6e4;
+    }
+    .slide-accent {
+      background: #c04010;
+      color: #fff;
+    }
+    .tag {
+      font-family: 'SF Mono', ui-monospace, monospace;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #999;
+      margin-bottom: 40px;
+    }
+    .slide-dark .tag { color: #777; }
+    .slide-accent .tag { color: rgba(255,255,255,0.6); }
+    h1 {
+      font-size: 72px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -2px;
+      color: #111;
+      margin-bottom: 40px;
+    }
+    .slide-dark h1 { color: #e8e6e4; }
+    .slide-accent h1 { color: #fff; font-size: 64px; }
+    .subtitle {
+      font-size: 28px;
+      color: #666;
+      line-height: 1.5;
+      max-width: 700px;
+    }
+    .slide-dark .subtitle { color: #999; }
+    .slide-accent .subtitle { color: rgba(255,255,255,0.8); }
+    .big-stat {
+      font-size: 180px;
+      font-weight: 800;
+      color: #c04010;
+      line-height: 1;
+      margin-bottom: 30px;
+    }
+    .slide-dark .big-stat { color: #c04010; }
+    .stat-label {
+      font-size: 36px;
+      color: #333;
+      line-height: 1.4;
+      max-width: 700px;
+    }
+    .slide-dark .stat-label { color: #ccc; }
+    .body-text {
+      font-size: 32px;
+      color: #333;
+      line-height: 1.6;
+      max-width: 750px;
+    }
+    .slide-dark .body-text { color: #ccc; }
+    .slide-accent .body-text { color: rgba(255,255,255,0.9); font-size: 36px; }
+    .emphasis {
+      color: #c04010;
+      font-weight: 700;
+    }
+    .slide-dark .emphasis { color: #c04010; }
+    .byline {
+      position: absolute;
+      bottom: 60px;
+      left: 100px;
+      font-family: 'SF Mono', ui-monospace, monospace;
+      font-size: 16px;
+      color: #bbb;
+    }
+    .slide-dark .byline { color: #555; }
+    .slide-accent .byline { color: rgba(255,255,255,0.4); }
+    .table-row {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      padding: 20px 0;
+      align-items: baseline;
+    }
+    .slide-dark .table-row { border-color: #333; }
+    .table-model { width: 340px; font-size: 26px; color: #666; }
+    .table-rate { font-size: 36px; font-weight: 700; color: #c04010; }
+    .slide-dark .table-model { color: #999; }
+    .page-num {
+      position: absolute;
+      bottom: 60px;
+      right: 100px;
+      font-family: 'SF Mono', ui-monospace, monospace;
+      font-size: 14px;
+      color: #ccc;
+    }
+    @media print {
+      body { background: white; }
+      .slide { margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SLIDE 1: Cover -->
+<div class="slide">
+  <p class="tag">Open Primitive | March 2026</p>
+  <h1>When Agents<br>Get Drug<br>Data Wrong</h1>
+  <p class="subtitle">Why AI needs verified federal sources — and what the infrastructure looks like.</p>
+  <p class="page-num">1 / 8</p>
+</div>
+
+<!-- SLIDE 2: The problem stat -->
+<div class="slide slide-dark">
+  <p class="tag">The problem</p>
+  <div class="big-stat">64%</div>
+  <p class="stat-label">of AI medical responses contain hallucinated information on clinical cases.</p>
+  <p class="subtitle" style="margin-top:40px; font-size:22px;">MedRxiv, Feb 2025. 300 physician-validated clinical vignettes. All major models tested.</p>
+  <p class="byline">Open Primitive</p>
+  <p class="page-num" style="color:#555;">2 / 8</p>
+</div>
+
+<!-- SLIDE 3: Drug interaction stat -->
+<div class="slide">
+  <p class="tag">Drug interactions</p>
+  <div class="big-stat" style="font-size:160px;">3 in 10</div>
+  <p class="stat-label">drug interaction queries return <span class="emphasis">wrong answers</span> across all major models.</p>
+  <p class="subtitle" style="margin-top:40px; font-size:22px;">Rx-LLM Benchmark, Dec 2025. GPT-4o-mini achieved 70.4% accuracy — the best performer. The rest scored lower.</p>
+  <p class="byline">Open Primitive</p>
+  <p class="page-num">3 / 8</p>
+</div>
+
+<!-- SLIDE 4: The human cost -->
+<div class="slide slide-accent">
+  <p class="tag">The human cost</p>
+  <h1>92% of clinicians have encountered AI medical hallucinations.</h1>
+  <p class="body-text">85% said those hallucinations could cause patient harm. This is not a technology problem. It is a data problem.</p>
+  <p class="byline">Open Primitive</p>
+  <p class="page-num" style="color:rgba(255,255,255,0.4);">4 / 8</p>
+</div>
+
+<!-- SLIDE 5: All models, not one -->
+<div class="slide slide-dark">
+  <p class="tag">Every model. Not just one.</p>
+  <div class="table-row">
+    <span class="table-model">Gemini 2.0 Flash</span>
+    <span class="table-rate">0.7%</span>
+  </div>
+  <div class="table-row">
+    <span class="table-model">GPT-4o</span>
+    <span class="table-rate">0.8 – 2.0%</span>
+  </div>
+  <div class="table-row">
+    <span class="table-model">Claude 3.7 Sonnet</span>
+    <span class="table-rate">4.4%</span>
+  </div>
+  <div class="table-row">
+    <span class="table-model">GPT-5</span>
+    <span class="table-rate">9.6%</span>
+  </div>
+  <div class="table-row">
+    <span class="table-model">Claude 3 Opus</span>
+    <span class="table-rate">10.1%</span>
+  </div>
+  <p class="subtitle" style="margin-top:40px; font-size:20px;">General hallucination rates. On medical tasks, all models exceed 10%. Vectara Leaderboard, 2026.</p>
+  <p class="byline">Open Primitive</p>
+  <p class="page-num" style="color:#555;">5 / 8</p>
+</div>
+
+<!-- SLIDE 6: What exists -->
+<div class="slide">
+  <p class="tag">What the federal data actually says</p>
+  <div class="big-stat" style="font-size:120px;">601,477</div>
+  <p class="stat-label">FDA adverse event reports for aspirin alone. 424,005 classified as serious.</p>
+  <p class="body-text" style="margin-top:40px; font-size:26px;">This data is real, timestamped, and freely accessible. No model queries it directly. They hallucinate instead.</p>
+  <p class="byline">Open Primitive</p>
+  <p class="page-num">6 / 8</p>
+</div>
+
+<!-- SLIDE 7: The fix -->
+<div class="slide slide-dark">
+  <p class="tag">The infrastructure</p>
+  <h1 style="font-size:56px;">Every response carries<br>four guarantees.</h1>
+  <p class="body-text" style="margin-top:40px;">
+    <span class="emphasis">Source provenance</span> — which federal database.<br><br>
+    <span class="emphasis">Freshness timestamp</span> — when it was fetched.<br><br>
+    <span class="emphasis">Confidence score</span> — how reliable.<br><br>
+    <span class="emphasis">Cryptographic signature</span> — proof it wasn't altered.
+  </p>
+  <p class="byline">Open Primitive</p>
+  <p class="page-num" style="color:#555;">7 / 8</p>
+</div>
+
+<!-- SLIDE 8: Close -->
+<div class="slide">
+  <p class="tag">Open Primitive Protocol</p>
+  <h1 style="font-size:48px;">The question is not whether AI agents will make drug safety decisions.</h1>
+  <p class="body-text" style="margin-top:30px;">They already do.</p>
+  <p class="body-text" style="margin-top:30px;">The question is whether those decisions come from <span class="emphasis">verified federal sources</span> or fabricated citations.</p>
+  <p class="subtitle" style="margin-top:60px; font-size:22px;">api.openprimitive.com/white-paper</p>
+  <p class="byline">Open Primitive</p>
+  <p class="page-num">8 / 8</p>
+</div>
+
+</body>
+</html>
