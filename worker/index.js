@@ -68,6 +68,23 @@ const earthquakes = require('../sources/earthquakes');
 const spending = require('../sources/spending');
 const dailymed = require('../sources/dailymed');
 const meat = require('../sources/meat');
+const reclaim = require('../sources/reclaim');
+const reclaimStates = require('../sources/reclaim-states');
+
+// New data domains
+const courts = require('../sources/courts');
+const federalRegister = require('../sources/federal-register');
+const education = require('../sources/education');
+const infrastructure = require('../sources/infrastructure');
+
+// Infrastructure modules
+const provenance = require('../sources/provenance');
+const archiveTemporal = require('../sources/archive-temporal');
+const entityGraph = require('../sources/entity-graph');
+const confidence = require('../sources/confidence');
+const subscriptions = require('../sources/subscriptions');
+const compliance = require('../sources/compliance');
+const registry = require('../sources/registry');
 
 // ─── Agent detection (in-memory stats) ───
 
@@ -108,6 +125,7 @@ const QUERY_EXTRACTORS = {
   nutrition: (q) => q.q || q.id,
   health:    (q) => q.q,
   meat:      (q) => q.q || q.est,
+  reclaim:   (q) => [q.first_name, q.last_name].filter(Boolean).join(' ') || null,
 };
 
 function trackQuery(domain, queryValue) {
@@ -272,7 +290,7 @@ app.get('/v1', (c) => {
   return c.json({
     name: 'Open Primitive API',
     version: '1.0.0',
-    description: 'Federal data for agents. 21 domains, one API.',
+    description: 'Federal data for agents. 22 domains, one API.',
     domains: {
       flights: { endpoint: '/v1/flights', source: 'FAA NAS + Open-Meteo', description: 'Live airline delays and hub weather for 8 US carriers' },
       cars: { endpoint: '/v1/cars?year=&make=&model=', source: 'NHTSA', description: 'Crash safety ratings and recalls for any US vehicle' },
@@ -299,6 +317,7 @@ app.get('/v1', (c) => {
       earthquakes: { endpoint: '/v1/earthquakes', source: 'USGS', description: 'Earthquakes in the last 24 hours, magnitude 2.5+' },
       spending: { endpoint: '/v1/spending?q=defense', source: 'USAspending.gov', description: 'Federal awards and contracts by keyword' },
       meat: { endpoint: '/v1/meat', source: 'USDA FSIS', description: 'Meat, poultry, egg product recalls and FSIS-inspected establishment data' },
+      reclaim: { endpoint: '/v1/reclaim/search?first_name=John&last_name=Smith', source: 'State Unclaimed Property + Federal', description: 'Search unclaimed property across federal and state databases' },
       changes: { endpoint: '/v1/changes?date=2026-03-22', source: 'Archive', description: 'Daily change detection: what changed overnight across all federal domains' },
     },
     auth: 'No API key required. Completely free, no limits.',
@@ -450,6 +469,199 @@ app.get('/v1/meat', (c) => {
   return wrap(c, meat.getRecent());
 });
 
+// ─── RECLAIM (Unclaimed Property) ───
+app.get('/v1/reclaim/search', async (c) => {
+  const firstName = c.req.query('first_name');
+  const lastName = c.req.query('last_name');
+  if (!firstName || !lastName) {
+    return c.json({ error: 'first_name and last_name are required' }, 400);
+  }
+
+  const state = c.req.query('state') || null;
+  const sourcesParam = c.req.query('sources') || 'all';
+  const requestedSources = sourcesParam.toLowerCase().split(',').map(s => s.trim());
+  const runFederal = requestedSources.includes('all') || requestedSources.includes('federal');
+  const runStates = requestedSources.includes('all') || requestedSources.includes('states');
+
+  try {
+    const promises = [];
+    const sourceLabels = [];
+
+    if (runFederal) {
+      promises.push(reclaim.search({ firstName, lastName, state }).catch(err => ({ error: err.message, source: 'federal' })));
+      sourceLabels.push('federal');
+    }
+    if (runStates) {
+      promises.push(reclaimStates.searchStates({ firstName, lastName, state }).catch(err => ({ error: err.message, source: 'states' })));
+      sourceLabels.push('states');
+    }
+
+    const raw = await Promise.all(promises);
+    const results = [];
+    const sourcesFailed = [];
+    const sourcesSearched = [];
+
+    for (let i = 0; i < raw.length; i++) {
+      const r = raw[i];
+      if (r && r.error) {
+        sourcesFailed.push({ source: sourceLabels[i], error: r.error });
+      } else if (Array.isArray(r)) {
+        results.push(...r);
+        sourcesSearched.push(sourceLabels[i]);
+      } else if (r && r.results && Array.isArray(r.results)) {
+        results.push(...r.results);
+        sourcesSearched.push(sourceLabels[i]);
+        if (r.sources_searched) sourcesSearched.push(...r.sources_searched);
+      } else {
+        sourcesSearched.push(sourceLabels[i]);
+      }
+    }
+
+    const query = { first_name: firstName, last_name: lastName };
+    if (state) query.state = state;
+
+    const data = {
+      data: {
+        results,
+        query,
+        sources_searched: sourcesSearched,
+        sources_failed: sourcesFailed,
+      },
+      provenance: {
+        source: 'Open Primitive — Reclaim',
+        domains: ['unclaimed-property'],
+        retrieved: new Date().toISOString(),
+        freshness: 'live',
+      },
+      confidence: {
+        score: results.length > 0 ? 0.7 : 0.3,
+        basis: results.length > 0
+          ? `${results.length} result${results.length === 1 ? '' : 's'} found across ${sourcesSearched.length} source${sourcesSearched.length === 1 ? '' : 's'}`
+          : 'No results found — name may not have unclaimed property or sources may be limited',
+      },
+      citation: `Unclaimed property search for ${firstName} ${lastName}${state ? ' in ' + state : ''} via Open Primitive Reclaim`,
+    };
+
+    const proof = signResponse(data, c.env);
+    if (proof) data.proof = proof;
+
+    const pathname = new URL(c.req.url).pathname;
+    const match = pathname.match(/^\/v1\/(\w+)/);
+    if (match) {
+      c.executionCtx.waitUntil(archiveToRedis(c.env, match[1], c.req.url, data));
+    }
+
+    return c.json(data);
+  } catch (err) {
+    console.error('[reclaim]', err);
+    return c.json({ error: 'Reclaim search failed: ' + (err.message || 'unknown error') }, 500);
+  }
+});
+
+// /v1/reclaim/sources — which databases this domain searches
+app.get('/v1/reclaim/sources', (c) => {
+  const sources = {
+    federal: [
+      { id: 'pbgc', name: 'PBGC Pensions', status: 'live' },
+      { id: 'fdic', name: 'FDIC Unclaimed Deposits', status: 'live' },
+      { id: 'hud', name: 'HUD/FHA Refunds', status: 'live' },
+      { id: 'dol', name: 'DOL Abandoned Retirement Plans', status: 'live' },
+    ],
+    states: [
+      'MI', 'NY', 'CA', 'TX', 'FL', 'PA', 'IL', 'OH', 'NJ', 'GA',
+    ],
+    planned: ['VA Insurance', 'Treasury Bonds', '40 additional states'],
+  };
+  return c.json(sources);
+});
+
+// ─── COURTS (Federal Court Records) ───
+app.get('/v1/courts', (c) => {
+  const q = c.req.query('q');
+  const party = c.req.query('party');
+  const court = c.req.query('court');
+  if (party) return wrap(c, courts.searchParties({ name: party }));
+  return wrap(c, courts.searchCases({ query: q || '', court, dateAfter: c.req.query('after'), dateBefore: c.req.query('before') }));
+});
+app.get('/v1/courts/opinion/:id', (c) => wrap(c, courts.getOpinion(c.req.param('id'))));
+app.get('/v1/courts/dockets', (c) => wrap(c, courts.searchDockets({ query: c.req.query('q') || '', court: c.req.query('court') })));
+
+// ─── FEDERAL REGISTER (Regulatory Filings) ───
+app.get('/v1/federal-register', (c) => {
+  const q = c.req.query('q');
+  const agency = c.req.query('agency');
+  const type = c.req.query('type');
+  if (agency && !q) return wrap(c, federalRegister.getAgencyRules(agency));
+  if (!q && !agency) return wrap(c, federalRegister.getTodaysDocuments());
+  return wrap(c, federalRegister.searchRules({ query: q, agency, type, dateAfter: c.req.query('after') }));
+});
+app.get('/v1/federal-register/:docNumber', (c) => wrap(c, federalRegister.getDocument(c.req.param('docNumber'))));
+
+// ─── EDUCATION (College Scorecard) ───
+app.get('/v1/education', (c) => {
+  const name = c.req.query('name');
+  const state = c.req.query('state');
+  const zip = c.req.query('zip');
+  const ids = c.req.query('compare');
+  if (ids) return wrap(c, education.compare(ids.split(','), c.req.query('fields')));
+  return wrap(c, education.searchSchools({ name, state, zip }));
+});
+app.get('/v1/education/:id', (c) => wrap(c, education.getSchool(c.req.param('id'))));
+
+// ─── INFRASTRUCTURE (Energy + Broadband) ───
+app.get('/v1/infrastructure/electricity', (c) => wrap(c, infrastructure.getElectricityPrice({ state: c.req.query('state') })));
+app.get('/v1/infrastructure/gas', (c) => wrap(c, infrastructure.getNaturalGasPrice({ state: c.req.query('state') })));
+app.get('/v1/infrastructure/energy-outlook', (c) => wrap(c, infrastructure.getEnergyOutlook()));
+app.get('/v1/infrastructure/broadband', (c) => wrap(c, infrastructure.getBroadband({ zip: c.req.query('zip'), state: c.req.query('state') })));
+
+// ─── ENTITY GRAPH (Cross-Domain) ───
+app.get('/v1/entity/:type/:identifier', async (c) => {
+  const sourceModules = { water, air, weather, demographics, hospitals, earthquakes, location, eligible, sec, drugs, food, products, spending, clinicalTrials, drugInteractions, dailymed, health };
+  try {
+    const result = await entityGraph.buildEntityProfile(c.req.param('type'), c.req.param('identifier'), sourceModules);
+    const data = { ...result };
+    const proof = signResponse(data, c.env);
+    if (proof) data.proof = proof;
+    return c.json(data);
+  } catch (err) {
+    console.error('[entity-graph]', err);
+    return c.json({ error: 'Entity graph query failed: ' + err.message }, 500);
+  }
+});
+
+// ─── SUBSCRIPTIONS (Real-time Push) ───
+app.post('/v1/subscriptions', async (c) => {
+  try {
+    const body = await c.req.json();
+    const sub = await subscriptions.createSubscription(c.env, body);
+    return c.json(sub, 201);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+app.get('/v1/subscriptions/:agentId', async (c) => {
+  const subs = await subscriptions.listSubscriptions(c.env, c.req.param('agentId'));
+  return c.json({ subscriptions: subs });
+});
+app.delete('/v1/subscriptions/:id', async (c) => {
+  await subscriptions.deleteSubscription(c.env, c.req.param('id'));
+  return c.json({ deleted: true });
+});
+app.get('/v1/subscriptions/:agentId/stream', async (c) => {
+  const domains = c.req.query('domains')?.split(',') || [];
+  const stream = subscriptions.createSSEStream(c.env, c.req.param('agentId'), domains);
+  return new Response(stream, { headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' } });
+});
+
+// ─── COMPLIANCE ───
+app.get('/v1/compliance/assess', async (c) => {
+  const domain = c.req.query('domain') || 'general';
+  const jurisdiction = c.req.query('jurisdiction') || 'eu-ai-act';
+  const result = compliance.assessCompliance({}, jurisdiction);
+  const tagged = compliance.tagCompliance({}, { domain, signed: true, provenancePresent: true, auditTrailPresent: true });
+  return c.json({ assessment: result, compliance: tagged });
+});
+
 // ─── RISK ───
 app.get('/v1/risk', (c) => wrap(c, risk.getRiskProfile(c.req.query('zip'))));
 
@@ -470,7 +682,7 @@ app.post('/v1/register', async (c) => {
 const HARDCODED_PROVIDERS = [{
   url: 'https://api.openprimitive.com',
   name: 'Open Primitive',
-  domains: ['flights','cars','food','water','drugs','drug-labels','drug-interactions','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending','meat'],
+  domains: ['flights','cars','food','water','drugs','drug-labels','drug-interactions','hospitals','health','nutrition','jobs','demographics','products','sec','safety','weather','location','compare','ask','risk','eligible','air','clinical-trials','earthquakes','spending','meat','reclaim','courts','federal-register','education','infrastructure'],
   lastVerified: '2026-03-21T00:00:00Z',
   status: 'active',
 }];

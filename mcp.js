@@ -327,6 +327,192 @@ server.registerTool('get-meat-safety', {
   return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
 });
 
+server.registerTool('search-unclaimed-property', {
+  title: 'Search Unclaimed Property',
+  description: 'Search for unclaimed property (money, assets) across federal and state databases. Source: State Unclaimed Property Offices + Federal.',
+  inputSchema: z.object({
+    first_name: z.string().describe('First name of the person to search for.'),
+    last_name: z.string().describe('Last name of the person to search for.'),
+    state: z.string().optional().describe('Two-letter state code to narrow search (e.g. "CA", "TX"). Omit to search all.'),
+    sources: z.string().optional().describe('Comma-separated sources: "federal", "states", or "all" (default "all").'),
+  }),
+}, async ({ first_name, last_name, state, sources }) => {
+  const params = new URLSearchParams({ first_name, last_name });
+  if (state) params.set('state', state);
+  if (sources) params.set('sources', sources);
+  const resp = await fetch(`https://api.openprimitive.com/v1/reclaim/search?${params}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── COURT RECORDS ───
+server.registerTool('search-court-records', {
+  title: 'Search Court Records',
+  description: 'Search federal and state court records by query, party name, court, or date range. Source: CourtListener / PACER.',
+  inputSchema: z.object({
+    q: z.string().optional().describe('Search query (case name, topic, etc.)'),
+    party: z.string().optional().describe('Party name to filter by'),
+    court: z.string().optional().describe('Court filter (e.g. "scotus", "ca9", "nysd")'),
+    after: z.string().optional().describe('Start date filter (YYYY-MM-DD)'),
+    before: z.string().optional().describe('End date filter (YYYY-MM-DD)'),
+  }),
+}, async ({ q, party, court, after, before }) => {
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (party) params.set('party', party);
+  if (court) params.set('court', court);
+  if (after) params.set('after', after);
+  if (before) params.set('before', before);
+  const resp = await fetch(`https://api.openprimitive.com/v1/courts/search?${params}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── FEDERAL REGISTER ───
+server.registerTool('search-federal-register', {
+  title: 'Search Federal Register',
+  description: 'Search the Federal Register for rules, proposed rules, notices, and presidential documents. Source: Federal Register API.',
+  inputSchema: z.object({
+    q: z.string().optional().describe('Search query'),
+    agency: z.string().optional().describe('Agency slug (e.g. "environmental-protection-agency")'),
+    type: z.string().optional().describe('Document type: rule, proposed_rule, notice, presidential_document'),
+    after: z.string().optional().describe('Published after date (YYYY-MM-DD)'),
+  }),
+}, async ({ q, agency, type, after }) => {
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (agency) params.set('agency', agency);
+  if (type) params.set('type', type);
+  if (after) params.set('after', after);
+  const resp = await fetch(`https://api.openprimitive.com/v1/federal-register/search?${params}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+server.registerTool('get-federal-register-document', {
+  title: 'Get Federal Register Document',
+  description: 'Get a specific Federal Register document by document number. Source: Federal Register API.',
+  inputSchema: z.object({
+    document_number: z.string().describe('Federal Register document number (e.g. "2024-12345")'),
+  }),
+}, async ({ document_number }) => {
+  const resp = await fetch(`https://api.openprimitive.com/v1/federal-register/documents/${encodeURIComponent(document_number)}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── SCHOOLS ───
+server.registerTool('search-schools', {
+  title: 'Search Schools',
+  description: 'Search K-12 schools and districts by name, state, or ZIP code. Source: NCES.',
+  inputSchema: z.object({
+    name: z.string().optional().describe('School or district name'),
+    state: z.string().optional().describe('2-letter state code (e.g. "CA")'),
+    zip: z.string().optional().describe('5-digit ZIP code'),
+  }),
+}, async ({ name, state, zip }) => {
+  const params = new URLSearchParams();
+  if (name) params.set('name', name);
+  if (state) params.set('state', state);
+  if (zip) params.set('zip', zip);
+  const resp = await fetch(`https://api.openprimitive.com/v1/schools/search?${params}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+server.registerTool('get-school', {
+  title: 'Get School',
+  description: 'Get detailed data for a specific school by NCES ID. Source: NCES.',
+  inputSchema: z.object({
+    id: z.string().describe('NCES school ID'),
+  }),
+}, async ({ id }) => {
+  const resp = await fetch(`https://api.openprimitive.com/v1/schools/${encodeURIComponent(id)}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── ELECTRICITY ───
+server.registerTool('get-electricity-price', {
+  title: 'Get Electricity Price',
+  description: 'Get average electricity price by state. Source: EIA.',
+  inputSchema: z.object({
+    state: z.string().describe('2-letter state code (e.g. "TX")'),
+  }),
+}, async ({ state }) => {
+  const resp = await fetch(`https://api.openprimitive.com/v1/electricity/price?state=${encodeURIComponent(state)}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── BROADBAND ───
+server.registerTool('get-broadband', {
+  title: 'Get Broadband Data',
+  description: 'Get broadband availability and speed data by ZIP code or state. Source: FCC BDC.',
+  inputSchema: z.object({
+    zip: z.string().optional().describe('5-digit ZIP code'),
+    state: z.string().optional().describe('2-letter state code (e.g. "CA")'),
+  }),
+}, async ({ zip, state }) => {
+  const params = new URLSearchParams();
+  if (zip) params.set('zip', zip);
+  if (state) params.set('state', state);
+  const resp = await fetch(`https://api.openprimitive.com/v1/broadband?${params}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── ENTITY GRAPH ───
+server.registerTool('query-entity-graph', {
+  title: 'Query Entity Graph',
+  description: 'Query the Open Primitive entity graph to get cross-domain linked data for a ZIP, company, drug, geographic area, or FIPS code. Source: Open Primitive.',
+  inputSchema: z.object({
+    entity_type: z.string().describe('Entity type: zip, company, drug, geographic, fips'),
+    identifier: z.string().describe('Entity identifier (e.g. "90210", "AAPL", "ibuprofen", "06037")'),
+  }),
+}, async ({ entity_type, identifier }) => {
+  const resp = await fetch(`https://api.openprimitive.com/v1/graph/${encodeURIComponent(entity_type)}/${encodeURIComponent(identifier)}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── SUBSCRIPTIONS ───
+server.registerTool('create-subscription', {
+  title: 'Create Subscription',
+  description: 'Subscribe an agent to data change notifications for a domain with optional filters. Source: Open Primitive.',
+  inputSchema: z.object({
+    agent_id: z.string().describe('Unique agent identifier'),
+    domain: z.string().describe('Data domain to subscribe to (e.g. "food-recalls", "weather-alerts")'),
+    filter: z.string().optional().describe('JSON filter object to narrow subscription scope'),
+    webhook_url: z.string().describe('Webhook URL to receive notifications'),
+  }),
+}, async ({ agent_id, domain, filter, webhook_url }) => {
+  const body = { agent_id, domain, webhook_url };
+  if (filter) body.filter = JSON.parse(filter);
+  const resp = await fetch('https://api.openprimitive.com/v1/subscriptions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
+// ─── COMPLIANCE ───
+server.registerTool('assess-compliance', {
+  title: 'Assess Compliance',
+  description: 'Assess AI compliance posture against a regulatory framework. Source: Open Primitive.',
+  inputSchema: z.object({
+    domain: z.string().describe('Application domain to assess (e.g. "healthcare", "finance", "hiring")'),
+    jurisdiction: z.string().describe('Regulatory framework: eu-ai-act, nist-ai-rmf, eo-14110, canada-aida'),
+  }),
+}, async ({ domain, jurisdiction }) => {
+  const params = new URLSearchParams({ domain, jurisdiction });
+  const resp = await fetch(`https://api.openprimitive.com/v1/compliance/assess?${params}`);
+  const data = await resp.json();
+  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+});
+
 // Start
 async function main() {
   const transport = new StdioServerTransport();
