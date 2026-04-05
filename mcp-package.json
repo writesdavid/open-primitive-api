@@ -1,8 +1,8 @@
 {
   "name": "open-primitive-mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "mcpName": "io.github.writesdavid/open-primitive",
-  "description": "MCP server for 22 federal data tools — flights, cars, food, water, drugs, hospitals, health, nutrition, jobs, demographics, products, SEC, safety, weather, location, compare, ask, risk, eligibility, air quality, alerts, federated query",
+  "description": "MCP server for 33 tools across 30 federal data domains — courts, federal register, education, infrastructure, unclaimed property, entity graph, subscriptions, compliance, plus flights, cars, food, water, drugs, hospitals, health, nutrition, jobs, demographics, products, SEC, safety, weather, and more",
   "main": "mcp.js",
   "bin": {
     "open-primitive-mcp": "./mcp.js"
