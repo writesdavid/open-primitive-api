@@ -1,6 +1,6 @@
 # Open Primitive Protocol — Reference Implementation
 
-> The data layer of the agent internet. 16 US federal data domains, signed responses, cross-domain intelligence. Every response carries provenance, confidence, and citation metadata.
+> The data layer of the agent internet. 30 data domains, signed responses, cross-domain intelligence. Every response carries provenance, confidence, and citation metadata.
 
 Base URL: https://api.openprimitive.com
 
@@ -33,6 +33,18 @@ Base URL: https://api.openprimitive.com
 - GET /v1/sec?cik= — Company financial facts by CIK.
 - GET /v1/weather?lat=&lng= — 7-day forecast by coordinates. Source: NOAA National Weather Service.
 - GET /v1/safety?zip= — Cross-domain safety profile (water + hospitals composite). Source: EPA + CMS.
+- GET /v1/air?zip= — Air quality by ZIP. Source: AirNow/EPA.
+- GET /v1/clinical-trials?q= — Search active clinical trials. Source: ClinicalTrials.gov.
+- GET /v1/earthquakes — Recent seismic activity. Source: USGS.
+- GET /v1/spending?q= — Federal contract and grant spending. Source: USASpending.gov.
+- GET /v1/eligible — Benefits eligibility checker (Medicaid, EITC, CHIP). Source: Federal poverty guidelines.
+- GET /v1/meat?q= — Meat/poultry/egg inspection and recalls. Source: USDA FSIS.
+- GET /v1/reclaim/search?first_name=&last_name= — Unclaimed property search across federal and state databases. Sources: FDIC, HUD/FHA, DOL, 10 state treasuries.
+- GET /v1/courts?q= — Federal court records, opinions, dockets. Source: CourtListener.
+- GET /v1/federal-register?q= — Regulatory filings, proposed rules, agency actions. Source: Federal Register.
+- GET /v1/education?name= — College and university data. Source: College Scorecard/DOE.
+- GET /v1/infrastructure/electricity?state= — Electricity prices by state. Source: EIA.
+- GET /v1/infrastructure/broadband?zip= — Broadband availability. Source: FCC.
 
 ## Cross-Domain Intelligence Endpoints
 
@@ -42,6 +54,14 @@ Base URL: https://api.openprimitive.com
 - GET /v1/compare?zip1=&zip2= — Side-by-side comparison of two ZIP codes: income, population, safety scores, hospital ratings.
 - GET /v1/weather?lat=&lng= — NOAA 7-day forecast with temperature, wind, precipitation detail.
 
+## Infrastructure Services
+
+- GET /v1/entity/:type/:identifier — Cross-domain entity graph. Query by zip, company, drug, geographic, or fips. Returns correlated data from all relevant domains.
+- POST /v1/subscriptions — Real-time push notifications. Agents subscribe to data changes via webhooks or SSE.
+- GET /v1/compliance/assess — Regulatory compliance metadata. Scores responses against EU AI Act, NIST AI RMF, EO 14110.
+- GET /v1/registry — Federation registry of OPP-compliant data providers.
+- GET /v1/reclaim/sources — List of unclaimed property sources and their status.
+
 ## Authentication
 No API key required. Completely free, no limits.
 
@@ -50,10 +70,10 @@ Every response includes: domain, source, source_url, freshness (ISO 8601 timesta
 
 ## MCP Server
 Available as Model Context Protocol server. Install: node mcp.js (stdio transport).
-Tools: get-flights, get-car-safety, get-food-recalls, get-water-safety, get-drug-safety, get-hospital-quality, get-health-evidence, get-nutrition, get-jobs, get-demographics, get-product-recalls, get-sec-filings, get-safety-profile, ask, get-alerts, get-location, compare-zips, get-weather.
+Tools: get-flights, get-car-safety, get-food-recalls, get-water-safety, get-drug-safety, get-hospital-quality, get-health-evidence, get-nutrition, get-jobs, get-demographics, get-product-recalls, get-sec-filings, get-safety-profile, ask, get-alerts, get-location, compare-zips, get-weather, get-air-quality, search-clinical-trials, get-earthquakes, get-spending, check-eligibility, get-meat-safety, search-court-records, search-federal-register, get-federal-register-document, search-schools, get-school, get-electricity-price, get-broadband, query-entity-graph, create-subscription, assess-compliance, search-unclaimed-property.
 
 ## A2A Agent Card
 Discovery: https://api.openprimitive.com/.well-known/agent-card.json
 
 ## About
-Open Primitive is the reference implementation of the Open Primitive Protocol. Federal government data translated into signed, structured, agent-consumable endpoints. 11 federal agencies. 16 data domains. Cross-domain intelligence. Primary sources: FAA, NHTSA, FDA, EPA, CMS, NIH/NLM, USDA, BLS, Census Bureau, CPSC, SEC, NOAA.
+Open Primitive is the reference implementation of the Open Primitive Protocol. Federal government data translated into signed, structured, agent-consumable endpoints. 30 data domains. Cross-domain intelligence. Infrastructure services. Primary sources: FAA, NHTSA, FDA, EPA, CMS, NIH/NLM, USDA, BLS, Census Bureau, CPSC, SEC, NOAA, AirNow, ClinicalTrials.gov, USGS, USASpending, USDA FSIS, CourtListener, Federal Register, DOE, EIA, FCC.

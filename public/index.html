@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Open Primitive API</title>
-  <meta name="description" content="Reference implementation of the Open Primitive Protocol. 16 federal data domains. 11 US agencies.">
+  <meta name="description" content="Reference implementation of the Open Primitive Protocol. 30 federal data domains. 15 US agencies.">
   <link rel="stylesheet" href="https://openprimitive.com/primitive.css">
   <style>
     /* Page-level overrides for API docs */
@@ -160,7 +160,7 @@
 
     <!-- Title -->
     <h1 class="api-title">API Reference</h1>
-    <p class="api-subtitle">Reference implementation of the Open Primitive Protocol. 16 federal data domains across 11 US agencies.</p>
+    <p class="api-subtitle">Reference implementation of the Open Primitive Protocol. 30 federal data domains across 15 US agencies.</p>
 
     <div class="base-url">
       <span class="base-url-label">Base</span>
@@ -196,6 +196,22 @@
             <tr><td class="mono">sec</td><td><code>/v1/sec</code></td><td>SEC EDGAR</td><td><code>q</code> or <code>cik</code></td><td>daily</td></tr>
             <tr><td class="mono">water</td><td><code>/v1/water</code></td><td>EPA SDWIS</td><td><code>zip</code>; <code>/v1/water/:pwsid</code></td><td>quarterly</td></tr>
             <tr><td class="mono">weather</td><td><code>/v1/weather</code></td><td>NWS / Open-Meteo</td><td><code>zip</code> or <code>state</code></td><td>real-time</td></tr>
+            <tr><td class="mono">air</td><td><code>/v1/air</code></td><td>EPA AQS</td><td><code>zip</code> or <code>state</code></td><td>real-time</td></tr>
+            <tr><td class="mono">clinical-trials</td><td><code>/v1/clinical-trials</code></td><td>ClinicalTrials.gov</td><td><code>q</code></td><td>daily</td></tr>
+            <tr><td class="mono">context</td><td><code>/v1/context</code></td><td>Archive</td><td><code>entity</code></td><td>real-time</td></tr>
+            <tr><td class="mono">courts</td><td><code>/v1/courts</code></td><td>CourtListener</td><td><code>q</code></td><td>daily</td></tr>
+            <tr><td class="mono">drug-interactions</td><td><code>/v1/drug-interactions</code></td><td>FDA Drug Labels</td><td><code>drug1</code>, <code>drug2</code></td><td>continuous</td></tr>
+            <tr><td class="mono">drug-labels</td><td><code>/v1/drug-labels</code></td><td>NLM DailyMed</td><td><code>name</code></td><td>continuous</td></tr>
+            <tr><td class="mono">earthquakes</td><td><code>/v1/earthquakes</code></td><td>USGS</td><td>none</td><td>real-time</td></tr>
+            <tr><td class="mono">education</td><td><code>/v1/education</code></td><td>Dept of Education</td><td><code>q</code> or <code>id</code></td><td>annual</td></tr>
+            <tr><td class="mono">eligible</td><td><code>/v1/eligible</code></td><td>HHS / CMS / IRS / HUD</td><td><code>income</code>, <code>household</code>, <code>state</code></td><td>annual</td></tr>
+            <tr><td class="mono">federal-register</td><td><code>/v1/federal-register</code></td><td>Federal Register</td><td><code>q</code></td><td>daily</td></tr>
+            <tr><td class="mono">infrastructure</td><td><code>/v1/infrastructure/electricity</code></td><td>EIA</td><td><code>state</code></td><td>monthly</td></tr>
+            <tr><td class="mono">meat</td><td><code>/v1/meat</code></td><td>USDA FSIS</td><td><code>q</code> (optional)</td><td>daily</td></tr>
+            <tr><td class="mono">reclaim</td><td><code>/v1/reclaim/search</code></td><td>State + Federal</td><td><code>first_name</code>, <code>last_name</code></td><td>monthly</td></tr>
+            <tr><td class="mono">risk</td><td><code>/v1/risk</code></td><td>Cross-domain</td><td><code>zip</code></td><td>composite</td></tr>
+            <tr><td class="mono">spending</td><td><code>/v1/spending</code></td><td>USAspending.gov</td><td><code>q</code></td><td>daily</td></tr>
+            <tr><td class="mono">changes</td><td><code>/v1/changes</code></td><td>Archive</td><td><code>date</code></td><td>daily</td></tr>
           </tbody>
         </table>
       </div>
@@ -270,6 +286,22 @@
             <tr><td class="mono">sec</td><td>mandatory public filings</td><td class="conf-high">0.95</td><td>Private companies not covered</td></tr>
             <tr><td class="mono">water</td><td>mandatory but delayed (SDWIS)</td><td class="conf-mid">0.70</td><td>Small systems under-report; data lags 6 months</td></tr>
             <tr><td class="mono">weather</td><td>NWS observational + modeled</td><td class="conf-high">0.90</td><td>Forecast accuracy degrades beyond 72 hours</td></tr>
+            <tr><td class="mono">air</td><td>EPA AQS monitoring stations</td><td class="conf-mid">0.80</td><td>Rural areas have sparse monitors</td></tr>
+            <tr><td class="mono">clinical-trials</td><td>ClinicalTrials.gov registry</td><td class="conf-high">0.92</td><td>Registration compliance varies</td></tr>
+            <tr><td class="mono">context</td><td>internal archive / change detection</td><td class="conf-mid">0.75</td><td>Only covers previously queried entities</td></tr>
+            <tr><td class="mono">courts</td><td>CourtListener RECAP archive</td><td class="conf-mid">0.70</td><td>State courts under-represented</td></tr>
+            <tr><td class="mono">drug-interactions</td><td>FDA label cross-reference</td><td class="conf-mid">0.75</td><td>Only covers FDA-labeled interactions</td></tr>
+            <tr><td class="mono">drug-labels</td><td>NLM DailyMed mandatory labeling</td><td class="conf-high">0.93</td><td>OTC labels may lag</td></tr>
+            <tr><td class="mono">earthquakes</td><td>USGS seismic network</td><td class="conf-high">0.95</td><td>Magnitude &lt;2.5 not included</td></tr>
+            <tr><td class="mono">education</td><td>Dept of Ed College Scorecard</td><td class="conf-mid">0.85</td><td>Small institutions may lack data</td></tr>
+            <tr><td class="mono">eligible</td><td>statutory thresholds (HHS, IRS, HUD)</td><td class="conf-mid">0.80</td><td>State-level variation not fully modeled</td></tr>
+            <tr><td class="mono">federal-register</td><td>Federal Register API</td><td class="conf-high">0.95</td><td>Pre-1994 documents not digitized</td></tr>
+            <tr><td class="mono">infrastructure</td><td>EIA survey data</td><td class="conf-mid">0.85</td><td>State-level only; no local granularity</td></tr>
+            <tr><td class="mono">meat</td><td>USDA FSIS mandatory inspection</td><td class="conf-high">0.90</td><td>Game and exotic meats under-covered</td></tr>
+            <tr><td class="mono">reclaim</td><td>state unclaimed property databases</td><td class="conf-mid">0.65</td><td>Coverage varies by state; name matching imperfect</td></tr>
+            <tr><td class="mono">risk</td><td>composite cross-domain scoring</td><td class="conf-mid">0.70</td><td>Only as strong as weakest input domain</td></tr>
+            <tr><td class="mono">spending</td><td>USAspending.gov mandatory reporting</td><td class="conf-high">0.90</td><td>Sub-awards may lag primary awards</td></tr>
+            <tr><td class="mono">changes</td><td>internal daily diff archive</td><td class="conf-mid">0.80</td><td>Only detects changes in monitored domains</td></tr>
           </tbody>
         </table>
       </div>

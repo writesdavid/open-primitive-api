@@ -1,6 +1,6 @@
 # Open Primitive Protocol — Complete Documentation
 
-> The data layer of the agent internet. 16 US federal data domains, signed responses, cross-domain intelligence. Every response carries provenance, confidence, and citation metadata.
+> The data layer of the agent internet. 30 US federal data domains, infrastructure services, signed responses, cross-domain intelligence. Every response carries provenance, confidence, and citation metadata.
 
 Base URL: https://api.openprimitive.com
 
@@ -28,7 +28,7 @@ Every OPP response carries a standard envelope:
   "domain": "water",
   "source": "EPA SDWIS",
   "source_url": "https://enviro.epa.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "confidence": 0.95,
   "citations": [
     { "title": "EPA SDWIS Federal Reports", "url": "https://enviro.epa.gov/..." }
@@ -75,7 +75,7 @@ Returns all 8 airlines with current delay status and 4-day weather forecast at e
 No parameters required.
 
 ```
-curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/flights
+curl https://api.openprimitive.com/v1/flights
 ```
 
 Response:
@@ -84,7 +84,7 @@ Response:
   "domain": "flights",
   "source": "FAA NAS + Open-Meteo",
   "source_url": "https://nasstatus.faa.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "airlines": [
     {
       "name": "Delta",
@@ -112,7 +112,7 @@ Parameters:
 - iata (path, required) — two-letter IATA airline code: DL, UA, AA, WN, AS, B6, G4, F9
 
 ```
-curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/flights/DL
+curl https://api.openprimitive.com/v1/flights/DL
 ```
 
 Response:
@@ -120,7 +120,7 @@ Response:
 {
   "domain": "flights",
   "source": "FAA NAS + Open-Meteo",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "name": "Delta",
   "iata": "DL",
   "hubs": ["ATL", "MSP", "DTW", "SLC"],
@@ -153,7 +153,7 @@ Parameters:
 - model (query, required) — model name, e.g. "Camry"
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/cars?year=2024&make=Toyota&model=Camry"
+curl "https://api.openprimitive.com/v1/cars?year=2024&make=Toyota&model=Camry"
 ```
 
 Response:
@@ -162,7 +162,7 @@ Response:
   "domain": "cars",
   "source": "NHTSA",
   "source_url": "https://api.nhtsa.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "year": "2024",
   "make": "Toyota",
   "model": "Camry",
@@ -207,7 +207,7 @@ Source URL: https://api.fda.gov
 Returns the 20 most recent active food recalls from the last 90 days. No parameters required.
 
 ```
-curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/food
+curl https://api.openprimitive.com/v1/food
 ```
 
 ### GET /v1/food?q=
@@ -218,7 +218,7 @@ Parameters:
 - q (query, required) — search term, e.g. "peanut butter" or "Trader Joe"
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/food?q=salmonella"
+curl "https://api.openprimitive.com/v1/food?q=salmonella"
 ```
 
 Response:
@@ -227,7 +227,7 @@ Response:
   "domain": "food",
   "source": "FDA Enforcement",
   "source_url": "https://api.fda.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "total": 47,
   "recalls": [
     {
@@ -266,7 +266,7 @@ Parameters:
 - zip (query, required) — 5-digit US ZIP code
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/water?zip=48201"
+curl "https://api.openprimitive.com/v1/water?zip=48201"
 ```
 
 Response:
@@ -275,7 +275,7 @@ Response:
   "domain": "water",
   "source": "EPA SDWIS",
   "source_url": "https://enviro.epa.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "zip": "48201",
   "systems": [
     {
@@ -300,7 +300,7 @@ Parameters:
 - pwsid (path, required) — Public Water System ID (9-12 alphanumeric characters, e.g. "MI0000101")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/water/MI0000101
+curl https://api.openprimitive.com/v1/water/MI0000101
 ```
 
 Response:
@@ -309,7 +309,7 @@ Response:
   "domain": "water",
   "source": "EPA SDWIS",
   "source_url": "https://enviro.epa.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "pwsid": "MI0000101",
   "system": {
     "pwsid": "MI0000101",
@@ -357,7 +357,7 @@ Parameters:
 - name (query, required) — drug name, brand or generic (e.g. "ibuprofen", "Ozempic", "metformin")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/drugs?name=ibuprofen"
+curl "https://api.openprimitive.com/v1/drugs?name=ibuprofen"
 ```
 
 Response:
@@ -366,7 +366,7 @@ Response:
   "domain": "drugs",
   "source": "FDA FAERS + Drug Labels",
   "source_url": "https://api.fda.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "drug": "ibuprofen",
   "totalEvents": 185432,
   "seriousEvents": 98201,
@@ -390,6 +390,84 @@ What the data means: totalEvents is the count of adverse event reports filed wit
 ---
 
 
+## Domain: Drug Labels
+
+Full FDA-approved drug labeling from DailyMed (National Library of Medicine).
+
+Source: DailyMed (NLM)
+Source URL: https://dailymed.nlm.nih.gov
+
+### GET /v1/drug-labels?name=
+
+Parameters:
+- name (query, required) — drug name, brand or generic (e.g. "aspirin", "Lipitor")
+
+```
+curl "https://api.openprimitive.com/v1/drug-labels?name=aspirin"
+```
+
+Response:
+```json
+{
+  "domain": "drug-labels",
+  "source": "DailyMed (NLM)",
+  "source_url": "https://dailymed.nlm.nih.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "drug": "aspirin",
+  "labels": [
+    {
+      "setId": "abc123-def456",
+      "title": "ASPIRIN tablet",
+      "labeler": "Example Pharma Inc"
+    }
+  ]
+}
+```
+
+What the data means: DailyMed is the official source for FDA-approved drug labels. Each label includes the full prescribing information, warnings, indications, and dosage. The setId is a unique identifier for retrieving the complete structured label.
+
+
+---
+
+
+## Domain: Drug Interactions
+
+FDA label-derived drug interaction checking between two medications.
+
+Source: FDA Drug Labels (openFDA)
+Source URL: https://api.fda.gov
+
+### GET /v1/drug-interactions?drug1=&drug2=
+
+Parameters:
+- drug1 (query, required) — first drug name (brand or generic)
+- drug2 (query, required) — second drug name (brand or generic)
+
+```
+curl "https://api.openprimitive.com/v1/drug-interactions?drug1=warfarin&drug2=aspirin"
+```
+
+Response:
+```json
+{
+  "domain": "drug-interactions",
+  "source": "FDA Drug Labels",
+  "source_url": "https://api.fda.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "drug1": "warfarin",
+  "drug2": "aspirin",
+  "interactionFound": true,
+  "severity": "major",
+  "details": "Concurrent use may increase the risk of bleeding..."
+}
+```
+
+What the data means: interaction data is extracted from FDA-approved drug labels. The check looks for mentions of drug2 in drug1's interaction and warning sections, and vice versa. Severity levels are "major", "moderate", "minor", or "none". This is not a substitute for clinical pharmacist review.
+
+
+---
+
+
 ## Domain: Hospitals
 
 CMS hospital quality ratings, mortality, readmissions, and patient experience.
@@ -405,7 +483,7 @@ Parameters:
 - q (query, required) — hospital name or 5-digit ZIP code
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/hospitals?q=Mayo"
+curl "https://api.openprimitive.com/v1/hospitals?q=Mayo"
 ```
 
 Response:
@@ -414,7 +492,7 @@ Response:
   "domain": "hospitals",
   "source": "CMS Care Compare",
   "source_url": "https://data.cms.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "query": "Mayo",
   "results": [
     {
@@ -440,7 +518,7 @@ Parameters:
 - id (query, required) — CMS Provider ID (e.g. "240010")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/hospitals?id=240010"
+curl "https://api.openprimitive.com/v1/hospitals?id=240010"
 ```
 
 Response:
@@ -449,7 +527,7 @@ Response:
   "domain": "hospitals",
   "source": "CMS Care Compare",
   "source_url": "https://data.cms.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "providerId": "240010",
   "name": "MAYO CLINIC HOSPITAL SAINT MARYS",
   "city": "ROCHESTER",
@@ -489,7 +567,7 @@ Parameters:
 - q (query, required) — supplement name or health claim (e.g. "vitamin d immune", "turmeric inflammation", "melatonin sleep")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/health?q=turmeric+inflammation"
+curl "https://api.openprimitive.com/v1/health?q=turmeric+inflammation"
 ```
 
 Response:
@@ -498,7 +576,7 @@ Response:
   "domain": "health",
   "source": "PubMed/MEDLINE",
   "source_url": "https://pubmed.ncbi.nlm.nih.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "query": "turmeric inflammation",
   "totalStudies": 1842,
   "evidence": "Strong research signal",
@@ -523,6 +601,52 @@ What the data means: evidenceLevel tiers — "strong" (500+ studies), "moderate"
 ---
 
 
+## Domain: Clinical Trials
+
+Active clinical trials from ClinicalTrials.gov by condition or intervention.
+
+Source: ClinicalTrials.gov (NLM)
+Source URL: https://clinicaltrials.gov
+
+### GET /v1/clinical-trials?q=
+
+Parameters:
+- q (query, required) — condition or intervention (e.g. "lung cancer", "mRNA vaccine", "diabetes")
+
+```
+curl "https://api.openprimitive.com/v1/clinical-trials?q=lung+cancer"
+```
+
+Response:
+```json
+{
+  "domain": "clinical-trials",
+  "source": "ClinicalTrials.gov",
+  "source_url": "https://clinicaltrials.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "query": "lung cancer",
+  "total": 8432,
+  "studies": [
+    {
+      "nctId": "NCT06012345",
+      "title": "Phase III Trial of Novel Immunotherapy in NSCLC",
+      "status": "RECRUITING",
+      "phase": "PHASE3",
+      "conditions": ["Non-Small Cell Lung Cancer"],
+      "interventions": ["Drug: Pembrolizumab"],
+      "startDate": "2025-09-01",
+      "sponsor": "National Cancer Institute"
+    }
+  ]
+}
+```
+
+What the data means: returns the 10 most relevant active trials. Status values include RECRUITING, ACTIVE_NOT_RECRUITING, COMPLETED, ENROLLING_BY_INVITATION. Phase values follow the ClinicalTrials.gov taxonomy. The nctId is the unique trial identifier.
+
+
+---
+
+
 ## Domain: Nutrition
 
 USDA nutrition data for any food.
@@ -538,7 +662,7 @@ Parameters:
 - q (query, required) — food search term (e.g. "banana", "cheddar cheese", "chicken breast")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/nutrition?q=banana"
+curl "https://api.openprimitive.com/v1/nutrition?q=banana"
 ```
 
 Response:
@@ -547,7 +671,7 @@ Response:
   "domain": "nutrition",
   "source": "USDA FoodData Central",
   "source_url": "https://fdc.nal.usda.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "query": "banana",
   "total": 1523,
   "results": [
@@ -578,7 +702,7 @@ Parameters:
 - id (query, required) — FDC ID from a search result (e.g. "173944")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/nutrition?id=173944"
+curl "https://api.openprimitive.com/v1/nutrition?id=173944"
 ```
 
 Response:
@@ -587,7 +711,7 @@ Response:
   "domain": "nutrition",
   "source": "USDA FoodData Central",
   "source_url": "https://fdc.nal.usda.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "fdcId": 173944,
   "description": "Bananas, raw",
   "brandName": null,
@@ -608,6 +732,59 @@ What the data means: search results include 7 key nutrients (calories, protein, 
 ---
 
 
+## Domain: Meat
+
+USDA FSIS meat, poultry, and egg product recall notices and federally inspected establishment data.
+
+Source: USDA Food Safety and Inspection Service (FSIS)
+Source URL: https://www.fsis.usda.gov
+
+### GET /v1/meat
+
+Returns recent meat and poultry recalls. No parameters required.
+
+```
+curl https://api.openprimitive.com/v1/meat
+```
+
+### GET /v1/meat?q=
+
+Search meat recalls by keyword.
+
+Parameters:
+- q (query, optional) — product type or keyword (e.g. "chicken", "salmonella", "E. coli")
+
+```
+curl "https://api.openprimitive.com/v1/meat?q=chicken"
+```
+
+Response:
+```json
+{
+  "domain": "meat",
+  "source": "USDA FSIS",
+  "source_url": "https://www.fsis.usda.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "total": 12,
+  "recalls": [
+    {
+      "recallNumber": "012-2026",
+      "product": "Frozen Chicken Nuggets",
+      "reason": "Possible Salmonella contamination",
+      "classification": "Class I",
+      "pounds": "45,000",
+      "date": "2026-03-15"
+    }
+  ]
+}
+```
+
+What the data means: FSIS recalls cover meat, poultry, and processed egg products — these are separate from FDA food recalls. Classification follows the same I/II/III severity scale. Pounds indicates the volume of product recalled.
+
+
+---
+
+
 ## Domain: Jobs
 
 Bureau of Labor Statistics economic data — unemployment, CPI, employment, wages.
@@ -620,7 +797,7 @@ Source URL: https://www.bls.gov
 Returns the current unemployment rate (seasonally adjusted). No parameters required.
 
 ```
-curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/jobs
+curl https://api.openprimitive.com/v1/jobs
 ```
 
 ### GET /v1/jobs?series=
@@ -636,7 +813,7 @@ Common series IDs:
 - CES0000000001 — Total nonfarm payrolls
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/jobs?series=CUUR0000SA0"
+curl "https://api.openprimitive.com/v1/jobs?series=CUUR0000SA0"
 ```
 
 Response:
@@ -675,7 +852,7 @@ Parameters:
 - zip (query, required) — 5-digit US ZIP code
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/demographics?zip=90210"
+curl "https://api.openprimitive.com/v1/demographics?zip=90210"
 ```
 
 Response:
@@ -713,7 +890,7 @@ Source URL: https://www.saferproducts.gov
 Returns recent product recalls from the last 90 days. No parameters required.
 
 ```
-curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/products
+curl https://api.openprimitive.com/v1/products
 ```
 
 ### GET /v1/products?q=
@@ -724,7 +901,7 @@ Parameters:
 - q (query, required) — product type or brand (e.g. "crib", "Samsung", "space heater")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/products?q=space+heater"
+curl "https://api.openprimitive.com/v1/products?q=space+heater"
 ```
 
 Response:
@@ -733,7 +910,7 @@ Response:
   "domain": "products",
   "source": "CPSC",
   "source_url": "https://www.saferproducts.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "total": 5,
   "recalls": [
     {
@@ -772,7 +949,7 @@ Parameters:
 - q (query, required) — company name (e.g. "Apple", "Tesla")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/sec?q=Apple"
+curl "https://api.openprimitive.com/v1/sec?q=Apple"
 ```
 
 Response:
@@ -781,7 +958,7 @@ Response:
   "domain": "sec",
   "source": "SEC EDGAR",
   "source_url": "https://www.sec.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "query": "Apple",
   "companies": [
     {
@@ -804,7 +981,7 @@ Parameters:
 - cik (query, required) — SEC Central Index Key (e.g. "320193" for Apple)
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/sec?cik=320193"
+curl "https://api.openprimitive.com/v1/sec?cik=320193"
 ```
 
 Response:
@@ -813,7 +990,7 @@ Response:
   "domain": "sec",
   "source": "SEC EDGAR",
   "source_url": "https://www.sec.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "cik": "320193",
   "name": "Apple Inc.",
   "facts": {
@@ -857,7 +1034,7 @@ Parameters:
 - lng (query, required) — longitude (e.g. "-74.0060")
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/weather?lat=40.7128&lng=-74.0060"
+curl "https://api.openprimitive.com/v1/weather?lat=40.7128&lng=-74.0060"
 ```
 
 Response:
@@ -866,7 +1043,7 @@ Response:
   "domain": "weather",
   "source": "NOAA National Weather Service",
   "source_url": "https://api.weather.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "forecast": [
     {
       "name": "Tonight",
@@ -896,6 +1073,520 @@ What the data means: returns up to 14 periods (7 days, day and night). Temperatu
 ---
 
 
+## Domain: Air Quality
+
+Real-time air quality index (AQI) by ZIP code from EPA AirNow.
+
+Source: EPA AirNow
+Source URL: https://www.airnow.gov
+
+### GET /v1/air?zip=
+
+Parameters:
+- zip (query, required) — 5-digit US ZIP code
+
+```
+curl "https://api.openprimitive.com/v1/air?zip=90210"
+```
+
+Response:
+```json
+{
+  "domain": "air",
+  "source": "EPA AirNow",
+  "source_url": "https://www.airnow.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "zip": "90210",
+  "aqi": 42,
+  "category": "Good",
+  "dominantPollutant": "PM2.5",
+  "observations": [
+    {
+      "parameter": "PM2.5",
+      "aqi": 42,
+      "category": "Good"
+    },
+    {
+      "parameter": "O3",
+      "aqi": 35,
+      "category": "Good"
+    }
+  ]
+}
+```
+
+What the data means: AQI ranges from 0-500. 0-50 = Good, 51-100 = Moderate, 101-150 = Unhealthy for Sensitive Groups, 151-200 = Unhealthy, 201-300 = Very Unhealthy, 301-500 = Hazardous. The dominant pollutant is the one driving the highest AQI reading.
+
+
+---
+
+
+## Domain: Earthquakes
+
+Recent earthquake activity from the USGS Earthquake Hazards Program.
+
+Source: USGS
+Source URL: https://earthquake.usgs.gov
+
+### GET /v1/earthquakes
+
+Returns earthquakes of magnitude 2.5+ from the last 24 hours. No parameters required.
+
+```
+curl https://api.openprimitive.com/v1/earthquakes
+```
+
+Response:
+```json
+{
+  "domain": "earthquakes",
+  "source": "USGS",
+  "source_url": "https://earthquake.usgs.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "total": 15,
+  "earthquakes": [
+    {
+      "magnitude": 4.2,
+      "place": "18 km SE of Ridgecrest, CA",
+      "time": "2026-04-12T10:23:00.000Z",
+      "depth": 8.5,
+      "tsunami": false,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/..."
+    }
+  ]
+}
+```
+
+What the data means: magnitude is on the Richter scale. Depth is in kilometers below the surface. The tsunami field indicates whether a tsunami warning was issued. Returns up to 20 events sorted by time (newest first).
+
+
+---
+
+
+## Domain: Spending
+
+Federal contract and grant spending from USAspending.gov.
+
+Source: USAspending.gov (US Treasury)
+Source URL: https://www.usaspending.gov
+
+### GET /v1/spending?q=
+
+Parameters:
+- q (query, required) — keyword search (e.g. "artificial intelligence", "NASA", "highway construction")
+
+```
+curl "https://api.openprimitive.com/v1/spending?q=artificial+intelligence"
+```
+
+Response:
+```json
+{
+  "domain": "spending",
+  "source": "USAspending.gov",
+  "source_url": "https://www.usaspending.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "query": "artificial intelligence",
+  "total": 342,
+  "awards": [
+    {
+      "awardId": "CONT_AWD_12345",
+      "recipientName": "Example Defense Corp",
+      "amount": 15000000,
+      "awardingAgency": "Department of Defense",
+      "description": "AI-enabled threat detection system",
+      "startDate": "2025-10-01",
+      "type": "Contract"
+    }
+  ]
+}
+```
+
+What the data means: covers contracts, grants, direct payments, and loans from the past year. Amount is in USD. The awardingAgency is the federal agency that issued the award. Results are sorted by amount (largest first).
+
+
+---
+
+
+## Domain: Eligible
+
+Federal benefits eligibility screening based on household income, size, and state.
+
+Source: HHS Poverty Guidelines + CMS + IRS + HUD
+Source URL: https://aspe.hhs.gov
+
+### GET /v1/eligible
+
+Parameters:
+- income (query, required) — annual household income in dollars
+- householdSize (query, required) — number of people in household
+- state (query, optional) — two-letter state code (e.g. "CA", "TX")
+- zip (query, optional) — 5-digit ZIP code
+- children (query, optional) — number of children
+- age (query, optional) — age of primary applicant
+
+```
+curl "https://api.openprimitive.com/v1/eligible?income=25000&householdSize=3&state=CA"
+```
+
+Response:
+```json
+{
+  "domain": "eligible",
+  "source": "HHS + CMS + IRS + HUD",
+  "source_url": "https://aspe.hhs.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "income": 25000,
+  "householdSize": 3,
+  "fpl": 24390,
+  "fplPercentage": 102,
+  "programs": [
+    {
+      "name": "Medicaid",
+      "eligible": true,
+      "reason": "Income below 138% FPL in Medicaid expansion state"
+    },
+    {
+      "name": "SNAP",
+      "eligible": true,
+      "reason": "Income below 130% FPL"
+    },
+    {
+      "name": "EITC",
+      "eligible": true,
+      "maxCredit": 6960
+    },
+    {
+      "name": "CHIP",
+      "eligible": true,
+      "reason": "Children eligible up to 266% FPL in CA"
+    }
+  ]
+}
+```
+
+What the data means: uses 2026 Federal Poverty Level guidelines to screen against Medicaid, SNAP, CHIP, EITC, WIC, Section 8, Lifeline, LIHEAP, and other federal programs. Results are indicative — actual eligibility depends on additional factors determined by state agencies.
+
+
+---
+
+
+## Domain: Courts
+
+Federal court opinions and docket records from CourtListener (Free Law Project).
+
+Source: CourtListener (Free Law Project)
+Source URL: https://www.courtlistener.com
+
+### GET /v1/courts?q=
+
+Search federal court opinions by keyword.
+
+Parameters:
+- q (query, required) — search term (e.g. "qualified immunity", "Section 230")
+- court (query, optional) — court identifier (e.g. "scotus", "ca9")
+- dateAfter (query, optional) — filter by filing date (YYYY-MM-DD)
+- dateBefore (query, optional) — filter by filing date (YYYY-MM-DD)
+
+```
+curl "https://api.openprimitive.com/v1/courts?q=qualified+immunity"
+```
+
+Response:
+```json
+{
+  "domain": "courts",
+  "source": "CourtListener",
+  "source_url": "https://www.courtlistener.com",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "query": "qualified immunity",
+  "results": [
+    {
+      "id": 12345678,
+      "caseName": "Smith v. City of Springfield",
+      "court": "United States Court of Appeals for the Ninth Circuit",
+      "dateFiled": "2026-03-15",
+      "docketNumber": "24-1234",
+      "snippet": "The district court denied qualified immunity..."
+    }
+  ]
+}
+```
+
+### GET /v1/courts/opinion/:id
+
+Get the full text of a court opinion by ID.
+
+Parameters:
+- id (path, required) — opinion ID from search results
+
+```
+curl https://api.openprimitive.com/v1/courts/opinion/12345678
+```
+
+### GET /v1/courts/dockets?q=
+
+Search federal court dockets.
+
+Parameters:
+- q (query, required) — docket search term
+- court (query, optional) — court identifier
+
+```
+curl "https://api.openprimitive.com/v1/courts/dockets?q=Google"
+```
+
+What the data means: CourtListener indexes federal court opinions, oral arguments, and RECAP docket data. Court identifiers use CourtListener conventions (e.g. "scotus" for Supreme Court, "ca1" through "ca11" for circuit courts). Opinion IDs are stable and can be used to retrieve full text.
+
+
+---
+
+
+## Domain: Federal Register
+
+Federal rules, proposed rules, notices, and presidential documents from the Federal Register.
+
+Source: Federal Register (GPO/NARA)
+Source URL: https://www.federalregister.gov
+
+### GET /v1/federal-register?q=
+
+Search the Federal Register by keyword.
+
+Parameters:
+- q (query, required) — search term (e.g. "artificial intelligence", "emissions")
+- agency (query, optional) — agency slug (e.g. "environmental-protection-agency")
+- type (query, optional) — document type: "RULE", "PRORULE", "NOTICE", "PRESDOCU"
+- dateAfter (query, optional) — publication date filter (YYYY-MM-DD)
+
+```
+curl "https://api.openprimitive.com/v1/federal-register?q=artificial+intelligence"
+```
+
+Response:
+```json
+{
+  "domain": "federal-register",
+  "source": "Federal Register",
+  "source_url": "https://www.federalregister.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "query": "artificial intelligence",
+  "results": [
+    {
+      "documentNumber": "2026-05432",
+      "title": "Request for Comment on AI in Federal Procurement",
+      "type": "Proposed Rule",
+      "agency": "General Services Administration",
+      "publicationDate": "2026-03-28",
+      "abstractText": "The GSA seeks public comment on proposed requirements...",
+      "htmlUrl": "https://www.federalregister.gov/documents/2026/03/28/2026-05432/..."
+    }
+  ]
+}
+```
+
+### GET /v1/federal-register/:docNumber
+
+Get the full text and metadata for a specific Federal Register document.
+
+Parameters:
+- docNumber (path, required) — document number from search results (e.g. "2026-05432")
+
+```
+curl https://api.openprimitive.com/v1/federal-register/2026-05432
+```
+
+What the data means: the Federal Register is the daily journal of the US Government. Rules are final regulations with the force of law. Proposed rules (PRORULE) are open for public comment. Notices include agency announcements, meeting schedules, and other administrative actions. Presidential documents include executive orders and proclamations.
+
+
+---
+
+
+## Domain: Education
+
+College Scorecard data from the US Department of Education — admissions, costs, and earnings.
+
+Source: College Scorecard (US Dept of Education)
+Source URL: https://collegescorecard.ed.gov
+
+### GET /v1/education?q=
+
+Search schools by name.
+
+Parameters:
+- q (query, required) — school name (e.g. "MIT", "Stanford", "community college")
+- state (query, optional) — two-letter state code
+
+```
+curl "https://api.openprimitive.com/v1/education?q=MIT"
+```
+
+Response:
+```json
+{
+  "domain": "education",
+  "source": "College Scorecard (US Dept of Education)",
+  "source_url": "https://collegescorecard.ed.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "query": "MIT",
+  "results": [
+    {
+      "id": 166683,
+      "name": "Massachusetts Institute of Technology",
+      "city": "Cambridge",
+      "state": "MA",
+      "admissionRate": 0.04,
+      "annualCost": 79850,
+      "medianEarnings10yr": 124800,
+      "studentSize": 11520
+    }
+  ]
+}
+```
+
+### GET /v1/education/:id
+
+Get detailed data for a specific school by College Scorecard ID.
+
+Parameters:
+- id (path, required) — school ID from search results (e.g. "166683")
+
+```
+curl https://api.openprimitive.com/v1/education/166683
+```
+
+What the data means: admissionRate is a decimal (0.04 = 4% acceptance rate). annualCost is the total cost of attendance for one academic year in USD. medianEarnings10yr is the median earnings of graduates 10 years after entry, in USD. studentSize is total enrollment.
+
+
+---
+
+
+## Domain: Infrastructure
+
+Energy prices and broadband availability from EIA and FCC.
+
+Source: EIA (Energy Information Administration) + FCC Broadband Map
+Source URL: https://www.eia.gov + https://broadbandmap.fcc.gov
+
+### GET /v1/infrastructure/electricity?state=
+
+State-level electricity prices.
+
+Parameters:
+- state (query, optional) — two-letter state code. Omit for national averages.
+
+```
+curl "https://api.openprimitive.com/v1/infrastructure/electricity?state=CA"
+```
+
+Response:
+```json
+{
+  "domain": "infrastructure",
+  "source": "EIA",
+  "source_url": "https://www.eia.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "state": "CA",
+  "prices": [
+    {
+      "period": "2026-02",
+      "price": 28.5,
+      "unit": "cents/kWh",
+      "sector": "residential"
+    }
+  ]
+}
+```
+
+### GET /v1/infrastructure/gas?state=
+
+State-level natural gas prices.
+
+Parameters:
+- state (query, optional) — two-letter state code
+
+```
+curl "https://api.openprimitive.com/v1/infrastructure/gas?state=TX"
+```
+
+### GET /v1/infrastructure/energy-outlook
+
+National short-term energy outlook from EIA. No parameters required.
+
+```
+curl https://api.openprimitive.com/v1/infrastructure/energy-outlook
+```
+
+### GET /v1/infrastructure/broadband?zip=
+
+Broadband availability by ZIP code or state from the FCC broadband map.
+
+Parameters:
+- zip (query, optional) — 5-digit US ZIP code
+- state (query, optional) — two-letter state code
+
+```
+curl "https://api.openprimitive.com/v1/infrastructure/broadband?zip=48201"
+```
+
+What the data means: electricity prices are in cents per kilowatt-hour for residential customers. Gas prices are per thousand cubic feet. The energy outlook provides national forecasts for production, consumption, and prices. Broadband data reflects FCC provider availability reports.
+
+
+---
+
+
+## Domain: Unclaimed Property (Reclaim)
+
+State-level unclaimed property search — finds unclaimed money, securities, and other assets held by state treasuries.
+
+Source: State Treasury / Comptroller databases (50 states)
+Source URL: https://unclaimed.org
+
+### GET /v1/reclaim/search?name=&state=
+
+Parameters:
+- name (query, required) — full or partial name to search
+- state (query, required) — two-letter state code (e.g. "CA", "NY", "TX")
+
+```
+curl "https://api.openprimitive.com/v1/reclaim/search?name=Smith&state=CA"
+```
+
+Response:
+```json
+{
+  "domain": "reclaim",
+  "source": "State of California - Controller's Office",
+  "source_url": "https://ucpi.sco.ca.gov",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "name": "Smith",
+  "state": "CA",
+  "results": [
+    {
+      "owner": "SMITH, JOHN A",
+      "propertyType": "Checking Account",
+      "amount": "$142.50",
+      "holder": "WELLS FARGO BANK",
+      "claimUrl": "https://ucpi.sco.ca.gov/..."
+    }
+  ]
+}
+```
+
+### GET /v1/reclaim/sources
+
+Returns metadata about supported states and their data sources. No parameters required.
+
+```
+curl https://api.openprimitive.com/v1/reclaim/sources
+```
+
+What the data means: unclaimed property is money or assets held by financial institutions, employers, or government agencies that have lost contact with the owner. States hold these assets until claimed. Property types include bank accounts, insurance proceeds, stocks, wages, and utility deposits.
+
+
+---
+
+
 ## Domain: Safety (Cross-Domain)
 
 Composite safety profile for a US ZIP code combining water quality and hospital ratings.
@@ -909,7 +1600,7 @@ Parameters:
 - zip (query, required) — 5-digit US ZIP code
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/safety?zip=48201"
+curl "https://api.openprimitive.com/v1/safety?zip=48201"
 ```
 
 Response:
@@ -918,7 +1609,7 @@ Response:
   "domain": "safety",
   "source": "EPA SDWIS + CMS Care Compare",
   "source_url": "https://api.openprimitive.com/v1/safety",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "zip": "48201",
   "safetyScore": 65,
   "water": {
@@ -943,6 +1634,46 @@ What the data means: safetyScore is 0-100 (100 = best). Water component is 50 po
 ---
 
 
+## Domain: Risk (Cross-Domain)
+
+Multi-factor risk profile for a US ZIP code combining water, hospitals, weather, and demographics into a 0-100 risk score.
+
+Source: EPA + CMS + NOAA + Census
+Source URL: https://api.openprimitive.com/v1/risk
+
+### GET /v1/risk?zip=
+
+Parameters:
+- zip (query, required) — 5-digit US ZIP code
+
+```
+curl "https://api.openprimitive.com/v1/risk?zip=48201"
+```
+
+Response:
+```json
+{
+  "domain": "risk",
+  "source": "EPA + CMS + NOAA + Census",
+  "source_url": "https://api.openprimitive.com/v1/risk",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "zip": "48201",
+  "riskScore": 62,
+  "factors": {
+    "water": { "score": 15, "max": 25, "violations": 2 },
+    "hospitals": { "score": 10, "max": 25, "averageRating": 3.5 },
+    "weather": { "score": 12, "max": 25, "severeOutlook": false },
+    "demographics": { "score": 25, "max": 25, "povertyRate": 35.1 }
+  }
+}
+```
+
+What the data means: riskScore is 0-100 (0 = lowest risk, 100 = highest risk). Each factor contributes up to 25 points. Water risk increases with health-based violations. Hospital risk increases as average rating decreases. Weather risk increases with severe forecasts. Demographics risk increases with poverty rate.
+
+
+---
+
+
 ## Cross-Domain Intelligence Endpoints
 
 These endpoints combine data from multiple federal sources into unified responses. They represent the core value of OPP — structured intelligence that spans agency boundaries.
@@ -956,7 +1687,7 @@ Parameters (JSON body):
 - q (string, required) — natural language question
 
 ```
-curl -X POST -H "X-API-Key: YOUR_KEY" -H "Content-Type: application/json" \
+curl -X POST -H "Content-Type: application/json" \
   -d '{"q": "Is the tap water safe in Detroit?"}' \
   https://api.openprimitive.com/v1/ask
 ```
@@ -967,14 +1698,14 @@ Response:
   "domain": "water",
   "source": "EPA SDWIS",
   "source_url": "https://enviro.epa.gov",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "query": "Is the tap water safe in Detroit?",
   "routed_to": "water",
   "data": { ... }
 }
 ```
 
-The router matches keywords in your question to the 16 data domains. It handles queries like "What are the side effects of metformin?", "Any food recalls this week?", "How safe is ZIP 90210?", and "What's the unemployment rate?"
+The router matches keywords in your question to the 30 data domains. It handles queries like "What are the side effects of metformin?", "Any food recalls this week?", "How safe is ZIP 90210?", "What's the unemployment rate?", "Any earthquakes today?", and "Find clinical trials for diabetes."
 
 
 ### GET /v1/alerts
@@ -984,7 +1715,7 @@ Active federal alerts across food recalls and consumer product recalls. Surfaces
 No parameters required.
 
 ```
-curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1/alerts
+curl https://api.openprimitive.com/v1/alerts
 ```
 
 Response:
@@ -993,7 +1724,7 @@ Response:
   "domain": "alerts",
   "source": "FDA + CPSC",
   "source_url": "https://api.openprimitive.com/v1/alerts",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "alerts": [
     {
       "domain": "food",
@@ -1022,7 +1753,7 @@ Parameters:
 - zip (query, required) — 5-digit US ZIP code
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/location?zip=48201"
+curl "https://api.openprimitive.com/v1/location?zip=48201"
 ```
 
 Response:
@@ -1031,7 +1762,7 @@ Response:
   "domain": "location",
   "source": "Census + EPA + CMS",
   "source_url": "https://api.openprimitive.com",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "zip": "48201",
   "summary": "ZIP 48201, population 670,000, median income $31,283, safety score 65/100",
   "demographics": {
@@ -1058,7 +1789,7 @@ Parameters:
 - zip2 (query, required) — second 5-digit US ZIP code
 
 ```
-curl -H "X-API-Key: YOUR_KEY" "https://api.openprimitive.com/v1/compare?zip1=48201&zip2=90210"
+curl "https://api.openprimitive.com/v1/compare?zip1=48201&zip2=90210"
 ```
 
 Response:
@@ -1067,7 +1798,7 @@ Response:
   "domain": "compare",
   "source": "Census + EPA + CMS",
   "source_url": "https://api.openprimitive.com",
-  "freshness": "2026-03-19T14:00:00.000Z",
+  "freshness": "2026-04-12T14:00:00.000Z",
   "zip1": "48201",
   "zip2": "90210",
   "comparison": {
@@ -1080,6 +1811,290 @@ Response:
 ```
 
 
+### GET /v1/discover
+
+Discovery endpoint that returns all available domains, their endpoints, and capabilities. Useful for agents exploring what data is available.
+
+```
+curl https://api.openprimitive.com/v1/discover
+```
+
+
+### GET /v1/federated
+
+Federated query across multiple OPP-compliant servers. Queries the local server and any registered federation peers.
+
+Parameters:
+- domain (query, required) — data domain to query
+- Additional parameters passed through to the domain handler
+
+```
+curl "https://api.openprimitive.com/v1/federated?domain=water&zip=48201"
+```
+
+
+---
+
+
+## Infrastructure Services
+
+These modules provide cross-cutting capabilities that enhance every data domain response. They are the operational backbone of the protocol.
+
+
+### Entity Graph
+
+Cross-domain entity resolution that stitches data across all 30 domains by common identifiers: ZIP code, company (CIK/ticker), drug name, geographic coordinates, FIPS code.
+
+#### GET /v1/entity/:type/:identifier
+
+Parameters:
+- type (path, required) — entity type: "zip", "company", "drug", "geo", "fips"
+- identifier (path, required) — the entity value (e.g. "48201", "AAPL", "metformin", "40.7128,-74.0060")
+- domains (query, optional) — comma-separated list of domains to query (omit for all applicable)
+
+```
+curl https://api.openprimitive.com/v1/entity/zip/48201
+```
+
+Response:
+```json
+{
+  "domain": "entity-graph",
+  "entityType": "zip",
+  "identifier": "48201",
+  "freshness": "2026-04-12T14:00:00.000Z",
+  "results": {
+    "water": { "systems": 3, "healthViolations": 2 },
+    "air": { "aqi": 42, "category": "Good" },
+    "demographics": { "population": 670000, "medianIncome": 31283 },
+    "hospitals": { "count": 8, "averageRating": 3.5 },
+    "weather": { "shortForecast": "Partly Cloudy", "temperature": 58 }
+  }
+}
+```
+
+What the data means: the entity graph resolves a single identifier across every domain that understands it. A ZIP code queries water, air, weather, demographics, hospitals, earthquakes, location, and eligible. A company identifier queries SEC, drugs, food, products, and spending. A drug name queries drugs, drug-interactions, clinical-trials, dailymed, and health. Domains are queried in parallel with a 10-second timeout per source.
+
+
+### Subscriptions
+
+Real-time event subscriptions with webhook delivery and Server-Sent Events (SSE) streaming. Agents register interest in specific domains and receive push notifications when data changes.
+
+#### POST /v1/subscriptions
+
+Create a new subscription. JSON body:
+- agentId (string, required) — unique agent identifier
+- domain (string, required) — data domain to watch (e.g. "food", "drugs", "earthquakes")
+- filters (object, optional) — domain-specific filter criteria
+- webhookUrl (string, optional) — URL to receive POST notifications
+- sse (boolean, optional) — enable Server-Sent Events streaming
+
+```
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"agentId": "my-agent-001", "domain": "food", "filters": {"classification": "Class I"}, "webhookUrl": "https://my-agent.example.com/webhook"}' \
+  https://api.openprimitive.com/v1/subscriptions
+```
+
+#### GET /v1/subscriptions/:agentId
+
+List all active subscriptions for an agent.
+
+```
+curl https://api.openprimitive.com/v1/subscriptions/my-agent-001
+```
+
+#### GET /v1/subscriptions/:agentId/stream
+
+SSE stream for real-time events. Connect with an EventSource client.
+
+```
+curl -N https://api.openprimitive.com/v1/subscriptions/my-agent-001/stream
+```
+
+What the data means: subscriptions are stored in Redis with TTL-based expiration. Supported domain filters include drug name, product type, ZIP code, earthquake magnitude threshold, filing type, and more. Webhook payloads carry the full OPP envelope. SSE streams deliver events as they occur.
+
+
+### Compliance Metadata
+
+Regulatory compliance assessment against major AI governance frameworks. Tags API usage with jurisdiction-specific compliance scores so model providers can prove which data informed their outputs.
+
+#### GET /v1/compliance/assess
+
+Parameters:
+- jurisdiction (query, required) — regulatory framework: "eu-ai-act", "nist-ai-rmf", "eo-14110", "canada-aida"
+- domain (query, optional) — specific data domain to assess
+
+```
+curl "https://api.openprimitive.com/v1/compliance/assess?jurisdiction=eu-ai-act"
+```
+
+Response:
+```json
+{
+  "domain": "compliance",
+  "jurisdiction": "eu-ai-act",
+  "framework": "EU AI Act (Regulation 2024/1689)",
+  "effectiveDate": "2026-08-02",
+  "assessment": {
+    "provenanceChain": { "required": true, "satisfied": true },
+    "signedResponses": { "required": true, "satisfied": true },
+    "freshnessThreshold": { "required": 90, "actual": 0, "satisfied": true },
+    "auditTrail": { "required": true, "satisfied": true },
+    "transparencyReport": { "required": true, "satisfied": true }
+  },
+  "overallScore": 1.0,
+  "compliant": true
+}
+```
+
+Supported frameworks:
+- **EU AI Act** (Regulation 2024/1689) — provenance chains, signed responses, freshness thresholds, audit trails, transparency reporting
+- **NIST AI RMF** — risk management framework alignment with provenance and audit requirements
+- **EO 14110** — Executive Order on AI safety and security, federal data provenance requirements
+- **Canada AIDA** — Artificial Intelligence and Data Act compliance assessment
+
+
+### Provenance Chains
+
+SHA-256 content hashing for every upstream data fetch. Creates a cryptographic chain from the original government source through to the API response.
+
+Every response can carry a provenance chain that includes:
+- **contentHash** — SHA-256 hash of the raw upstream response body (`sha256:<hex>`)
+- **sourceHeaders** — relevant HTTP headers from the upstream source (date, etag, last-modified)
+- **fetchTimestamp** — ISO 8601 timestamp of when the upstream fetch occurred
+- **tlsCertHash** — TLS certificate hash when available (Cloudflare Workers cf object)
+
+```json
+{
+  "provenance": {
+    "contentHash": "sha256:a1b2c3d4e5f6...",
+    "sourceHeaders": {
+      "date": "Sat, 12 Apr 2026 14:00:00 GMT",
+      "etag": "\"abc123\"",
+      "lastModified": "Fri, 11 Apr 2026 08:00:00 GMT"
+    },
+    "fetchTimestamp": "2026-04-12T14:00:01.234Z"
+  }
+}
+```
+
+What the data means: the content hash lets any consumer verify that the data has not been modified since it was fetched from the government source. Combined with the Ed25519 signature on the response envelope, this creates a two-layer integrity proof: the hash proves the upstream data is unchanged, and the signature proves the API response is unchanged.
+
+
+### Temporal Archive
+
+Versioned record storage with diff detection. Every data point keeps a complete history of changes over time, stored in Redis sorted sets with 2-year TTL.
+
+#### GET /v1/history
+
+Parameters:
+- domain (query, required) — data domain (e.g. "water", "drugs")
+- key (query, required) — record identifier (e.g. a PWSID, drug name, or ZIP code)
+- from (query, optional) — start timestamp (ISO 8601)
+- to (query, optional) — end timestamp (ISO 8601)
+
+```
+curl "https://api.openprimitive.com/v1/history?domain=water&key=MI0000101"
+```
+
+Response:
+```json
+{
+  "domain": "archive",
+  "key": "water:MI0000101",
+  "versions": [
+    {
+      "timestamp": "2026-04-12T14:00:00.000Z",
+      "hash": "sha256:abc123...",
+      "diff": {
+        "violations.total": { "from": 0, "to": 1 },
+        "violations.healthBased": { "added": ["LEAD MCL violation"] }
+      }
+    },
+    {
+      "timestamp": "2026-04-11T14:00:00.000Z",
+      "hash": "sha256:def456...",
+      "diff": null
+    }
+  ]
+}
+```
+
+What the data means: the temporal archive detects silent data edits — when a government source changes a value without announcement. Each version stores the full data snapshot hash. Diffs show exactly what changed between consecutive versions. This is critical for accountability and detecting retroactive data modifications.
+
+
+### Confidence Scoring
+
+Multi-dimensional confidence scoring with cross-source corroboration. Every response's confidence field is computed from four weighted dimensions.
+
+Dimensions:
+- **Source reliability** (40%) — baseline trust score per federal agency (e.g. SEC = 0.97, NOAA = 0.96, EPA = 0.93)
+- **Data freshness** (30%) — decays over time: 1 day = 1.0, 7 days = 0.95, 30 days = 0.85, 90 days = 0.70, 365 days = 0.50
+- **Completeness** (20%) — percentage of expected fields that contain non-null values
+- **Corroboration** (10%) — agreement score when multiple sources report the same data point
+
+When multiple sources cover the same field (e.g., FDA and DailyMed both report drug warnings), the confidence module detects agreements and conflicts. Agreements boost the corroboration score. Conflicts flag the discrepancy for downstream consumers.
+
+```json
+{
+  "confidence": 0.93,
+  "confidenceDetail": {
+    "sourceReliability": 0.95,
+    "freshness": 0.95,
+    "completeness": 0.88,
+    "corroboration": 0.90,
+    "dimensions": {
+      "sourceReliability": { "weight": 0.4, "score": 0.95 },
+      "freshness": { "weight": 0.3, "score": 0.95 },
+      "completeness": { "weight": 0.2, "score": 0.88 },
+      "corroboration": { "weight": 0.1, "score": 0.90 }
+    }
+  }
+}
+```
+
+
+### Federation Registry
+
+Decentralized registry for OPP-compliant data providers. Any organization can register as a provider and be discovered by agents querying the federation.
+
+#### POST /v1/registry/register
+
+Register a new OPP-compliant provider. JSON body:
+- name (string, required) — provider name
+- url (string, required) — base URL of the OPP server
+- domains (array, required) — list of data domains served
+- publicKey (string, required) — Ed25519 public key for response verification
+- contact (string, required) — contact email
+
+```
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"name": "State of California", "url": "https://data.ca.gov/opp", "domains": ["water", "air"], "publicKey": "...", "contact": "data@ca.gov"}' \
+  https://api.openprimitive.com/v1/registry/register
+```
+
+#### GET /v1/registry
+
+List all registered OPP providers.
+
+```
+curl https://api.openprimitive.com/v1/registry
+```
+
+#### GET /v1/registry/search?domain=
+
+Search for providers serving a specific domain.
+
+Parameters:
+- domain (query, required) — data domain to find providers for
+
+```
+curl "https://api.openprimitive.com/v1/registry/search?domain=water"
+```
+
+What the data means: the federation registry enables a decentralized network of OPP servers. When an agent queries the federated endpoint, Open Primitive can fan out the request to all registered providers serving that domain, then merge and deduplicate the results. Each provider's responses are verified against their registered public key.
+
+
 ---
 
 
@@ -1090,7 +2105,7 @@ Response:
 Returns the API index — all domains with endpoint paths, sources, and descriptions.
 
 ```
-curl -H "X-API-Key: YOUR_KEY" https://api.openprimitive.com/v1
+curl https://api.openprimitive.com/v1
 ```
 
 ### GET /v1/stats
@@ -1105,9 +2120,21 @@ curl https://api.openprimitive.com/v1/stats
 
 Health check. Returns { "status": "ok", "timestamp": "..." }
 
-### GET /v1/history
+### GET /v1/context
 
-Retrieval layer for archived responses. Placeholder — not yet active.
+Returns contextual metadata about the API including version, supported domains, infrastructure capabilities, and protocol version.
+
+```
+curl https://api.openprimitive.com/v1/context
+```
+
+### GET /v1/changes
+
+Returns a changelog of recent API changes, new domains, and infrastructure updates.
+
+```
+curl https://api.openprimitive.com/v1/changes
+```
 
 
 ---
@@ -1123,7 +2150,7 @@ Open Primitive runs as a Model Context Protocol server for direct tool use by LL
 node mcp.js
 ```
 
-The MCP server exposes 18 tools:
+The MCP server exposes 34 tools:
 
 | Tool Name | Description |
 |-----------|-------------|
@@ -1140,11 +2167,27 @@ The MCP server exposes 18 tools:
 | get-product-recalls | CPSC recalls. Optional param: query |
 | get-sec-filings | SEC EDGAR. Optional params: query or cik |
 | get-safety-profile | Cross-domain safety. Param: zip (required) |
-| ask | Natural language query router. Param: q (required) |
-| get-alerts | Active federal alerts. No params. |
-| get-location | Location profile. Param: zip (required) |
-| compare-zips | ZIP comparison. Params: zip1, zip2 (required) |
 | get-weather | NOAA forecast. Params: lat, lng (required) |
+| get-location-profile | Location profile. Param: zip (required) |
+| get-comparison | ZIP comparison. Params: zip1, zip2 (required) |
+| ask-question | Natural language query router. Param: q (required) |
+| get-risk | Multi-factor risk profile. Param: zip (required) |
+| get-eligible | Benefits eligibility screening. Params: income, householdSize (required) |
+| get-air-quality | EPA AirNow AQI by ZIP. Param: zip (required) |
+| get-alerts | Active federal alerts. No params. |
+| federated-query | Query across federation peers. Param: domain (required) |
+| get-meat-safety | USDA FSIS meat recalls. Optional param: query |
+| search-unclaimed-property | State unclaimed property search. Params: name, state (required) |
+| search-court-records | Federal court opinions. Param: query (required) |
+| search-federal-register | Federal Register documents. Param: query (required) |
+| get-federal-register-document | Full Federal Register document. Param: docNumber (required) |
+| search-schools | College Scorecard search. Param: query (required) |
+| get-school | School detail by ID. Param: id (required) |
+| get-electricity-price | EIA electricity prices. Optional param: state |
+| get-broadband | FCC broadband availability. Optional params: zip, state |
+| query-entity-graph | Cross-domain entity query. Params: type, identifier (required) |
+| create-subscription | Create data change subscription. Params: agentId, domain (required) |
+| assess-compliance | Regulatory compliance assessment. Param: jurisdiction (required) |
 
 Each tool returns JSON wrapped in MCP text content format.
 
@@ -1200,6 +2243,17 @@ Domain-specific errors (returned as 400):
 - Ask: "q is required"
 - Compare: "zip1 and zip2 are required"
 - Location: "Valid 5-digit ZIP code required"
+- Air: "zip parameter is required"
+- Clinical Trials: "query parameter is required"
+- Spending: "query parameter is required"
+- Eligible: "income and householdSize are required"
+- Courts: "query parameter is required"
+- Federal Register: "query parameter is required"
+- Education: "query parameter is required"
+- Drug Interactions: "drug1 and drug2 are required"
+- Reclaim: "name and state are required"
+- Compliance: "jurisdiction parameter is required"
+- Entity Graph: "Invalid entity type"
 
 
 ---
@@ -1222,16 +2276,34 @@ All endpoints return `Access-Control-Allow-Origin: *` and `Access-Control-Allow-
 | Food | FDA | Enforcement Reports |
 | Water | EPA | Safe Drinking Water Information System |
 | Drugs | FDA | FAERS + Drug Labels |
+| Drug Labels | NLM | DailyMed |
+| Drug Interactions | FDA | openFDA Drug Labels |
 | Hospitals | CMS | Care Compare |
 | Health | NIH/NLM | PubMed/MEDLINE |
+| Clinical Trials | NLM | ClinicalTrials.gov |
 | Nutrition | USDA | FoodData Central |
+| Meat | USDA FSIS | Recall API + MPI Directory |
 | Jobs | BLS | Public Data API |
 | Demographics | Census Bureau | American Community Survey |
 | Products | CPSC | SaferProducts.gov |
 | SEC | SEC | EDGAR |
 | Weather | NOAA | National Weather Service |
+| Air Quality | EPA | AirNow |
+| Earthquakes | USGS | Earthquake Hazards Program |
+| Spending | US Treasury | USAspending.gov |
+| Eligible | HHS/CMS/IRS/HUD | Federal Poverty Guidelines + Program Rules |
+| Courts | Free Law Project | CourtListener |
+| Federal Register | GPO/NARA | Federal Register API |
+| Education | Dept of Education | College Scorecard |
+| Infrastructure | EIA + FCC | Energy Data + Broadband Map |
+| Reclaim | State Treasuries | Unclaimed Property (50 states) |
 | Safety | EPA + CMS | Composite (Water + Hospitals) |
+| Risk | EPA + CMS + NOAA + Census | Composite (Multi-Factor Risk) |
 | Location | Census + EPA + CMS | Composite (Demographics + Safety) |
 | Compare | Census + EPA + CMS | Composite (ZIP Comparison) |
 | Alerts | FDA + CPSC | Composite (Food + Product Recalls) |
 | Ask | All domains | Natural Language Router |
+| Entity Graph | All domains | Cross-Domain Entity Resolution |
+| Subscriptions | All domains | Real-Time Event Push |
+| Compliance | All domains | Regulatory Framework Assessment |
+| Federation | All providers | Decentralized OPP Network |
