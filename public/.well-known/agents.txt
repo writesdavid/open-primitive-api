@@ -1,0 +1,68 @@
+# agents.txt — Open Primitive API
+# https://api.openprimitive.com
+# Spec: agents.txt v0.3 / agent-manifest.txt draft
+
+Site-Name: Open Primitive
+Site-Description: Free, signed, agent-ready US public data API. 30 data domains across federal agencies. No API key required.
+Allow-Training: yes
+Allow-RAG: yes
+Allow-Actions: yes
+Preferred-Interface: rest
+API-Docs: https://api.openprimitive.com/openapi.json
+MCP-Server: npx open-primitive-mcp
+
+# Default rules — all agents welcome
+[Agent: *]
+Allow: /v1/*
+Allow: /openapi.json
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /.well-known/*
+Disallow:
+Auth-Required: no
+Allow-Actions: yes
+
+# -------------------------------------------------------------------
+# Service details
+# -------------------------------------------------------------------
+
+# Base URL
+# https://api.openprimitive.com
+
+# Data domains (30)
+# flights, cars, food, water, drugs, hospitals, health, nutrition,
+# jobs, demographics, products, sec, weather, safety, location,
+# compare, housing, education, crime, energy, environment, imports,
+# exports, patents, trademarks, bridges, dams, mines, grants, benefits
+
+# Authentication
+# Type: none
+# No API key, no OAuth, no tokens. Completely free.
+
+# Payment
+# x402 protocol supported (coming soon)
+
+# Protocol
+# OPP — Open Primitive Protocol
+# Manifest: https://api.openprimitive.com/.well-known/opp.json
+
+# Response format
+# JSON with Ed25519 cryptographic signatures on every response
+# Signatures enable agents to verify data provenance and integrity
+
+# MCP server
+# Install: npx open-primitive-mcp
+# Provides tool-use access to all 30 domains for MCP-compatible agents
+
+# Rate limits
+# None currently
+
+# Discovery endpoints
+# OpenAPI:     https://api.openprimitive.com/openapi.json
+# LLMs.txt:    https://api.openprimitive.com/llms.txt
+# LLMs full:   https://api.openprimitive.com/llms-full.txt
+# Agent card:  https://api.openprimitive.com/.well-known/agent-card.json
+# OPP manifest: https://api.openprimitive.com/.well-known/opp.json
+
+# Contact
+# See /.well-known/opp.json for provider details and full manifest
