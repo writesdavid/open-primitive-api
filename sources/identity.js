@@ -1,18 +1,26 @@
 /**
  * identity.js — Agent Identity Layer (Layer 2) for Open Primitive Protocol
  *
- * Handles agent identity registration, verification, and preference storage.
- * An Agent Identity is a portable Ed25519 keypair that represents a person's agent.
- * Any OPP-compatible service can verify the identity — it is not tied to Open Primitive.
+ * Fully decentralized. The agent IS the identity. The keypair lives on the
+ * user's device. Any OPP-compatible service verifies the signature by checking
+ * against the public key sent IN THE REQUEST — no central registry needed.
  *
- * Uses Upstash Redis (env.UPSTASH_REDIS_REST_URL, env.UPSTASH_REDIS_REST_TOKEN).
+ * How it works:
+ *   1. Agent generates an Ed25519 keypair locally (generateKeypair)
+ *   2. Agent creates an identity from the keypair (createIdentity)
+ *   3. Every request includes X-OPP-PublicKey and X-OPP-Signature headers
+ *   4. Any service calls verifyRequest(headers, body) — pure crypto, no network
+ *
+ * Redis is optional — used only as a convenience cache for preferences.
+ * The protocol itself requires zero server-side state.
+ *
  * Designed for Cloudflare Workers + nodejs_compat.
  */
 
 const { Redis } = require('@upstash/redis');
 
 // ---------------------------------------------------------------------------
-// Redis client
+// Redis client (optional — only for preference caching)
 // ---------------------------------------------------------------------------
 
 let _redis = null;
@@ -20,7 +28,7 @@ function getRedis(env) {
   if (_redis) return _redis;
   const url = env.UPSTASH_REDIS_REST_URL;
   const token = env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) throw new Error('Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN');
+  if (!url || !token) return null;
   _redis = new Redis({ url, token });
   return _redis;
 }
@@ -73,24 +81,14 @@ async function importPublicKey(base64Key) {
 // ---------------------------------------------------------------------------
 
 /**
- * Register a new agent identity.
+ * Create a new agent identity from a keypair. Stores NOTHING server-side.
+ * The public key IS the identity. The agentId is derived deterministically.
  *
- * @param {object} env — Worker environment bindings
- * @param {object} opts — { publicKey (base64), handle, preferences }
- * @returns {{ agentId, registered, verificationUrl }}
+ * @param {object} opts — { publicKey (base64), handle }
+ * @returns {{ agentId, publicKey, handle, created }}
  */
-async function registerIdentity(env, { publicKey, handle, preferences }) {
+async function createIdentity({ publicKey, handle }) {
   if (!publicKey) throw new Error('publicKey is required (base64-encoded Ed25519)');
-
-  const redis = getRedis(env);
-  const agentId = await deriveAgentId(publicKey);
-  const now = new Date().toISOString();
-
-  // Check for duplicate registration
-  const existing = await redis.get(`identity:${agentId}`);
-  if (existing) {
-    throw new Error(`Identity already registered: ${agentId}`);
-  }
 
   // Validate the public key can be imported
   try {
@@ -99,122 +97,162 @@ async function registerIdentity(env, { publicKey, handle, preferences }) {
     throw new Error(`Invalid Ed25519 public key: ${err.message}`);
   }
 
-  const identity = {
-    agentId,
-    publicKey,
-    handle: handle || 'anonymous',
-    preferences: { ...DEFAULT_PREFERENCES, ...(preferences || {}) },
-    registered: now,
-    lastSeen: now,
-  };
-
-  // Store identity + reverse index from publicKey → agentId
-  await Promise.all([
-    redis.set(`identity:${agentId}`, JSON.stringify(identity)),
-    redis.set(`identity:key:${publicKey}`, agentId),
-  ]);
+  const agentId = await deriveAgentId(publicKey);
 
   return {
     agentId,
-    registered: now,
-    verificationUrl: `https://api.openprimitive.com/v1/identity/${agentId}`,
+    publicKey,
+    handle: handle || 'anonymous',
+    created: new Date().toISOString(),
   };
 }
 
 /**
- * Verify an agent's Ed25519 signature on a payload.
+ * Verify an agent's Ed25519 signature using the public key from the request.
+ * No Redis. No network call. Pure crypto.
  *
- * @param {object} env
- * @param {object} opts — { agentId, signature (base64), payload (string) }
- * @returns {{ valid, identity }}
+ * @param {object} opts — { publicKey (base64), signature (base64), payload (string), timestamp (ISO string) }
+ * @returns {{ valid, agentId }}
  */
-async function verifyAgentSignature(env, { agentId, signature, payload }) {
-  if (!agentId || !signature || !payload) {
-    throw new Error('agentId, signature, and payload are all required');
+async function verifyAgentSignature({ publicKey, signature, payload, timestamp }) {
+  if (!publicKey || !signature || !payload) {
+    throw new Error('publicKey, signature, and payload are all required');
   }
 
-  const redis = getRedis(env);
-  const raw = await redis.get(`identity:${agentId}`);
-  if (!raw) return { valid: false, identity: null };
+  const cryptoKey = await importPublicKey(publicKey);
+  const agentId = await deriveAgentId(publicKey);
 
-  const identity = typeof raw === 'string' ? JSON.parse(raw) : raw;
-  const publicKey = await importPublicKey(identity.publicKey);
-
+  // Reconstruct the signed message: timestamp:payload
+  const message = timestamp ? `${timestamp}:${payload}` : payload;
   const sigBytes = Uint8Array.from(atob(signature), (c) => c.charCodeAt(0));
-  const payloadBytes = new TextEncoder().encode(payload);
+  const payloadBytes = new TextEncoder().encode(message);
 
   const valid = await globalThis.crypto.subtle.verify(
     { name: 'Ed25519' },
-    publicKey,
+    cryptoKey,
     sigBytes,
     payloadBytes
   );
 
-  // Update lastSeen on successful verification
-  if (valid) {
-    identity.lastSeen = new Date().toISOString();
-    await redis.set(`identity:${agentId}`, JSON.stringify(identity));
-  }
-
-  // Return public info only
-  return {
-    valid,
-    identity: {
-      agentId: identity.agentId,
-      handle: identity.handle,
-      registered: identity.registered,
-      lastSeen: identity.lastSeen,
-    },
-  };
+  return { valid, agentId };
 }
 
 /**
- * Get an agent's registered preferences and public profile.
+ * Verify a request's authenticity using only the headers. No Redis. No network.
+ * This is the function any OPP-compatible service calls to authenticate a request.
+ *
+ * Expects headers:
+ *   X-OPP-PublicKey — base64-encoded Ed25519 public key
+ *   X-OPP-Signature — base64-encoded Ed25519 signature
+ *   X-OPP-Timestamp — ISO timestamp used when signing
+ *
+ * @param {object} headers — request headers (or object with get() method)
+ * @param {string} body — the request body string that was signed
+ * @returns {{ valid, agentId, publicKey }}
+ */
+async function verifyRequest(headers, body) {
+  const get = typeof headers.get === 'function'
+    ? (k) => headers.get(k)
+    : (k) => headers[k];
+
+  const publicKey = get('X-OPP-PublicKey') || get('x-opp-publickey');
+  const signature = get('X-OPP-Signature') || get('x-opp-signature');
+  const timestamp = get('X-OPP-Timestamp') || get('x-opp-timestamp');
+
+  if (!publicKey || !signature) {
+    return { valid: false, agentId: null, publicKey: null };
+  }
+
+  const { valid, agentId } = await verifyAgentSignature({
+    publicKey,
+    signature,
+    payload: body || '',
+    timestamp,
+  });
+
+  return { valid, agentId, publicKey };
+}
+
+/**
+ * Extract identity info from request headers. No verification — just parsing.
+ *
+ * @param {object} headers — request headers
+ * @returns {{ agentId, publicKey } | null}
+ */
+async function extractIdentity(headers) {
+  const get = typeof headers.get === 'function'
+    ? (k) => headers.get(k)
+    : (k) => headers[k];
+
+  const publicKey = get('X-OPP-PublicKey') || get('x-opp-publickey');
+  if (!publicKey) return null;
+
+  const agentId = await deriveAgentId(publicKey);
+  return { agentId, publicKey };
+}
+
+/**
+ * Get an agent's preferences from Redis cache. Optional convenience.
+ * Returns defaults if Redis is unavailable or agent has no cached prefs.
  *
  * @param {object} env
  * @param {string} agentId
- * @returns {{ preferences, handle, registered }}
+ * @returns {{ preferences, handle, cached }}
  */
 async function getPreferences(env, agentId) {
   if (!agentId) throw new Error('agentId is required');
 
   const redis = getRedis(env);
-  const raw = await redis.get(`identity:${agentId}`);
-  if (!raw) return null;
+  if (!redis) return { preferences: { ...DEFAULT_PREFERENCES }, handle: null, cached: false };
 
-  const identity = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  try {
+    const raw = await redis.get(`identity:${agentId}`);
+    if (!raw) return { preferences: { ...DEFAULT_PREFERENCES }, handle: null, cached: false };
 
-  return {
-    preferences: identity.preferences,
-    handle: identity.handle,
-    registered: identity.registered,
-  };
+    const identity = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return {
+      preferences: identity.preferences,
+      handle: identity.handle,
+      cached: true,
+    };
+  } catch {
+    return { preferences: { ...DEFAULT_PREFERENCES }, handle: null, cached: false };
+  }
 }
 
 /**
- * Update an agent's preferences. Requires a valid signature over the
- * JSON-stringified new preferences object.
+ * Cache an agent's preferences in Redis. Optional convenience.
+ * Requires a valid signature over the JSON-stringified preferences.
  *
  * @param {object} env
- * @param {string} agentId
- * @param {string} signature — base64-encoded Ed25519 signature
- * @param {object} preferences — new preferences to merge
+ * @param {string} publicKey — base64 public key
+ * @param {string} signature — base64 signature over JSON.stringify(preferences)
+ * @param {string} timestamp — ISO timestamp used when signing
+ * @param {object} preferences — preferences to cache
  * @returns {{ updated }}
  */
-async function updatePreferences(env, agentId, signature, preferences) {
-  if (!agentId || !signature || !preferences) {
-    throw new Error('agentId, signature, and preferences are all required');
+async function updatePreferences(env, publicKey, signature, timestamp, preferences) {
+  if (!publicKey || !signature || !preferences) {
+    throw new Error('publicKey, signature, and preferences are all required');
   }
 
   const payload = JSON.stringify(preferences);
-  const { valid } = await verifyAgentSignature(env, { agentId, signature, payload });
+  const { valid, agentId } = await verifyAgentSignature({
+    publicKey,
+    signature,
+    payload,
+    timestamp,
+  });
   if (!valid) throw new Error('Invalid signature');
 
   const redis = getRedis(env);
-  const raw = await redis.get(`identity:${agentId}`);
-  if (!raw) throw new Error('Identity not found');
+  if (!redis) return { updated: false, reason: 'no cache available' };
 
-  const identity = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  const existing = await redis.get(`identity:${agentId}`);
+  const identity = existing
+    ? (typeof existing === 'string' ? JSON.parse(existing) : existing)
+    : { agentId, publicKey, handle: 'anonymous', preferences: { ...DEFAULT_PREFERENCES } };
+
   identity.preferences = { ...identity.preferences, ...preferences };
   identity.lastSeen = new Date().toISOString();
 
@@ -280,11 +318,14 @@ async function signRequest(privateKeyBase64, payload) {
 // ---------------------------------------------------------------------------
 
 module.exports = {
-  registerIdentity,
+  createIdentity,
   verifyAgentSignature,
+  verifyRequest,
+  extractIdentity,
   getPreferences,
   updatePreferences,
   generateKeypair,
   signRequest,
+  deriveAgentId,
   DEFAULT_PREFERENCES,
 };

@@ -87,6 +87,7 @@ const compliance = require('../sources/compliance');
 const registry = require('../sources/registry');
 const intent = require('../sources/intent');
 const action = require('../sources/action');
+const negotiation = require('../sources/negotiation');
 const identity = require('../sources/identity');
 
 // ─── Agent detection (in-memory stats) ───
@@ -800,6 +801,76 @@ app.delete('/v1/action/:actionId', async (c) => {
     return c.json(result);
   } catch (err) {
     return c.json({ error: err.message }, 404);
+  }
+});
+
+// ─── NEGOTIATION (Layer 5) ───
+
+app.post('/v1/negotiate', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await negotiation.proposeNegotiation(c.env, body);
+    return c.json(result, 201);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+app.get('/v1/negotiate/:negotiationId', async (c) => {
+  try {
+    const result = await negotiation.getNegotiation(c.env, c.req.param('negotiationId'));
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+app.post('/v1/negotiate/:negotiationId/terms', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await negotiation.offerTerms(c.env, c.req.param('negotiationId'), body);
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+app.post('/v1/negotiate/:negotiationId/accept', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await negotiation.acceptTerms(c.env, c.req.param('negotiationId'), body.signature);
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+app.post('/v1/negotiate/:negotiationId/counter', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await negotiation.counterTerms(c.env, c.req.param('negotiationId'), body);
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+app.post('/v1/negotiate/:negotiationId/reject', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await negotiation.rejectTerms(c.env, c.req.param('negotiationId'), body.reason);
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+app.get('/v1/negotiations/:agentId', async (c) => {
+  try {
+    const result = await negotiation.listNegotiations(c.env, c.req.param('agentId'));
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
   }
 });
 
