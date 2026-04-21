@@ -42,7 +42,37 @@
     "mcpServer": "npx open-primitive-mcp",
     "agentCard": "/.well-known/agent-card.json"
   },
+  "identity": {
+    "layer": 2,
+    "name": "Agent Identity",
+    "description": "Portable Ed25519 agent identity. Register once, verify anywhere. Not tied to Open Primitive — any OPP-compatible service can verify.",
+    "endpoints": {
+      "register": "POST /v1/identity/register",
+      "profile": "GET /v1/identity/{agentId}",
+      "verify": "POST /v1/identity/verify",
+      "preferences": "PUT /v1/identity/{agentId}/preferences",
+      "keypair": "GET /v1/identity/keypair"
+    },
+    "identityShape": {
+      "agentId": "opp_a_<sha256-prefix>",
+      "publicKey": "base64-encoded Ed25519",
+      "handle": "string",
+      "preferences": {
+        "dataDensity": "high | medium | low",
+        "responseFormat": "full | compact",
+        "domains": ["array of domain IDs"],
+        "jurisdiction": "us | eu | global",
+        "maxFreshness": "seconds"
+      }
+    },
+    "cryptography": {
+      "algorithm": "Ed25519",
+      "keyFormat": "raw (base64)",
+      "signatureFormat": "base64",
+      "verification": "crypto.subtle (Web Crypto API)"
+    }
+  },
   "geographic": { "scope": "US", "granularity": "zip-code" },
   "authentication": { "type": "none", "description": "No API key required. Completely free, no limits." },
-  "lastUpdated": "2026-03-19T00:00:00Z"
+  "lastUpdated": "2026-04-20T00:00:00Z"
 }

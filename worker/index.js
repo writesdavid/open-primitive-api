@@ -85,6 +85,9 @@ const confidence = require('../sources/confidence');
 const subscriptions = require('../sources/subscriptions');
 const compliance = require('../sources/compliance');
 const registry = require('../sources/registry');
+const intent = require('../sources/intent');
+const action = require('../sources/action');
+const identity = require('../sources/identity');
 
 // ─── Agent detection (in-memory stats) ───
 
@@ -653,6 +656,153 @@ app.get('/v1/subscriptions/:agentId/stream', async (c) => {
   return new Response(stream, { headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' } });
 });
 
+// ─── IDENTITY (Layer 2) ───
+app.post('/v1/identity/register', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await identity.registerIdentity(c.env, body);
+    return c.json(result, 201);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+app.get('/v1/identity/keypair', async (c) => {
+  try {
+    const keypair = await identity.generateKeypair();
+    return c.json(keypair);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+app.get('/v1/identity/:agentId', async (c) => {
+  try {
+    const prefs = await identity.getPreferences(c.env, c.req.param('agentId'));
+    if (!prefs) return c.json({ error: 'Identity not found' }, 404);
+    return c.json(prefs);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+app.post('/v1/identity/verify', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await identity.verifyAgentSignature(c.env, body);
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+app.put('/v1/identity/:agentId/preferences', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { signature, preferences } = body;
+    const result = await identity.updatePreferences(c.env, c.req.param('agentId'), signature, preferences);
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+// ─── INTENT (Layer 3) ───
+const intentSourceModules = { water, air, weather, demographics, hospitals, earthquakes, location, eligible, sec, drugs, food, products, spending, clinicalTrials, drugInteractions, dailymed, health, jobs, safety, nutrition, cars, flights, courts, federalRegister, education, infrastructure, meat, risk };
+
+app.post('/v1/intent', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await intent.submitIntent(c.env, body);
+    return c.json(result, 201);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+app.get('/v1/intent/:intentId', async (c) => {
+  try {
+    const result = await intent.getIntent(c.env, c.req.param('intentId'));
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+app.post('/v1/intent/:intentId/resolve', async (c) => {
+  try {
+    const result = await intent.resolveIntent(c.env, c.req.param('intentId'), intentSourceModules);
+    return c.json(result);
+  } catch (err) {
+    console.error('[intent/resolve]', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+app.get('/v1/intents/:agentId', async (c) => {
+  try {
+    const result = await intent.listIntents(c.env, c.req.param('agentId'));
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+app.delete('/v1/intent/:intentId', async (c) => {
+  try {
+    const result = await intent.cancelIntent(c.env, c.req.param('intentId'));
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+// ─── ACTION (Layer 4) ───
+const actionSourceModules = { subscriptions };
+
+app.post('/v1/action', async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = await action.createAction(c.env, body);
+    return c.json(result, 201);
+  } catch (err) {
+    return c.json({ error: err.message }, 400);
+  }
+});
+
+app.get('/v1/action/:actionId', async (c) => {
+  try {
+    const result = await action.getAction(c.env, c.req.param('actionId'));
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
+app.post('/v1/action/:actionId/execute', async (c) => {
+  try {
+    const result = await action.executeAction(c.env, c.req.param('actionId'), actionSourceModules);
+    return c.json(result);
+  } catch (err) {
+    console.error('[action/execute]', err);
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+app.get('/v1/actions/:agentId', async (c) => {
+  try {
+    const result = await action.listActions(c.env, c.req.param('agentId'));
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+app.delete('/v1/action/:actionId', async (c) => {
+  try {
+    const result = await action.cancelAction(c.env, c.req.param('actionId'));
+    return c.json(result);
+  } catch (err) {
+    return c.json({ error: err.message }, 404);
+  }
+});
+
 // ─── COMPLIANCE ───
 app.get('/v1/compliance/assess', async (c) => {
   const domain = c.req.query('domain') || 'general';
@@ -828,6 +978,86 @@ app.get('/v1/registry/search', async (c) => {
   } catch (err) {
     console.error(err);
     return c.json({ error: 'Search failed' }, 500);
+  }
+});
+
+// ─── DEPLOY DAVID ───
+app.post('/v1/deploy-david', async (c) => {
+  try {
+    const { problem } = await c.req.json();
+    if (!problem) return c.json({ error: 'problem is required' }, 400);
+
+    const apiKey = c.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return c.json({ error: 'not configured' }, 503);
+
+    const systemPrompt = `You are simulating the design thinking of David Hamilton — a Design Engineer and Principal at Block who builds data-dense interfaces, developer tooling, and observability systems.
+
+You MUST respond with valid JSON only. No markdown. No explanation outside the JSON.
+
+Respond in exactly this JSON structure:
+{
+  "phases": {
+    "frame": { "name": "short title", "body": "2-3 sentences", "duration": "340ms" },
+    "map": { "name": "short title", "body": "2-3 sentences", "duration": "520ms" },
+    "architect": { "name": "short title", "body": "2-3 sentences", "duration": "680ms" },
+    "stress": { "name": "short title", "body": "2-3 sentences", "duration": "410ms" },
+    "ship": { "name": "short title", "body": "2-3 sentences", "duration": "290ms" }
+  }
+}
+
+David's approach:
+FRAME — Reframe the ask into the real structural problem. Not what was asked. What friction exists, who feels it. Ask the question nobody asked.
+MAP — Trace the information flow. Where does data originate? How fresh? Who consumes it and in what cognitive state? Systems, not screens.
+ARCHITECT — Density and hierarchy. Design for 2 AM under pressure first. Smart defaults over clean layouts. Progressive disclosure. Think CLI, API, IDE, and UI as one surface.
+STRESS — What breaks at scale, with bad data, with a new user who has no context? Error states deserve the same attention as happy paths. The loading state IS the interface.
+SHIP — Smallest version that proves the architecture. Not a prototype. A working system with real data. Measure time-to-insight, not satisfaction.
+
+Rules:
+- Be specific to the problem given. No generic advice.
+- Active voice. One idea per sentence.
+- Never say "leverage", "utilize", "innovative", "seamless", "stakeholder", "it's worth noting".
+- Give concrete examples from observability, developer tooling, or data-dense interfaces.
+- Duration should be a realistic-looking latency (200-900ms).
+- Total response under 250 words across all phases.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: `Design problem: ${problem}` }],
+        system: systemPrompt,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[deploy-david] Anthropic error:', err);
+      return c.json({ error: 'AI service error' }, 502);
+    }
+
+    const aiRes = await res.json();
+    const text = aiRes.content?.[0]?.text || '';
+
+    try {
+      const parsed = JSON.parse(text);
+      return c.json(parsed);
+    } catch {
+      // Try to extract JSON from response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return c.json(JSON.parse(jsonMatch[0]));
+      }
+      return c.json({ error: 'Failed to parse response', raw: text }, 500);
+    }
+  } catch (err) {
+    console.error('[deploy-david]', err);
+    return c.json({ error: 'Deploy failed: ' + (err.message || 'unknown') }, 500);
   }
 });
 
