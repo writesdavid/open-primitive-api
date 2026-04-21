@@ -77,3 +77,6 @@ Discovery: https://api.openprimitive.com/.well-known/agent-card.json
 
 ## About
 Open Primitive is the reference implementation of the Open Primitive Protocol. Federal government data translated into signed, structured, agent-consumable endpoints. 30 data domains. Cross-domain intelligence. Infrastructure services. Primary sources: FAA, NHTSA, FDA, EPA, CMS, NIH/NLM, USDA, BLS, Census Bureau, CPSC, SEC, NOAA, AirNow, ClinicalTrials.gov, USGS, USASpending, USDA FSIS, CourtListener, Federal Register, DOE, EIA, FCC.
+
+## Sovereign Protocol
+Open Primitive is the data layer of the Sovereign protocol — a standard for an internet that bends toward the individual instead of toward brands. The full spec, agent runtime, and provider template are at github.com/writesdavid/sovereign-agent.

@@ -74,5 +74,6 @@
   },
   "geographic": { "scope": "US", "granularity": "zip-code" },
   "authentication": { "type": "none", "description": "No API key required. Completely free, no limits." },
+  "sovereign": "https://github.com/writesdavid/sovereign-agent",
   "lastUpdated": "2026-04-20T00:00:00Z"
 }

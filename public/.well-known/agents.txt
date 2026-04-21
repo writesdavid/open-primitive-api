@@ -64,5 +64,9 @@ Allow-Actions: yes
 # Agent card:  https://api.openprimitive.com/.well-known/agent-card.json
 # OPP manifest: https://api.openprimitive.com/.well-known/opp.json
 
+# Sovereign Protocol
+# Open Primitive is the data layer of the Sovereign protocol.
+# Spec, agent runtime, provider template: https://github.com/writesdavid/sovereign-agent
+
 # Contact
 # See /.well-known/opp.json for provider details and full manifest
